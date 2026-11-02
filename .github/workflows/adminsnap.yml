@@ -2,8 +2,8 @@ name: adminsnap (관리자·관제 통계 미리 모아 두기)
 # 30분마다 26곳 통계·수집 시각을 모아 관제 작업 저장소(Cloudflare KV)에 넣는다.
 #  - snap: 관리자 화면용 (암호화) / vis: 관제로 보낼 방문·광고 숫자 (관제 작업이 10분마다 꺼내 씀)
 on:
-  schedule:   # 2026-11-02 대표 승인으로 자동 실행 켬
-    - cron: "4 * * * *"     # 1시간마다 (도시 50곳 — GitHub 무료 실행 시간 아끼기)
+  # schedule: (보류 — snap 가지·Cloudflare KV 가 친구 계정 것이라 대전에서는 아직 못 씀. 관리자 화면은 GoatCounter 직접 조회로 동작) 2026-11-02
+  #   - cron: "4 * * * *"     # 1시간마다 (도시 50곳 — GitHub 무료 실행 시간 아끼기)
   workflow_dispatch:
 permissions:
   contents: read
