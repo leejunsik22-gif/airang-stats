@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 10
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
       GC_KEY_ADMIN: ${{ secrets.GC_KEY_ADMIN }}
       GC_KEY_YONGIN: ${{ secrets.GC_KEY_YONGIN }}
       GC_KEY_SUWON: ${{ secrets.GC_KEY_SUWON }}

@@ -1,5 +1,5 @@
 name: cf-all (시험) 아이랑 사이트 하나에 모든 도시
-# 도시 앱 전부를 Cloudflare 사이트 하나(airang-all)에 올린다. 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js).
+# 도시 앱 전부를 Cloudflare 사이트 하나(airang-daejeon-all)에 올린다. 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js).
 # 아직 시험 단계: 실제 주소(…daejeon.example.invalid)는 붙이지 않음. 손으로만 실행.
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -25,17 +25,17 @@ jobs:
       - name: 올리기
         run: |
           npm i -g wrangler@3 >/dev/null 2>&1
-          wrangler pages project create airang-all --production-branch main >/dev/null 2>&1 || true
-          wrangler pages deploy all --project-name airang-all --branch main --commit-dirty=true 2>&1 | tail -4
+          wrangler pages project create airang-daejeon-all --production-branch main >/dev/null 2>&1 || true
+          wrangler pages deploy all --project-name airang-daejeon-all --branch main --commit-dirty=true 2>&1 | tail -4
       - name: 시험 주소 붙이기 (alltest.daejeon.example.invalid)
         run: |
-          A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-all/domains
+          A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-all/domains
           curl -s -X POST $A -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d '{"name":"alltest.daejeon.example.invalid"}' | tr -d '\n ' | grep -o '"success":[a-z]*\|"message":"[^"]*"' | head -3
           curl -s $A/alltest.daejeon.example.invalid -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | tr -d '\n ' | grep -o '"status":"[a-z_]*"' | head -2
           curl -s -o /dev/null -w "alltest: %{http_code}\n" https://alltest.daejeon.example.invalid/ || true
       - name: 확인
         run: |
-          sleep 15; B=https://airang-all.pages.dev
+          sleep 15; B=https://airang-daejeon-all.pages.dev
           for p in / /gangnam/ /yongin/ /entry/ /mapo/assets/hero-mapo.webp /gangnam/nope.js /gangnam/index.html; do
             printf "%-34s " "$p"; curl -s -o /tmp/b -w "%{http_code} %{redirect_url}" "$B$p"; printf "  %s\n" "$(grep -o '<title>[^<]*' /tmp/b | head -1)"
           done

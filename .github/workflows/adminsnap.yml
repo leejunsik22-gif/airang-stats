@@ -16,7 +16,7 @@ jobs:
     env:
       GC_KEY_YONGIN: ${{ secrets.GC_KEY_YONGIN }}
       CF: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      KV: https://api.cloudflare.com/client/v4/accounts/fdf0f693700c270e15a856ec9453fde7/storage/kv/namespaces/209aba818b064846ac7cdb268c4d7515/values
+      KV: https://api.cloudflare.com/client/v4/accounts/ec2068662f417d156ec0ebeda41a396e/storage/kv/namespaces/209aba818b064846ac7cdb268c4d7515/values
     steps:
       - uses: actions/checkout@v4
         with: { sparse-checkout: snap, fetch-depth: 1 }

@@ -1,7 +1,7 @@
 // 아이랑 사이트 하나에 여러 도시 — 들어온 주소(호스트)를 보고 그 도시 폴더를 보여 준다.
 //   yongin.daejeon.example.invalid/…  →  /yongin/…
 //   airang.daejeon.example.invalid/…  →  /entry/…
-// 모르는 주소(시험용 airang-all.pages.dev 등)는 경로 그대로: /yongin/ 처럼 폴더로 들어가 확인.
+// 모르는 주소(시험용 airang-daejeon-all.pages.dev 등)는 경로 그대로: /yongin/ 처럼 폴더로 들어가 확인.
 const HOSTS = /*HOSTS*/{};
 
 export default {

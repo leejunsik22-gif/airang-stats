@@ -1,6 +1,6 @@
 name: cf-apps (아이랑 앱들을 Cloudflare Pages로)
 # 앱 화면만 올린다(데이터는 앱이 GitHub에서 바로 읽음). 앱이 바뀐 경우에만 다시 올려 배포 횟수를 아낀다.
-# 2026-11-01부터: 도시마다 사이트 하나 → 모든 도시를 사이트 하나(airang-all)에. 예전 airang-<도시> 사이트는 지우지 않고 둠.
+# 2026-11-01부터: 도시마다 사이트 하나 → 모든 도시를 사이트 하나(airang-daejeon-all)에. 예전 airang-<도시> 사이트는 지우지 않고 둠.
 on:
   workflow_dispatch:
     inputs:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4      # 앱 원본 1벌 (airang-cities/app) → 도시 7곳으로 만들어 올림
@@ -25,16 +25,16 @@ jobs:
       - run: |
           npm i -g wrangler@3 >/dev/null 2>&1
           mkdir -p deployed data
-          # 도시 앱 전부를 사이트 하나(airang-all)에 올림 — 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js)
+          # 도시 앱 전부를 사이트 하나(airang-daejeon-all)에 올림 — 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js)
           python3 src-cities/app/build.py --out all >/dev/null
           python3 src-cities/app/seo.py --out all --data src-cities/data   # 검색용 페이지 (<도시>/guide/…, sitemap.xml, robots.txt)
           python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js
           { sha=$(cd all && find . -type f | sort | xargs sha256sum | sha256sum | cut -c1-16)
             if [ "$(cat deployed/all 2>/dev/null)" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "yes" ]; then echo "앱 그대로 (올리지 않음)"
-            elif wrangler pages deploy all --project-name airang-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"
+            elif wrangler pages deploy all --project-name airang-daejeon-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"
             else tail -6 /tmp/d.log; echo "::warning::배포 실패 (다음 실행 때 다시 올림)"; fi
-            # 새 도시 주소: airang-all 에 아직 없으면 붙임 (DNS CNAME <도시> → airang-all.pages.dev 필요)
-            A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-all/domains
+            # 새 도시 주소: airang-daejeon-all 에 아직 없으면 붙임 (DNS CNAME <도시> → airang-daejeon-all.pages.dev 필요)
+            A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-all/domains
             python3 -c "import json;c=json.load(open('src-cities/app/cities.json'));print('\n'.join([v['domain'] for v in c['cities'].values()]+[c['entry']['domain']]))" | while read dom; do
               st=$(curl -s "$A/$dom" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result.status // empty' || true)
               [ -n "$st" ] && continue
@@ -42,7 +42,7 @@ jobs:
               # DNS 연결(CNAME)도 없으면 만듦 (토큰에 Zone·DNS·Edit 권한)
               Z=https://api.cloudflare.com/client/v4/zones/$(curl -s "https://api.cloudflare.com/client/v4/zones?name=daejeon.example.invalid" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result[0].id')/dns_records
               if [ "$(curl -s "$Z?name=$dom" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.result | length')" = 0 ]; then
-                curl -s -X POST $Z -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d "{\"type\":\"CNAME\",\"name\":\"$dom\",\"content\":\"airang-all.pages.dev\",\"proxied\":true}" | jq -c '{dns:.success,errors}'
+                curl -s -X POST $Z -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d "{\"type\":\"CNAME\",\"name\":\"$dom\",\"content\":\"airang-daejeon-all.pages.dev\",\"proxied\":true}" | jq -c '{dns:.success,errors}'
               fi
             done
           } 2>&1 | tee data/cf-apps.txt

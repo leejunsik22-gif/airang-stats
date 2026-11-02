@@ -202,7 +202,7 @@ const kstYmd = d => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10
 const kstMidnight = daysAgo => { const k = new Date(Date.now() + 9 * 3600e3); k.setUTCHours(0, 0, 0, 0); return new Date(k.getTime() - 9 * 3600e3 - daysAgo * 86400e3); };
 const iso = d => d.toISOString().slice(0, 19) + "Z";
 const days7 = (n = 7) => [...Array(n)].map((_, i) => { const d = new Date(Date.now() - (n - 1 - i) * 86400e3); const y = kstYmd(d); return { y, l: (+y.slice(5, 7)) + "/" + (+y.slice(8)) }; });
-async function pinHash(pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("airang-admin:" + pin + ":" + (ls.get(KEY) || ""))); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+async function pinHash(pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("airang-daejeon-admin:" + pin + ":" + (ls.get(KEY) || ""))); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
 
 let unlocked = false, tab = "one", DATA = null, busy = false, prog = 0;
 try { tab = sessionStorage.getItem("airang.admin.tab") || "one"; } catch (e) {}
@@ -558,9 +558,9 @@ function viewLinks() {
     ${L("▶️", "유튜브 스튜디오", "쇼츠 조회수·예약", "https://studio.youtube.com/channel/UCDEJ8hzgEEN52QtiqdF8-ew/videos/short")}</div>
     <h2>관리</h2><div class="grid links">
     ${L("📊", "GoatCounter", "원본 통계", "https://www.goatcounter.com/login")}
-    ${L("☁️", "Cloudflare Pages", "앱 서버", "https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/workers-and-pages")}
+    ${L("☁️", "Cloudflare Pages", "앱 서버", "https://dash.cloudflare.com/ec2068662f417d156ec0ebeda41a396e/workers-and-pages")}
     ${L("🐙", "GitHub", "코드·수집기", "https://github.com/leejunsik22-gif")}
-    ${L("🌐", "Cloudflare DNS", "도메인 주소 (daejeon.example.invalid)", "https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/daejeon.example.invalid/dns/records")}
+    ${L("🌐", "Cloudflare DNS", "도메인 주소 (daejeon.example.invalid)", "https://dash.cloudflare.com/ec2068662f417d156ec0ebeda41a396e/daejeon.example.invalid/dns/records")}
     ${L("🏷️", "가비아", "도메인 등록·연장", "https://www.gabia.com/")}
     ${L("🔑", "Bitwarden", "키 보관함", "https://vault.bitwarden.com/")}
     ${L("💬", "카카오 개발자", "검색 API 키", "https://developers.kakao.com/console/app")}</div>
@@ -741,7 +741,7 @@ function renderPC() {
     <p class="legend">GitHub Actions 기록이에요 (5분마다 새로). 줄을 누르면 자세한 기록이 열려요.</p>`;
   else if (pcTab === "newcity") body = `<div class="pcard newcity"><h3>새 도시 여는 순서</h3><ol>
     <li><b>Claude에게</b> "○○ 열어 줘"라고 말해요 — 도시 설정·첫 수집·앱 화면은 Claude가 해요.</li>
-    <li><b>DNS</b> 한 줄: <a href="https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/daejeon.example.invalid/dns/records" target="_blank" rel="noopener">Cloudflare DNS ↗</a> → CNAME <code>도시</code> → <code>airang-도시.pages.dev</code> (주황 구름 켬)</li>
+    <li><b>DNS</b> 한 줄: <a href="https://dash.cloudflare.com/ec2068662f417d156ec0ebeda41a396e/daejeon.example.invalid/dns/records" target="_blank" rel="noopener">Cloudflare DNS ↗</a> → CNAME <code>도시</code> → <code>airang-도시.pages.dev</code> (주황 구름 켬)</li>
     <li><b>GoatCounter</b> 사이트 하나: <a href="https://airang-daejeon.goatcounter.com/settings/sites" target="_blank" rel="noopener">사이트 추가 ↗</a> → <code>도시-edu-app</code></li>
     <li><b>그림</b> (나중에 해도 돼요): GPT에 한 장씩 <b>1200×500</b> — 동화풍 3D, 엄마·아이 뒷모습, 글자 없이</li>
     <li>미리보기를 보고 <b>"올려"</b> 하면 앱·입구·관리자·관제에 한꺼번에 들어가요.</li></ol>

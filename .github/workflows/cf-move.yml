@@ -1,5 +1,5 @@
-name: cf-move 도시 주소를 사이트 하나(airang-all)로 옮기기
-# 도시마다: 예전 사이트에서 주소 떼기 → airang-all 에 붙이기 → DNS 대상 바꾸기 → 열리는지 확인.
+name: cf-move 도시 주소를 사이트 하나(airang-daejeon-all)로 옮기기
+# 도시마다: 예전 사이트에서 주소 떼기 → airang-daejeon-all 에 붙이기 → DNS 대상 바꾸기 → 열리는지 확인.
 # 실패하면 그 도시는 예전 사이트로 되돌림.
 on:
   workflow_dispatch:
@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      ACC: fdf0f693700c270e15a856ec9453fde7
-      NEW: airang-all
+      ACC: ec2068662f417d156ec0ebeda41a396e
+      NEW: airang-daejeon-all
     steps:
       - uses: actions/checkout@v4
         with: { repository: leejunsik22-gif/airang-cities, sparse-checkout: app }
