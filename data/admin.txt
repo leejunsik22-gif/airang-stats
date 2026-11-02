@@ -1,0 +1,10 @@
+
+
+🪵  Logs were written to "/home/runner/.config/.wrangler/logs/wrangler-2026-11-02_06-12-37_212.log"
+{"success":false,"errors":[{"code":9106,"message":"Missing X-Auth-Key, X-Auth-Email or Authorization headers"}],"messages":[],"result":null}
+
+{"success":false,"errors":[{"code":9106,"message":"Missing X-Auth-Key, X-Auth-Email or Authorization headers"}],"messages":[],"result":null}
+
+DNS: 
+admin: 000
+pages.dev: 200 <title>아이랑 관리자
