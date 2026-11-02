@@ -1,8 +1,8 @@
-name: relay
+name: relay (GoatCounter 중계기 — 보류, 대전에서는 사용 안 함)
+# 2026-11-02 클로드: 예전 용인·수원 통계용 중계기. Cloudflare 토큰에 Workers 권한이 없어 올리기 실패(No access) → 보류.
+# 필요해지면 (1) 토큰에 Workers Scripts 편집 권한 추가 (2) worker/gc-relay.js 의 허용 사이트를 대전 5구로 바꾼 뒤 손으로 실행.
 on:
   workflow_dispatch:
-  push:   # 2026-11-02 대표 승인으로 자동 배포 켬
-    paths: ["worker/gc-relay.js", ".github/workflows/relay.yml"]
 permissions:
   contents: write
 jobs:
