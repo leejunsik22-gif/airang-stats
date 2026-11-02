@@ -1,9 +1,29 @@
+✨ Uploading _headers
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://07d1823d.airang-daejeon-admin.pages.dev
+{
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 8000015,
+      "message": "The domain you have entered contains an invalid TLD."
+    }
+  ],
+  "messages": []
+}
 
-
-🪵  Logs were written to "/home/runner/.config/.wrangler/logs/wrangler-2026-11-02_06-12-37_212.log"
-{"success":false,"errors":[{"code":9106,"message":"Missing X-Auth-Key, X-Auth-Email or Authorization headers"}],"messages":[],"result":null}
-
-{"success":false,"errors":[{"code":9106,"message":"Missing X-Auth-Key, X-Auth-Email or Authorization headers"}],"messages":[],"result":null}
+{
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 8000021,
+      "message": "The domain you have requested does not exist. Add a custom domain to your Pages project before continuing."
+    }
+  ],
+  "messages": []
+}
 
 DNS: 
 admin: 000
