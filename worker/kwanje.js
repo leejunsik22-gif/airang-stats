@@ -131,7 +131,7 @@ async function isAdmin(req, env) {
   const a = req.headers.get("Authorization") || "";
   if (env.RUN_KEY && a === "Bearer " + env.RUN_KEY) return true;      // 배포할 때 스스로 시험하는 키
   if (!/^Bearer .{10,}$/.test(a)) return false;
-  try { const r = await fetch("https://yongin-edu-app.goatcounter.com/api/v0/me", { headers: { Authorization: a, "User-Agent": UA } }); return r.ok; } catch (e) { return false; }
+  try { const r = await fetch("https://airang-daejeon.goatcounter.com/api/v0/me", { headers: { Authorization: a, "User-Agent": UA } }); return r.ok; } catch (e) { return false; }
 }
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };

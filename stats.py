@@ -4,8 +4,8 @@ import json, os, time, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
 
 KST = timezone(timedelta(hours=9))
-SITES = {"yongin": ("https://yongin-edu-app.goatcounter.com", "GC_KEY_YONGIN"),
-         "suwon": ("https://suwon-edu-app.goatcounter.com", "GC_KEY_SUWON")}
+SITES = {"yongin": ("https://airang-daejeon.goatcounter.com", "GC_KEY_YONGIN"),
+         }
 
 def iso(d): return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -25,8 +25,8 @@ def reachable(url):
 
 def pick_route():
     global RELAY
-    if reachable("https://yongin-edu-app.goatcounter.com/api/v0/me"): print("경로: 직접"); return True
-    if RELAY_URL and reachable(RELAY_URL + "/api/v0/me?site=yongin-edu-app"): RELAY = RELAY_URL; print("경로: Cloudflare 중계기"); return True
+    if reachable("https://airang-daejeon.goatcounter.com/api/v0/me"): print("경로: 직접"); return True
+    if RELAY_URL and reachable(RELAY_URL + "/api/v0/me?site=airang-daejeon"): RELAY = RELAY_URL; print("경로: Cloudflare 중계기"); return True
     return False
 
 def api(base, key, path, **params):

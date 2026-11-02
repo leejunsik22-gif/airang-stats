@@ -12,16 +12,16 @@ jobs:
           set +e; mkdir -p data
           {
             date -u
-            for h in www.goatcounter.com gc.zgo.at yongin-edu-app.goatcounter.com suwon-edu-app.goatcounter.com; do
+            for h in www.goatcounter.com gc.zgo.at airang-daejeon.goatcounter.com; do
               echo "== $h"; getent hosts $h || echo "DNS 실패"
               curl -sS -m 20 -o /dev/null -w "code=%{http_code} ip=%{remote_ip} t=%{time_total}\n" https://$h/ 2>&1
             done
             echo "== count.js"; curl -sS -m 20 -o /dev/null -w "code=%{http_code} size=%{size_download}\n" https://gc.zgo.at/count.js 2>&1
-            echo "== api yongin (키)"; curl -sS -m 20 -o /tmp/y.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_YONGIN" "https://yongin-edu-app.goatcounter.com/api/v0/me" 2>&1; head -c 200 /tmp/y.txt | grep -o '"[a-z_]*"' | head -5; echo
+            echo "== api yongin (키)"; curl -sS -m 20 -o /tmp/y.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_YONGIN" "https://airang-daejeon.goatcounter.com/api/v0/me" 2>&1; head -c 200 /tmp/y.txt | grep -o '"[a-z_]*"' | head -5; echo
             echo "== api suwon (키)"; curl -sS -m 20 -o /tmp/s.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_SUWON" "https://suwon-edu-app.goatcounter.com/api/v0/me" 2>&1; echo
             R=$(cat relay.txt); echo "== relay $R"
             curl -sS -m 30 -o /tmp/r.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_SUWON" "$R/api/v0/me?site=suwon-edu-app" 2>&1; head -c 300 /tmp/r.txt; echo
-            curl -sS -m 30 -o /tmp/r2.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_YONGIN" "$R/api/v0/stats/total?site=yongin-edu-app&start=2026-10-14T00:00:00Z&end=2026-10-15T00:00:00Z" 2>&1; head -c 300 /tmp/r2.txt; echo
+            curl -sS -m 30 -o /tmp/r2.txt -w "code=%{http_code}\n" -H "Authorization: Bearer $GC_KEY_YONGIN" "$R/api/v0/stats/total?site=airang-daejeon&start=2026-10-14T00:00:00Z&end=2026-10-15T00:00:00Z" 2>&1; head -c 300 /tmp/r2.txt; echo
             echo "== http 80"; curl -sS -m 20 -o /dev/null -w "code=%{http_code} redirect=%{redirect_url}\n" http://www.goatcounter.com/ 2>&1
             echo "== tls1.2"; curl -sS -m 20 --tls-max 1.2 -o /dev/null -w "code=%{http_code}\n" https://www.goatcounter.com/ 2>&1
             echo "== ipv6"; curl -6 -sS -m 20 -o /dev/null -w "code=%{http_code}\n" https://www.goatcounter.com/ 2>&1

@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { repository: leejunsik22-gif/airang-cities, sparse-checkout: app, ref: "${{ github.event.inputs.ref }}" }
       - run: |
-          A=https://yongin-edu-app.goatcounter.com/api/v0
+          A=https://airang-daejeon.goatcounter.com/api/v0
           h=(-H "Authorization: Bearer $K" -H "Content-Type: application/json")
           echo "키 길이: ${#K}"; echo "me: $(curl -s -o /dev/null -w '%{http_code}' "$A/me" "${h[@]}")"
           code=$(curl -s -o /tmp/s.json -w "%{http_code}" "$A/sites" "${h[@]}"); echo "사이트 목록 읽기: $code"

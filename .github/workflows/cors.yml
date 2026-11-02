@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           set +e; mkdir -p data
-          S=https://yongin-edu-app.goatcounter.com/api/v0
+          S=https://airang-daejeon.goatcounter.com/api/v0
           {
             for o in https://admin.daejeon.example.invalid https://yongin.daejeon.example.invalid; do
               for p in paths "stats/hits?limit=5" stats/toprefs; do
