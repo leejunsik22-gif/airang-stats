@@ -31,7 +31,7 @@ jobs:
           python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js
           { sha=$(cd all && find . -type f | sort | xargs sha256sum | sha256sum | cut -c1-16)
             if [ "$(cat deployed/all 2>/dev/null)" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "yes" ]; then echo "앱 그대로 (올리지 않음)"
-            elif wrangler pages deploy all --project-name airang-daejeon-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"
+            elif { wrangler pages project create airang-daejeon-all --production-branch main >/dev/null 2>&1 || true; } && wrangler pages deploy all --project-name airang-daejeon-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"
             else tail -6 /tmp/d.log; echo "::warning::배포 실패 (다음 실행 때 다시 올림)"; fi
             # 새 도시 주소: airang-daejeon-all 에 아직 없으면 붙임 (DNS CNAME <도시> → airang-daejeon-all.pages.dev 필요)
             A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-all/domains
