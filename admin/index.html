@@ -163,11 +163,154 @@ input{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid v
 .pcwrap.m .rbars{gap:3px}.pcwrap.m .rbars div{min-width:0}.pcwrap.m .rbars em{font-size:9px}.pcwrap.m .rbars small{font-size:8.5px;overflow:hidden}
 .pcwrap.m .lg{flex-wrap:wrap;gap:4px 12px}.pcwrap.m .lg span:last-child{flex-basis:100%;margin-left:0!important}
 .pcwrap.m .feedrow{grid-template-columns:54px 14px 1fr auto}
+
+/* ───────────────────────────────────────────────────────────────
+   아이랑 브랜드 디자인 시스템 v1후보 (2026-11-02, 작업 가지 work)
+   기본: 따뜻한 아이보리 + 깊은 네이비 / 보조: 절제된 코랄·세이지 / 골드 포인트 최소
+   규칙: 글꼴 Noto Sans KR · 본문 15px/1.55 · 카드 곡률 20 · 버튼 곡률 14 · 터치 44px 이상
+   이 파일은 각 화면의 기존 CSS "뒤에" 붙어 토큰과 공통 요소만 덮어쓴다(원본 CSS는 보존).
+   ─────────────────────────────────────────────────────────────── */
+:root{
+  --ivory:#FAF7F1;--ivory-2:#F2EDE3;--paper:#FFFFFF;
+  --navy:#1F2A44;--navy-ink:#16203A;--navy-soft:#E6E9F1;
+  --coral:#D9654A;--coral-ink:#A33D27;--coral-bg:#FBE9E3;
+  --sage:#5E8C7A;--sage-ink:#2E5A4B;--sage-bg:#E6F0EB;
+  --gold:#B8923E;--gold-ink:#6F5415;--gold-bg:#F7EEDC;
+  --ink:var(--navy-ink);--muted:#5B6274;--line:#E8E3D9;--ground:var(--ivory);
+  --indigo:var(--navy);--indigo-ink:var(--navy-ink);--indigo-bg:var(--navy-soft);
+  --mint-ink:var(--sage-ink);--mint-bg:var(--sage-bg);--sun-ink:var(--gold-ink);--sun-bg:var(--gold-bg);
+  --card:var(--paper);
+  --r-card:20px;--r-btn:14px;--r-chip:12px;
+  --shadow:0 1px 2px rgba(31,42,68,.05),0 10px 24px -16px rgba(31,42,68,.28);
+  --shadow-sm:0 1px 2px rgba(31,42,68,.06);
+}
+html,body{background:var(--ground)!important;color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55}
+body{background-image:none!important}
+.bg{background:var(--ground)!important}
+a{color:var(--navy)}
+h1,h2,h3{letter-spacing:-.3px;color:var(--navy-ink)}
+/* 카드 */
+.lift,.card,.pcard{background:var(--paper)!important;border-radius:var(--r-card)!important;box-shadow:var(--shadow)!important;border:1px solid rgba(31,42,68,.06)}
+.glass{background:rgba(255,255,255,.82)!important;border:1px solid rgba(31,42,68,.08)!important;backdrop-filter:blur(14px)}
+/* 버튼·칩: 터치 44px, 입체 효과 제거 */
+.btn,.chip,.oc-tab,.ask,.navi,.seg button,button.btn-soft,button.btn-3d,a.btn{min-height:44px!important;border-radius:var(--r-btn)!important;font-weight:700;letter-spacing:-.2px}
+.btn-3d{background:var(--navy)!important;color:#fff!important;box-shadow:0 6px 14px -8px rgba(31,42,68,.6)!important}
+.btn-soft{background:var(--paper)!important;color:var(--navy)!important;box-shadow:var(--shadow-sm)!important;border:1px solid var(--line)}
+.btn:active,.btn-3d:active,.btn-soft:active{transform:translateY(1px)}
+.chip{background:var(--paper);border:1px solid var(--line)}
+/* 아이콘 타일: 같은 굵기·같은 스타일(단색 + 연한 바탕) */
+.tile,.t-indigo,.t-coral,.t-mint,.t-sun,.t-lilac{background:var(--navy-soft)!important;color:var(--navy)!important;box-shadow:none!important;border-radius:14px!important}
+.t-coral{background:var(--coral-bg)!important;color:var(--coral-ink)!important}
+.t-mint{background:var(--sage-bg)!important;color:var(--sage-ink)!important}
+.t-sun{background:var(--gold-bg)!important;color:var(--gold-ink)!important}
+.t-lilac{background:var(--navy-soft)!important;color:var(--navy)!important}
+.orb-sun{background:radial-gradient(circle at 30% 26%,#fff 0%,#F7EEDC 30%,var(--gold) 100%)!important;box-shadow:none!important}
+/* 히어로·제목 */
+.hero{background:linear-gradient(140deg,var(--navy),#2B3A5C)!important;box-shadow:var(--shadow)!important;border-radius:var(--r-card)!important}
+.sec-head h2{font-size:18px;font-weight:800}
+.sec-head a,.sec-head button{color:var(--navy)}
+/* 배지·태그: 골드는 '확인됨·NEW'에만 */
+.pill-gray{background:var(--ivory-2);color:var(--muted)}
+.pill-coral{background:var(--coral-bg);color:var(--coral-ink)}
+/* 입력창 */
+input[type=text],input[type=search],.search{min-height:44px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--paper)}
+/* 하단 탭 */
+.navi{min-height:48px!important;border-radius:14px!important}
+/* 글자 대비: 작은 보조 글자는 muted 통일 */
+.foot,.note,.sub{color:var(--muted)}
+/* 움직임 줄이기 */
+.fl{animation:none!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0E1220;--paper:#171C2E;--card:#171C2E;--ink:#EEF1FA;--navy-ink:#EEF1FA;--navy:#AEB6FF;--navy-soft:#232A55;--muted:#9AA3BC;--line:#262D45;--ivory-2:#1F2538;--shadow:none}}
+:root[data-theme="dark"]{--ground:#0E1220;--paper:#171C2E;--card:#171C2E;--ink:#EEF1FA;--navy-ink:#EEF1FA;--navy:#AEB6FF;--navy-soft:#232A55;--muted:#9AA3BC;--line:#262D45;--ivory-2:#1F2538;--shadow:none}
+.bi{display:inline-flex;align-items:center;justify-content:center;border-radius:28%;color:currentColor;flex:0 0 auto;vertical-align:middle}.bi svg{display:block}.pnav .bi{margin-right:6px}.bi-inl{display:inline-flex;vertical-align:-3px;margin-right:4px}
+.pc .pmain{min-width:0;overflow-x:hidden}.pkpis .pcard{min-width:0}.pkpis .d{overflow-wrap:anywhere;word-break:keep-all;line-height:1.5;max-height:3.2em;overflow:hidden}.ptbl{table-layout:fixed;width:100%}.ptbl td,.ptbl th{overflow-wrap:anywhere;word-break:keep-all;vertical-align:top}.ptbl .sub{max-height:3.2em;overflow:hidden}.evd{border-top:1px solid var(--line);padding:8px 0}.evd summary{cursor:pointer;padding:6px 0}.ptbl.ev code{font-size:12px;background:var(--ivory-2);padding:1px 5px;border-radius:6px}.ev-warn td:nth-child(2){color:var(--warn-c);font-weight:800}.ev-hold td:nth-child(2){color:var(--gold-ink);font-weight:700}.ev-ex td:nth-child(2){color:var(--muted)}.ev-ok td:nth-child(2){color:var(--ok-c)}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <script>
+// ───────────────────────────────────────────────────────────────
+// 아이랑 브랜드 아이콘 한 벌 v1후보 (2026-11-02, 작업 가지 work)
+// 규칙: 24px 격자 · 선 굵기 1.75 · 둥근 끝 · 단색(네이비, 상태색은 CSS로) · 연한 둥근 바탕
+// 외부 파일·CDN 없음(인라인 SVG). 같은 벌을 앱·입구·관리자가 공유한다.
+// ───────────────────────────────────────────────────────────────
+const BI = {
+  home: '<path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10v9h11v-9"/><path d="M10 19v-5h4v5"/>',
+  ticket: '<path d="M4 9V7h16v2a2 2 0 0 0 0 4v2H4v-2a2 2 0 0 0 0-4z"/><path d="M12 7v10" stroke-dasharray="2 2"/>',
+  gift: '<rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3.5 7.5h17v2.5h-17z"/><path d="M12 7.5v12.5"/><path d="M12 7.5c-1.5-3.5-5-3.5-5-1.5s3 1.5 5 1.5c2 0 5 .5 5-1.5s-3.5-2-5 1.5"/>',
+  hospital: '<rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M12 9v6M9 12h6"/><path d="M9 20v-3h6v3"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  pencil: '<path d="m4 20 1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z"/><path d="m14 7 3 3"/>',
+  bear: '<circle cx="12" cy="13" r="6"/><circle cx="6.5" cy="7.5" r="2"/><circle cx="17.5" cy="7.5" r="2"/><path d="M10 14h4M12 14v1.5"/>',
+  book: '<path d="M4 5.5A2 2 0 0 1 6 4h5v15H6a2 2 0 0 0-2 1.5z"/><path d="M20 5.5A2 2 0 0 0 18 4h-5v15h5a2 2 0 0 1 2 1.5z"/>',
+  books: '<rect x="4" y="15" width="16" height="4" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/><rect x="6" y="5" width="12" height="4" rx="1"/>',
+  school: '<path d="M3 20V11l9-5 9 5v9"/><path d="M9 20v-6h6v6"/><path d="M12 6V3"/>',
+  coins: '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"/><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>',
+  cap: '<path d="m3 9 9-4 9 4-9 4z"/><path d="M7 11v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4"/><path d="M21 9v5"/>',
+  tag: '<path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8" cy="8" r="1.25"/>',
+  swim: '<path d="M3 17c2 0 2-1.5 4-1.5S9 17 11 17s2-1.5 4-1.5 2 1.5 4 1.5"/><circle cx="16" cy="8" r="2"/><path d="m5 12 4-5 4 3"/>',
+  briefcase: '<rect x="3" y="8" width="18" height="11" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>',
+  stethoscope: '<path d="M6 4v5a4 4 0 0 0 8 0V4"/><path d="M10 13v3a4 4 0 0 0 8 0v-1"/><circle cx="18" cy="13" r="2"/>',
+  pill: '<rect x="3" y="9" width="18" height="7" rx="3.5" transform="rotate(-45 12 12.5)"/><path d="m9 9 6 6"/>',
+  ambulance: '<path d="M3 16V8h10l4 4h4v4"/><circle cx="7" cy="17" r="1.75"/><circle cx="17" cy="17" r="1.75"/><path d="M8 10v4M6 12h4"/>',
+  card: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M7 14h4"/>',
+  bag: '<path d="M5 9h14l-1 11H6z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/>',
+  store: '<path d="M4 10 5 5h14l1 5"/><path d="M4 10c0 1.5 1.3 2.5 2.7 2.5S9.3 11.5 9.3 10c0 1.5 1.3 2.5 2.7 2.5s2.7-1 2.7-2.5c0 1.5 1.3 2.5 2.7 2.5S20 11.5 20 10"/><path d="M5 12.5V20h14v-7.5"/><path d="M10 20v-4h4v4"/>',
+  child: '<circle cx="12" cy="8" r="3.5"/><path d="M6 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/>',
+  chart: '<path d="M4 20h16"/><rect x="6" y="11" width="3" height="7"/><rect x="11" y="6" width="3" height="12"/><rect x="16" y="9" width="3" height="9"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',
+  suncloud: '<circle cx="8" cy="8" r="3"/><path d="M8 2v1.5M2 8h1.5M3.8 3.8l1 1"/><path d="M9 19h8a3.5 3.5 0 0 0 .5-7A5 5 0 0 0 8 13.5 2.8 2.8 0 0 0 9 19z"/>',
+  cloud: '<path d="M7 18h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 11.5 3.3 3.3 0 0 0 7 18z"/>',
+  rain: '<path d="M7 15h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 8.5 3.3 3.3 0 0 0 7 15z"/><path d="M9 18v2M13 18v2M17 18v2"/>',
+  pin: '<path d="M12 21s6-6 6-11a6 6 0 0 0-12 0c0 5 6 11 6 11z"/><circle cx="12" cy="10" r="2"/>',
+  puzzle: '<path d="M10 4h4v3a2 2 0 1 0 0 2v3h3a2 2 0 1 1 0 4h-3v4h-4v-3a2 2 0 1 0 0-2v-3H7a2 2 0 1 1 0-4h3z"/>',
+  shield: '<path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="m9.5 12 2 2 3.5-4"/>',
+  rice: '<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8 12c0-3 2-5 4-5s4 2 4 5"/>',
+  search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-4-4"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5c3 0 5.5 2.5 5.5 5.5"/>',
+  refresh: '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>',
+  megaphone: '<path d="M4 10v4h3l8 4V6l-8 4z"/><path d="M18 9a4 4 0 0 1 0 6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  rocket: '<path d="M14 4c3 0 6 3 6 6l-6 6-4-4z"/><path d="M8 12l-4 1 2-5 3 1M12 16l-1 4 5-2-1-3"/><circle cx="15" cy="9" r="1.25"/>',
+  key: '<circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l2 2M19 3l2 2"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  city: '<path d="M3 20V9h6v11M9 20V4h6v16M15 20v-8h6v8"/><path d="M5 12h2M5 15h2M11 8h2M11 11h2M11 14h2M17 15h2"/>',
+  alert: '<path d="M12 4 3 19h18z"/><path d="M12 10v4M12 16.5v.5"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  mail: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="m3 8 9 6 9-6"/>',
+  heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  star: '<path d="m12 4 2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8z"/>',
+  leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19c3-4 6-7 10-9"/>',
+};
+const EMOJI_ICON = { "🏠": "home", "🎟️": "ticket", "🎁": "gift", "🏥": "hospital", "🚑": "ambulance", "🩺": "stethoscope", "💊": "pill", "🛡️": "shield",
+  "🏷️": "tag", "💳": "card", "🛍️": "bag", "🏪": "store", "🧒": "child", "📊": "chart", "☀️": "sun", "🌤️": "suncloud", "⛅": "suncloud", "☁️": "cloud", "🌧️": "rain", "🌦️": "rain",
+  "📚": "books", "📖": "book", "✏️": "pencil", "🧸": "bear", "📍": "pin", "🍚": "rice", "🏊": "swim", "🧘": "swim", "🏋️": "swim", "💃": "swim", "♨️": "sun", "🧩": "puzzle",
+  "🏫": "school", "🎓": "cap", "💼": "briefcase", "🔍": "search", "📞": "phone", "📅": "calendar", "⭐": "star", "⚠️": "alert", "🌙": "moon", "⏰": "clock", "🕐": "clock", "✉️": "mail", "📧": "mail", "❤️": "heart", "💛": "heart", "🌱": "leaf", "🏡": "home", "🆕": "star", "📱": "grid" };
+// 화면 안의 글자 이모지를 브랜드 아이콘으로 바꿔 끼움(버튼·칩·제목·태그·안내줄). 상태 점(🟢 등)·체크(✓)는 그대로.
+const ICONIZE_SEL = "button, a, h1, h2, h3, .pill, .chip, .foot, .note, label, b, strong, .sub";
+function iconize(root) {
+  if (!root || !root.querySelectorAll) return;
+  const re = /^([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}])\uFE0F?\s?/u;
+  root.querySelectorAll(ICONIZE_SEL).forEach(el => {
+    el.childNodes.forEach(n => { if (n.nodeType !== 3) return; const m = n.textContent.match(re); if (!m) return; const name = EMOJI_ICON[m[1]] || EMOJI_ICON[m[1] + "\uFE0F"]; if (!name) return;
+      const span = document.createElement("span"); span.innerHTML = ico(name, 15, "none"); span.className = "bi-inl"; n.textContent = n.textContent.replace(re, ""); el.insertBefore(span, n); });
+  });
+}
+function iconizeStart() { const v = document.getElementById("view") || document.body; iconize(v); if (typeof MutationObserver !== "undefined") new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => n.nodeType === 1 && iconize(n)))).observe(v, { childList: true, subtree: true }); }
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iconizeStart); else iconizeStart();
+const ROUTE_ICON = { acas: "pencil", kinders: "bear", library: "book", books: "books", schools: "school", premium: "coins", elite: "cap", deals: "tag", hosp: "hospital", sports: "swim", jobs: "briefcase", safety: "shield" };
+// 바탕 색조(브랜드 보조색만): 기본 네이비 바탕, 코랄·세이지·골드는 의미 있을 때만
+const ICON_TINT = { coral: "var(--coral-bg)", sage: "var(--sage-bg)", gold: "var(--gold-bg)", navy: "var(--navy-soft)", none: "transparent" };
+function ico(name, px = 24, tint = "navy", color) {
+  const d = BI[name] || BI.grid, box = tint === "none" ? px : Math.round(px * 1.6), inner = tint === "none" ? px : Math.round(px);
+  return `<span class="bi" aria-hidden="true" style="width:${box}px;height:${box}px;background:${ICON_TINT[tint] || ICON_TINT.navy}${color ? `;color:${color}` : ""}"><svg viewBox="0 0 24 24" width="${inner}" height="${inner}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
+}
+function icoE(e, px = 24, tint = "navy") { const n = EMOJI_ICON[e]; return n ? ico(n, px, tint) : `<span class="e-flat" style="width:${px}px;height:${px}px;font-size:${Math.round(px * .62)}px" aria-hidden="true">${e}</span>`; }
+
+
 // ───── 설정 ─────
 const CITIES = [   // airang-cities app/cities.json 과 같은 순서 (도시를 열면 여기도 추가)
   { k: "djdonggu", name: "대전 동구", sido: "대전", site: "https://airang-daejeon-all.pages.dev/djdonggu/", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/djdonggu/" },
@@ -202,7 +345,22 @@ const kstYmd = d => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10
 const kstMidnight = daysAgo => { const k = new Date(Date.now() + 9 * 3600e3); k.setUTCHours(0, 0, 0, 0); return new Date(k.getTime() - 9 * 3600e3 - daysAgo * 86400e3); };
 const iso = d => d.toISOString().slice(0, 19) + "Z";
 const days7 = (n = 7) => [...Array(n)].map((_, i) => { const d = new Date(Date.now() - (n - 1 - i) * 86400e3); const y = kstYmd(d); return { y, l: (+y.slice(5, 7)) + "/" + (+y.slice(8)) }; });
-async function pinHash(pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("airang-daejeon-admin:" + pin + ":" + (ls.get(KEY) || ""))); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+// ───── 키 보관 (2026-11-02 작업 가지): API 키를 평문으로 두지 않고 비밀번호로 잠가서(AES-GCM) 저장. 풀린 키는 메모리(SESS)에만 ─────
+const VAULT = "airang.admin.vault";   // {salt, iv, ct} base64
+let SESS = null;                      // 풀린 API 키 (화면 잠그면 지움)
+const b64 = u => btoa(String.fromCharCode(...u)), unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function kdf(pass, salt) { const base = await crypto.subtle.importKey("raw", new TextEncoder().encode("airang-daejeon-admin:" + pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 600000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]); }
+async function vaultSeal(apiKey, pass) { const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await kdf(pass, salt), new TextEncoder().encode(apiKey));
+  ls.set(VAULT, JSON.stringify({ v: 1, salt: b64(salt), iv: b64(iv), ct: b64(new Uint8Array(ct)) })); }
+async function vaultOpen(pass) { const o = JSON.parse(ls.get(VAULT) || "null"); if (!o) return null;
+  try { const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(o.iv) }, await kdf(pass, unb64(o.salt)), unb64(o.ct)); return new TextDecoder().decode(pt); } catch (e) { return null; } }
+const passOk = p => /^\d{6,}$/.test(p) || p.length >= 8;   // 숫자 6자리 이상 또는 아무 글자 8자 이상
+const apiKey = () => SESS || "";
+let idleTimer = null; function touchIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(() => { if (unlocked) lock(); }, 10 * 60e3); }   // 10분 안 쓰면 잠금
+["click", "keydown", "touchstart"].forEach(ev => document.addEventListener(ev, touchIdle, { passive: true }));
+document.addEventListener("visibilitychange", () => { if (document.hidden && unlocked) lock(); });   // 다른 앱으로 가면 잠금
 
 let unlocked = false, tab = "one", DATA = null, busy = false, prog = 0;
 try { tab = sessionStorage.getItem("airang.admin.tab") || "one"; } catch (e) {}
@@ -214,7 +372,7 @@ async function gc(c, path, params, tries = 0) {
   const now = Date.now(); slot = Math.max(now, slot + 340); await sleep(slot - now);   // 1초 4번 제한보다 조금 천천히
   const q = new URLSearchParams(params).toString();
   let r;
-  try { r = await fetch(gcSite(c) + "/api/v0/" + path + (q ? "?" + q : ""), { headers: { Authorization: "Bearer " + ls.get(KEY), "Content-Type": "application/json" } }); }
+  try { r = await fetch(gcSite(c) + "/api/v0/" + path + (q ? "?" + q : ""), { headers: { Authorization: "Bearer " + apiKey(), "Content-Type": "application/json" } }); }
   catch (e) { if (tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); } throw e; }   // 끊김: 너무 빨라 막힌 경우(429에 CORS 없음)도 여기로 와서 기다렸다 다시
   if (r.status === 429 && tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); }
   if (r.status === 401 || r.status === 403) throw new Error("키 권한 없음 (" + r.status + ")");
@@ -338,7 +496,7 @@ function freshLevel(v, hours) {
   return [h > hours * 2 ? "bad" : h > hours ? "warn" : "ok", label];
 }
 function cityHealth(c) {
-  const f = DATA.fresh[c.k] || {}; let worst = "ok";
+  const f = (DATA && DATA.fresh && DATA.fresh[c.k]) || {}; let worst = "ok";   // 잠금 직후 DATA 비어 있을 때 보호
   for (const [k, , hrs] of FILES) { if (k === "deals" && f[k] === null) continue; const [lv] = freshLevel(f[k], hrsOf(c, k, hrs)); if (lv === "bad") worst = "bad"; else if (lv === "warn" && worst === "ok") worst = "warn"; }
   return worst;
 }
@@ -346,12 +504,13 @@ function cityHealth(c) {
 // ───── 화면 ─────
 function render() {
   $app.className = "wrap";
-  if (!ls.get(KEY) || !ls.get(PIN)) return viewSetup();
+  if (ls.get(KEY)) { ls.del(KEY); ls.del(PIN); }   // 예전 평문 키가 남아 있으면 지우고 다시 등록(안전 전환)
+  if (!ls.get(VAULT)) return viewSetup();
   if (!unlocked) return viewPin();
   if (!DATA) { const c = ls.get(CACHE); if (c) { try { DATA = JSON.parse(c); } catch (e) {} } if (DATA && !busy && !snapTried && CITIES.some(x => (DATA.city[x.k] || {}).err)) setTimeout(loadSnap, 30); if (!DATA && !busy && !snapTried) { loadSnap().then(() => { if (!DATA && !busy) loadAll(); }); } else if (!DATA && !busy) { loadAll(); } else if (DATA && !busy && Date.now() - DATA.at > 20 * 60e3 && !snapTried) setTimeout(() => loadSnap().then(() => { if (DATA && Date.now() - DATA.at > 40 * 60e3 && !busy) loadAll(); }), 50); }
   pcWas = isPC(); return renderPC();   // PC·휴대폰 같은 화면 구성 (휴대폰은 위쪽 버튼·한 줄 배치)
   $app.className = "wrap"; pcWas = false;
-  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">송골랩 · 도시 ${CITIES.length}곳 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
+  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">라그릴스 · 대전 ${CITIES.length}개 구 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
     <button class="btn" onclick="loadAll()" ${busy ? "disabled" : ""}>${busy ? "불러오는 중 " + prog + "/" + CITIES.length : "↻ 새로고침"}</button>
     <button class="btn soft" onclick="lock()">잠그기</button></header>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}
@@ -362,7 +521,7 @@ function render() {
   $app.innerHTML = head + body();
 }
 function setTab(k) { tab = k; try { sessionStorage.setItem("airang.admin.tab", k); } catch (e) {} render(); window.scrollTo(0, 0); }
-function lock() { unlocked = false; render(); }
+function lock() { unlocked = false; SESS = null; render(); }
 
 function kpi(label, v, unit, prev) {
   const d = prev === undefined ? "" : v - prev;
@@ -584,7 +743,7 @@ function kwBox() {
       · <b>KWANJE_URL</b> = 관제 바깥 주소 (관제는 보류 — 비워 둠)<br>· <b>KWANJE_TOKEN</b> = 관제 설정 → 연결의 API 토큰<br>넣은 뒤 Claude에게 "넣었어"라고 말하면 바로 적용해요.</div>`}${res}`;
 }
 async function kwCall(path, opt = {}) {
-  const r = await fetch(KW + path, { ...opt, headers: { Authorization: "Bearer " + ls.get(KEY) } });
+  const r = await fetch(KW + path, { ...opt, headers: { Authorization: "Bearer " + apiKey() } });
   const j = await r.json().catch(() => ({})); if (!r.ok && !j.data) throw new Error(j.error || ("응답 " + r.status)); return j;
 }
 async function kwLoad() { try { kwState = await kwCall("/preview"); } catch (e) { kwState = { err: String(e.message || e) }; } const b = document.getElementById("kw"); if (b) b.innerHTML = kwBox(); }
@@ -665,7 +824,7 @@ function pcRefs() {
   const rows = Object.entries(all).sort((a, b) => b[1] - a[1]); return bl(rows, 7) || `<span class="sub">아직 없어요</span>`;
 }
 function pcConn() {
-  const errs = CITIES.filter(c => (DATA.city[c.k] || {}).err).length;
+  const errs = CITIES.filter(c => ((DATA && DATA.city[c.k]) || {}).err).length;   // 통계 전에도 화면이 그려지게
   const last = n => Array.isArray(RUNS) ? RUNS.find(r => runName(r.name) === n && r.st === "completed") : null;
   const cf = last("cf-apps"), dl = last("daily");
   const kw = snapAt && !(kwState && !kwState.err) ? ["g", "연결됨"] : kwState && !kwState.err ? (kwState.url_set && kwState.token_last4 ? ["g", "연결됨"] : ["y", "설정 필요"]) : kwState ? ["r", "못 읽음"] : ["y", "확인 중"];
@@ -676,8 +835,8 @@ function pcConn() {
     ${row("Cloudflare (앱 배포)", !RUNS || RUNS.err ? ["y", "확인 중"] : cf ? [cf.ok === "success" ? "g" : "r", (cf.ok === "success" ? "" : "실패 · ") + ago2(cf.at)] : ["y", "기록 없음"])}
     ${row("관제 (10분마다)", kw)}</div>`;
 }
-const PC_NAV = [["dash", "📊", "대시보드"], ["cities", "🏙️", "도시"], ["apps", "📱", "앱 보기"], ["traffic", "👥", "방문 통계"], ["data", "🔄", "수집 상태"], ["ads", "📣", "광고"],
-  ["sep", "", "운영"], ["newcity", "➕", "새 도시 열기"], ["deploy", "🚀", "배포·수집 기록"], ["settings", "🔑", "바로가기·관제"]];
+const PC_NAV = [["dash", ico("chart", 16, "none"), "대시보드"], ["cities", ico("city", 16, "none"), "도시"], ["apps", ico("grid", 16, "none"), "앱 보기"], ["traffic", ico("users", 16, "none"), "방문 통계"], ["data", ico("refresh", 16, "none"), "수집 상태"], ["ads", ico("megaphone", 16, "none"), "광고"],
+  ["sep", "", "운영"], ["newcity", ico("plus", 16, "none"), "새 도시 열기"], ["deploy", ico("rocket", 16, "none"), "배포·수집 기록"], ["settings", ico("key", 16, "none"), "바로가기·관제"]];
 function pcList(limit) {   // 휴대폰: 도시 카드 줄 (누르면 앱 보기로)
   const rows = pcRows();
   return rows.slice(0, limit).map(([c, s]) => { const hl = cityHealth(c);
@@ -702,6 +861,54 @@ function mData() {   // 휴대폰: 수집 상태를 도시 카드로
       <div class="mpills">${FILES.map(([k, n, h]) => { const v = f[k]; if (v === null && k === "deals") return `<span class="pill">${n} 준비 중</span>`; const [lv, l] = freshLevel(v, hrsOf(c, k, h)); return `<span class="pill p-${lv}">${n} ${l}</span>`; }).join("")}</div></div>`; }).join("") +
     `<p class="legend">초록 정상 · 노랑 늦음 · 빨강 멈춤. <a class="lnk" href="https://github.com/leejunsik22-gif/airang-cities/actions" target="_blank" rel="noopener">수집 기록 ↗</a></p>`;
 }
+// ───── 검문 현황 (tools/gate.py 가 만드는 _status.json · 오류·미확인·검증·승인 대기 중심) ─────
+let GATES = null, gatesLoading = false;
+function loadGates() { if (gatesLoading) return; gatesLoading = true;
+  Promise.all(CITIES.map(c => fetch(c.raw + "_status.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(j => [c.k, j])))
+    .then(rs => { GATES = Object.fromEntries(rs); if (unlocked) render(); }); }
+function opsPanel() {   // 2026-11-02: 방문 통계보다 먼저 — 검증 필요·승인 대기·공개 제외·운영 오류
+  const real = !DEMO && GATES;
+  const files = real ? CITIES.flatMap(c => Object.entries(((GATES[c.k] || {}).files) || {}).map(([f, v]) => ({ c: c.name, f, ...v }))) : [];
+  const fail = files.filter(x => /실패|만료/.test(x.auto_check || "") || /검사 실패/.test(x.reason || "")), hold = files.filter(x => x.hold), ex = files.filter(x => !x.published && !x.hold && !/실패|만료/.test(x.auto_check || ""));
+  const unverified = files.filter(x => x.published && x.official_verify && x.official_verify !== "확인 완료");   // 자동 통과했지만 기관 원문 검증은 미완료
+  const noGate = real ? CITIES.filter(c => !GATES[c.k]).length : null;
+  const failedRuns = Array.isArray(RUNS) ? RUNS.filter(r => r.ok === "failure").slice(0, 5) : [];
+  const statErr = DATA ? CITIES.filter(c => (DATA.city[c.k] || {}).err).length : 0;
+  const card = (k, v, sub, tone) => `<div class="pcard"><div class="k">${k}</div><div class="v" style="color:${tone}">${v}</div><div class="d light">${sub}</div></div>`;
+  const na = `<span style="font-size:18px;color:var(--muted)">—</span>`;
+  const body = DEMO
+    ? [card("검증 필요", na, "가상 시안 — 실제 값 없음", "var(--muted)"), card("승인 대기", na, "승인 기능 미구현(work 가지 수동 반영)", "var(--muted)"), card("공개 제외", na, "가상 시안 — 실제 값 없음", "var(--muted)"), card("운영 오류", na, "가상 시안 — 실제 값 없음", "var(--muted)")].join("")
+    : GATES === null ? `<div class="pcard note">검문 결과를 읽는 중…</div>`
+    : [card("검증 필요", fail.length, short(fail.length ? fail.map(x => `${x.c} ${x.label}`).join(", ") : (noGate ? `검문 미적용 ${noGate}곳 — work 승인 전` : "자동 검사 실패·만료 없음"), 80) + ` <a class="lnk" onclick="document.querySelector('.evd') && document.querySelector('.evd').scrollIntoView()">근거 ›</a>`, fail.length || noGate ? "var(--warn-c)" : "var(--ok-c)"),
+       card("승인 대기", na, "승인 기능 미구현 — 대표 승인 뒤 수동 반영", "var(--muted)"),
+       card("공개 보류·제외", `${hold.length + ex.length}`, short(`보류(원문 미확인) ${hold.length}: ${[...new Set(hold.map(x => x.label))].join(", ") || "없음"} / 제외 ${ex.length}: ${[...new Set(ex.map(x => x.label))].join(", ") || "없음"}`, 110), hold.length ? "var(--warn-c)" : "var(--muted)"),
+       card("운영 오류", failedRuns.length + statErr, short([failedRuns.length ? `실패한 작업 ${failedRuns.length}: ${failedRuns.map(r => r.name).join(", ")}` : "", statErr ? `통계 못 읽음 ${statErr}곳` : ""].filter(Boolean).join(" · ") || "없음", 80), failedRuns.length + statErr ? "var(--warn-c)" : "var(--ok-c)")].join("");
+  return `<div class="hd" style="margin:0 0 8px"><h3>운영 점검</h3>${DEMO ? `<span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안</span>` : `<span class="pill" style="background:var(--sage-bg);color:var(--sage-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">운영 데이터</span>`}</div><div class="pkpis" style="margin-bottom:14px">${body}</div>`;
+}
+function short(t, n = 90) { t = String(t || ""); return t.length > n ? t.slice(0, n) + "…" : t; }
+function evidencePanel() {   // 검증 필요·공개 제외·보류 숫자의 실제 파일별 근거(_status.json 그대로)
+  if (DEMO || !GATES) return "";
+  const cls = x => /실패|만료/.test(x.auto_check || "") ? ["warn", "검증 필요"] : x.hold ? ["hold", "공개 보류(원문 미확인)"] : !x.published ? ["ex", "공개 제외"] : x.official_verify && x.official_verify !== "확인 완료" ? ["unv", "공개 중·원문 부분 확인"] : ["ok", "공개"];
+  const blocks = CITIES.map(c => { const g = GATES[c.k]; if (!g) return `<details class="evd"><summary><b>${c.name}</b> <span class="sub">검문 결과 없음(미적용)</span></summary></details>`;
+    const rows = Object.entries(g.files || {}).map(([fn, x]) => { const [k, lab] = cls(x); return `<tr class="ev-${k}"><td><code>${esc(fn)}</code><div class="sub">${esc(x.label || "")}</div></td><td>${lab}</td><td>${esc(x.auto_check || "—")}</td><td>${esc(x.official_verify || "—")}${x.verified_at ? `<div class="sub">${esc(x.verified_at)} · ${esc(x.verified_by || "")}</div>` : ""}</td><td class="sub" title="${esc(x.reason || "")}">${esc(short(x.reason, 110))}</td></tr>`; }).join("");
+    const n = Object.values(g.files || {}); const nf = n.filter(x => /실패|만료/.test(x.auto_check || "")).length, nh = n.filter(x => x.hold).length, ne = n.filter(x => !x.published && !x.hold && !/실패|만료/.test(x.auto_check || "")).length;
+    return `<details class="evd" ${nf ? "open" : ""}><summary><b>${c.name}</b> <span class="sub">검문 ${esc(g.checked_at || "")} · 검증 필요 ${nf} · 보류 ${nh} · 제외 ${ne} · 파일 ${n.length}</span></summary>
+      <div class="tbl"><table class="ptbl ev"><thead><tr><th>파일</th><th>상태</th><th>자동 검사</th><th>원문 확인</th><th>근거(사유)</th></tr></thead><tbody>${rows}</tbody></table></div></details>`; }).join("");
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>파일별 근거</h3><span class="sp"></span><span class="sub">위 숫자는 아래 파일 목록에서 그대로 셉니다 · 구 이름을 누르면 펼쳐요</span></div>${blocks}</div>`;
+}
+function gatePanel() {
+  if (DEMO) {   // 가상 시안: 운영 숫자가 아님을 표시하고 예시 행만 보여 준다
+    return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>공개 전 검문 현황</h3><span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안 · 실제 값 없음</span><span class="sp"></span><span class="sub">실제 운영 화면에서는 각 구의 _status.json(검문 결과)을 읽어 보여 줍니다</span></div>
+      <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>검증 필요</th><th>보류</th><th>부분 확인</th><th>제외</th><th>승인 대기</th></tr></thead><tbody>${CITIES.map(c => `<tr><td><b>${c.name}</b><div class="sub">가상 시안</div></td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">승인 기능 미구현</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  if (GATES === null) { loadGates(); return `<div class="pcard note">검문 현황을 읽는 중…</div>`; }
+  const rows = CITIES.map(c => { const g = GATES[c.k]; if (!g) return `<tr><td>${c.name}</td><td colspan="4" class="sub">검문 미적용 — 작업 가지(work) 승인 전</td></tr>`;
+    const fs = Object.values(g.files || {}); const pub = fs.filter(x => x.published), fail = fs.filter(x => /실패|만료/.test(x.auto_check || "") || /검사 실패/.test(x.reason || "")), hold = fs.filter(x => x.hold), ex = fs.filter(x => !x.published && !x.hold && !/실패|만료/.test(x.auto_check || "")), unv = pub.filter(x => x.official_verify && x.official_verify !== "확인 완료");
+    const lab = a => `<div class="sub">${short(a.map(x => esc(x.label)).join(", "), 60)}</div>`;
+    return `<tr><td><b>${c.name}</b><div class="sub">${esc(g.checked_at || "")}</div></td><td style="color:var(--ok-c)">${pub.length}</td><td style="color:${fail.length ? "var(--warn-c)" : "inherit"}">${fail.length}${fail.length ? lab(fail) : ""}</td><td>${hold.length}${hold.length ? lab(hold) : ""}</td><td>${unv.length}${unv.length ? lab(unv) : ""}</td><td>${ex.length}${ex.length ? lab(ex) : ""}</td><td class="sub">${fail.length ? "확인 필요(수동)" : "—"}</td></tr>`; }).join("");
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>공개 전 검문 현황</h3><span class="pill" style="background:var(--sage-bg);color:var(--sage-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">운영 데이터</span><span class="sp"></span><span class="sub">공개 = 검사 통과해 고객 화면에 나감 · 실패 = 직전본 유지 · 제외 = 미확인 자료</span></div>
+    <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>검증 필요</th><th>보류(원문 미확인)</th><th>공개 중·부분 확인</th><th>제외</th><th>승인 대기</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 function renderPC() {
   const M = !isPC();
   loadRuns(); if (!kwState) setTimeout(kwLoad, 50);
@@ -714,7 +921,7 @@ function renderPC() {
     <button class="btn soft" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻ 새로고침</button><button class="btn soft" onclick="lock()">잠그기</button></div>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}`;
   let body = "";
-  if (!DATA) body = `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;
+  if (!DATA) body = opsPanel() + gatePanel() + evidencePanel() + `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;   // 통계보다 운영 점검을 먼저
   else if (pcTab === "dash") {
     const S = CITIES.map(c => [c, cityStats(c)]), sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
     const errC = CITIES.filter(c => (DATA.city[c.k] || {}).err);
@@ -724,7 +931,7 @@ function renderPC() {
     const new30 = CITIES.reduce((t, c) => t + days7(30).reduce((a, x) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-새로", x.y), 0), 0);
     const pct = (a, b) => b ? Math.round((a - b) / b * 100) : 0, d1 = pct(sum("today"), sum("yest"));
     const worst = CITIES.filter(c => cityHealth(c) !== "ok").map(c => c.name);
-    body = errBox + `<div class="pkpis">
+    body = opsPanel() + errBox + gatePanel() + evidencePanel() + `<div class="hd" style="margin:0 0 8px"><h3>방문 통계</h3></div><div class="pkpis">
       <div class="pcard"><div class="k">오늘 방문한 사람</div><div class="v">${fmt(sum("today"))}<small>명</small></div><div class="d ${d1 >= 0 ? "up" : "dn"}">어제(${fmt(sum("yest"))})보다 ${d1 >= 0 ? "+" : ""}${d1}%</div></div>
       <div class="pcard"><div class="k">최근 7일 방문</div><div class="v">${fmt(sum("w7"))}<small>명</small></div><div class="d light">하루 평균 ${fmt(Math.round(sum("w7") / 7))}명</div></div>
       <div class="pcard"><div class="k">처음 온 사람 · 30일</div><div class="v">${fmt(new30)}<small>명</small></div><div class="d light">새 기기 기준</div></div>
@@ -759,7 +966,7 @@ function renderPC() {
     return;
   }
   $app.className = "pcwrap";
-  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 송골랩</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${top}${body}</main></div>`;
+  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 라그릴스</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${top}${body}</main></div>`;
 }
 function pcSeg() { return `<div class="seg">${[["all", "전체 " + CITIES.length], ...SIDO_LIST.map(x => [x, x + " " + CITIES.filter(c => sidoOf(c) === x).length])].map(([k, l]) => `<button class="${pcSido === k ? "on" : ""}" onclick="pcSet('sido','${k}')">${l}</button>`).join("")}</div>`; }
 let pcWas = null;
@@ -768,29 +975,36 @@ window.addEventListener("resize", () => { const w = isPC(); if (w !== pcWas) { p
 // ───── 로그인 ─────
 function viewSetup() {
   $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1>
-    <p class="note">GoatCounter API 키를 이 브라우저에 한 번 넣어 주세요. 키는 이 브라우저에만 저장돼요. (앱 관리자에서 쓰던 <b>admin</b> 키 — 도시 7곳을 다 읽을 수 있는 키)</p>
+    <p class="note">GoatCounter API 키를 한 번 넣어 주세요. 키는 비밀번호로 잠가서 이 브라우저에만 저장되고, 서버로 보내지 않아요.<br><b>권한은 "Stats(통계 읽기)"만 있는 키</b>를 쓰세요. 만드는 곳: <a href="https://airang-daejeon.goatcounter.com/user/api" target="_blank" rel="noopener">GoatCounter → API 토큰</a></p>
     <input id="k" type="password" autocomplete="off" placeholder="API 키 붙여 넣기">
-    <div class="k">관리자 비밀번호 (숫자 4자리)</div>
-    <input id="p1" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리"><input id="p2" type="password" inputmode="numeric" maxlength="4" placeholder="한 번 더">
+    <div class="k">관리자 비밀번호 (숫자 6자리 이상, 또는 글자 8자 이상)</div>
+    <input id="p1" type="password" autocomplete="new-password" placeholder="비밀번호"><input id="p2" type="password" autocomplete="new-password" placeholder="한 번 더">
     <button class="btn" style="width:100%;justify-content:center;height:46px" onclick="saveKey()">등록</button></div>`;
 }
 async function saveKey() {
   const k = document.getElementById("k").value.trim(), a = document.getElementById("p1").value, b = document.getElementById("p2").value;
   if (k.length < 10) return alertMsg("API 키를 붙여 넣어 주세요");
-  if (!/^\d{4}$/.test(a)) return alertMsg("비밀번호는 숫자 4자리예요");
+  if (!passOk(a)) return alertMsg("비밀번호는 숫자 6자리 이상 또는 글자 8자 이상이에요");
   if (a !== b) return alertMsg("두 번 넣은 비밀번호가 달라요");
-  ls.set(KEY, k); ls.set(PIN, await pinHash(a)); unlocked = true; DATA = null; ls.del(CACHE); render();
+  if (/^(\d)\1+$|^123456|^654321/.test(a)) return alertMsg("너무 쉬운 비밀번호예요");
+  await vaultSeal(k, a); SESS = k; unlocked = true; DATA = null; ls.del(CACHE); touchIdle(); render();
 }
 function viewPin() {
   $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1><p class="note">비밀번호를 넣어 주세요.</p>
-    <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리" autofocus>
+    <input id="pin" type="password" autocomplete="current-password" placeholder="비밀번호" autofocus><button class="btn" style="width:100%;justify-content:center;height:46px;margin-top:8px" onclick="unlockNow()">열기</button>
     <div id="msg" class="note" style="color:var(--coral-ink)"></div>
     <button class="btn soft" style="margin-top:6px" onclick="forget()">비밀번호를 잊었어요 (키 지우고 다시 등록)</button></div>`;
   const el = document.getElementById("pin");
-  el.addEventListener("input", async () => { if (/^\d{4}$/.test(el.value)) { if (await pinHash(el.value) === ls.get(PIN)) { unlocked = true; render(); } else { el.value = ""; document.getElementById("msg").textContent = "비밀번호가 달라요"; } } });
+  el.addEventListener("keydown", e => { if (e.key === "Enter") unlockNow(); });
   setTimeout(() => el.focus(), 50);
 }
-function forget() { ls.del(KEY); ls.del(PIN); ls.del(CACHE); DATA = null; unlocked = false; render(); }
+let tries = 0;
+async function unlockNow() { const el = document.getElementById("pin"), m = document.getElementById("msg"); if (!el.value) return;
+  m.textContent = "확인 중…"; const k = await vaultOpen(el.value);
+  if (k) { SESS = k; unlocked = true; tries = 0; touchIdle(); render(); }
+  else { tries++; el.value = ""; m.textContent = "비밀번호가 달라요"; if (tries >= 5) { m.textContent = "5번 틀려서 30초 쉬어요"; el.disabled = true; setTimeout(() => { el.disabled = false; tries = 0; m.textContent = ""; }, 30000); } }
+}
+function forget() { ls.del(VAULT); ls.del(KEY); ls.del(PIN); ls.del(CACHE); DATA = null; SESS = null; unlocked = false; render(); }
 function alertMsg(t) { let m = document.getElementById("amsg"); if (!m) { m = document.createElement("div"); m.id = "amsg"; m.className = "note"; m.style.color = "var(--coral-ink)"; document.querySelector(".login").appendChild(m); } m.textContent = t; }
 
 // ───── 시안용 예시 숫자 (?demo=1) ─────
@@ -813,7 +1027,7 @@ if (DEMO) {
     DATA.fresh[c.k] = { latest: ago(5), meals: ago(5), kinder: ago(6), events: ago(5), jobs: ago(5), weather: ago(2), academies: ago(c.k === "yongin" ? 96 : 5), deals: ["yongin", "suwon"].includes(c.k) ? null : ago(4) };
     if (c.k === "goyang") DATA.fresh[c.k].events = ago(50);
   }
-  unlocked = true; ls.get = (k) => k === KEY || k === PIN ? "demo" : null;
+  unlocked = true; SESS = "demo"; ls.get = (k) => k === VAULT ? "{}" : null;
   const m = location.search.match(/tab=(\w+)/); if (m) tab = m[1];
 }
 render();
