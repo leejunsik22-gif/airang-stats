@@ -163,6 +163,65 @@ input{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid v
 .pcwrap.m .rbars{gap:3px}.pcwrap.m .rbars div{min-width:0}.pcwrap.m .rbars em{font-size:9px}.pcwrap.m .rbars small{font-size:8.5px;overflow:hidden}
 .pcwrap.m .lg{flex-wrap:wrap;gap:4px 12px}.pcwrap.m .lg span:last-child{flex-basis:100%;margin-left:0!important}
 .pcwrap.m .feedrow{grid-template-columns:54px 14px 1fr auto}
+
+/* ───────────────────────────────────────────────────────────────
+   아이랑 브랜드 디자인 시스템 v1후보 (2026-11-02, 작업 가지 work)
+   기본: 따뜻한 아이보리 + 깊은 네이비 / 보조: 절제된 코랄·세이지 / 골드 포인트 최소
+   규칙: 글꼴 Noto Sans KR · 본문 15px/1.55 · 카드 곡률 20 · 버튼 곡률 14 · 터치 44px 이상
+   이 파일은 각 화면의 기존 CSS "뒤에" 붙어 토큰과 공통 요소만 덮어쓴다(원본 CSS는 보존).
+   ─────────────────────────────────────────────────────────────── */
+:root{
+  --ivory:#FAF7F1;--ivory-2:#F2EDE3;--paper:#FFFFFF;
+  --navy:#1F2A44;--navy-ink:#16203A;--navy-soft:#E6E9F1;
+  --coral:#D9654A;--coral-ink:#A33D27;--coral-bg:#FBE9E3;
+  --sage:#5E8C7A;--sage-ink:#2E5A4B;--sage-bg:#E6F0EB;
+  --gold:#B8923E;--gold-ink:#6F5415;--gold-bg:#F7EEDC;
+  --ink:var(--navy-ink);--muted:#5B6274;--line:#E8E3D9;--ground:var(--ivory);
+  --indigo:var(--navy);--indigo-ink:var(--navy-ink);--indigo-bg:var(--navy-soft);
+  --mint-ink:var(--sage-ink);--mint-bg:var(--sage-bg);--sun-ink:var(--gold-ink);--sun-bg:var(--gold-bg);
+  --card:var(--paper);
+  --r-card:20px;--r-btn:14px;--r-chip:12px;
+  --shadow:0 1px 2px rgba(31,42,68,.05),0 10px 24px -16px rgba(31,42,68,.28);
+  --shadow-sm:0 1px 2px rgba(31,42,68,.06);
+}
+html,body{background:var(--ground)!important;color:var(--ink);font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55}
+body{background-image:none!important}
+.bg{background:var(--ground)!important}
+a{color:var(--navy)}
+h1,h2,h3{letter-spacing:-.3px;color:var(--navy-ink)}
+/* 카드 */
+.lift,.card,.pcard{background:var(--paper)!important;border-radius:var(--r-card)!important;box-shadow:var(--shadow)!important;border:1px solid rgba(31,42,68,.06)}
+.glass{background:rgba(255,255,255,.82)!important;border:1px solid rgba(31,42,68,.08)!important;backdrop-filter:blur(14px)}
+/* 버튼·칩: 터치 44px, 입체 효과 제거 */
+.btn,.chip,.oc-tab,.ask,.navi,.seg button,button.btn-soft,button.btn-3d,a.btn{min-height:44px!important;border-radius:var(--r-btn)!important;font-weight:700;letter-spacing:-.2px}
+.btn-3d{background:var(--navy)!important;color:#fff!important;box-shadow:0 6px 14px -8px rgba(31,42,68,.6)!important}
+.btn-soft{background:var(--paper)!important;color:var(--navy)!important;box-shadow:var(--shadow-sm)!important;border:1px solid var(--line)}
+.btn:active,.btn-3d:active,.btn-soft:active{transform:translateY(1px)}
+.chip{background:var(--paper);border:1px solid var(--line)}
+/* 아이콘 타일: 같은 굵기·같은 스타일(단색 + 연한 바탕) */
+.tile,.t-indigo,.t-coral,.t-mint,.t-sun,.t-lilac{background:var(--navy-soft)!important;color:var(--navy)!important;box-shadow:none!important;border-radius:14px!important}
+.t-coral{background:var(--coral-bg)!important;color:var(--coral-ink)!important}
+.t-mint{background:var(--sage-bg)!important;color:var(--sage-ink)!important}
+.t-sun{background:var(--gold-bg)!important;color:var(--gold-ink)!important}
+.t-lilac{background:var(--navy-soft)!important;color:var(--navy)!important}
+.orb-sun{background:radial-gradient(circle at 30% 26%,#fff 0%,#F7EEDC 30%,var(--gold) 100%)!important;box-shadow:none!important}
+/* 히어로·제목 */
+.hero{background:linear-gradient(140deg,var(--navy),#2B3A5C)!important;box-shadow:var(--shadow)!important;border-radius:var(--r-card)!important}
+.sec-head h2{font-size:18px;font-weight:800}
+.sec-head a,.sec-head button{color:var(--navy)}
+/* 배지·태그: 골드는 '확인됨·NEW'에만 */
+.pill-gray{background:var(--ivory-2);color:var(--muted)}
+.pill-coral{background:var(--coral-bg);color:var(--coral-ink)}
+/* 입력창 */
+input[type=text],input[type=search],.search{min-height:44px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--paper)}
+/* 하단 탭 */
+.navi{min-height:48px!important;border-radius:14px!important}
+/* 글자 대비: 작은 보조 글자는 muted 통일 */
+.foot,.note,.sub{color:var(--muted)}
+/* 움직임 줄이기 */
+.fl{animation:none!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0E1220;--paper:#171C2E;--card:#171C2E;--ink:#EEF1FA;--navy-ink:#EEF1FA;--navy:#AEB6FF;--navy-soft:#232A55;--muted:#9AA3BC;--line:#262D45;--ivory-2:#1F2538;--shadow:none}}
+:root[data-theme="dark"]{--ground:#0E1220;--paper:#171C2E;--card:#171C2E;--ink:#EEF1FA;--navy-ink:#EEF1FA;--navy:#AEB6FF;--navy-soft:#232A55;--muted:#9AA3BC;--line:#262D45;--ivory-2:#1F2538;--shadow:none}
 </style>
 </head>
 <body>
@@ -367,7 +426,7 @@ function render() {
   if (!DATA) { const c = ls.get(CACHE); if (c) { try { DATA = JSON.parse(c); } catch (e) {} } if (DATA && !busy && !snapTried && CITIES.some(x => (DATA.city[x.k] || {}).err)) setTimeout(loadSnap, 30); if (!DATA && !busy && !snapTried) { loadSnap().then(() => { if (!DATA && !busy) loadAll(); }); } else if (!DATA && !busy) { loadAll(); } else if (DATA && !busy && Date.now() - DATA.at > 20 * 60e3 && !snapTried) setTimeout(() => loadSnap().then(() => { if (DATA && Date.now() - DATA.at > 40 * 60e3 && !busy) loadAll(); }), 50); }
   pcWas = isPC(); return renderPC();   // PC·휴대폰 같은 화면 구성 (휴대폰은 위쪽 버튼·한 줄 배치)
   $app.className = "wrap"; pcWas = false;
-  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">송골랩 · 도시 ${CITIES.length}곳 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
+  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">라그릴스 · 대전 ${CITIES.length}개 구 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
     <button class="btn" onclick="loadAll()" ${busy ? "disabled" : ""}>${busy ? "불러오는 중 " + prog + "/" + CITIES.length : "↻ 새로고침"}</button>
     <button class="btn soft" onclick="lock()">잠그기</button></header>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}
@@ -718,6 +777,19 @@ function mData() {   // 휴대폰: 수집 상태를 도시 카드로
       <div class="mpills">${FILES.map(([k, n, h]) => { const v = f[k]; if (v === null && k === "deals") return `<span class="pill">${n} 준비 중</span>`; const [lv, l] = freshLevel(v, hrsOf(c, k, h)); return `<span class="pill p-${lv}">${n} ${l}</span>`; }).join("")}</div></div>`; }).join("") +
     `<p class="legend">초록 정상 · 노랑 늦음 · 빨강 멈춤. <a class="lnk" href="https://github.com/leejunsik22-gif/airang-cities/actions" target="_blank" rel="noopener">수집 기록 ↗</a></p>`;
 }
+// ───── 검문 현황 (tools/gate.py 가 만드는 _status.json · 오류·미확인·검증·승인 대기 중심) ─────
+let GATES = null, gatesLoading = false;
+function loadGates() { if (gatesLoading) return; gatesLoading = true;
+  Promise.all(CITIES.map(c => fetch(c.raw + "_status.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(j => [c.k, j])))
+    .then(rs => { GATES = Object.fromEntries(rs); if (unlocked) render(); }); }
+function gatePanel() {
+  if (GATES === null) { loadGates(); return `<div class="pcard note">검문 현황을 읽는 중…</div>`; }
+  const rows = CITIES.map(c => { const g = GATES[c.k]; if (!g) return `<tr><td>${c.name}</td><td colspan="4" class="sub">검문 미적용 — 작업 가지(work) 승인 전</td></tr>`;
+    const fs = Object.values(g.files || {}); const pub = fs.filter(x => x.published), fail = fs.filter(x => /검사 실패/.test(x.reason || "")), ex = fs.filter(x => !x.published && !/검사 실패/.test(x.reason || ""));
+    return `<tr><td><b>${c.name}</b><div class="sub">${esc(g.checked_at || "")}</div></td><td style="color:var(--ok-c)">${pub.length}</td><td style="color:${fail.length ? "var(--warn-c)" : "inherit"}">${fail.length}${fail.length ? `<div class="sub">${fail.map(x => esc(x.label)).join(", ")}</div>` : ""}</td><td>${ex.length}<div class="sub">${ex.map(x => esc(x.label)).join(", ")}</div></td><td>${fail.length ? "확인 필요" : "—"}</td></tr>`; }).join("");
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>공개 전 검문 현황</h3><span class="sp"></span><span class="sub">공개 = 검사 통과해 고객 화면에 나감 · 실패 = 직전본 유지 · 제외 = 미확인 자료</span></div>
+    <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>검사 실패</th><th>제외(미확인)</th><th>승인 대기</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 function renderPC() {
   const M = !isPC();
   loadRuns(); if (!kwState) setTimeout(kwLoad, 50);
@@ -740,7 +812,7 @@ function renderPC() {
     const new30 = CITIES.reduce((t, c) => t + days7(30).reduce((a, x) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-새로", x.y), 0), 0);
     const pct = (a, b) => b ? Math.round((a - b) / b * 100) : 0, d1 = pct(sum("today"), sum("yest"));
     const worst = CITIES.filter(c => cityHealth(c) !== "ok").map(c => c.name);
-    body = errBox + `<div class="pkpis">
+    body = errBox + gatePanel() + `<div class="pkpis">
       <div class="pcard"><div class="k">오늘 방문한 사람</div><div class="v">${fmt(sum("today"))}<small>명</small></div><div class="d ${d1 >= 0 ? "up" : "dn"}">어제(${fmt(sum("yest"))})보다 ${d1 >= 0 ? "+" : ""}${d1}%</div></div>
       <div class="pcard"><div class="k">최근 7일 방문</div><div class="v">${fmt(sum("w7"))}<small>명</small></div><div class="d light">하루 평균 ${fmt(Math.round(sum("w7") / 7))}명</div></div>
       <div class="pcard"><div class="k">처음 온 사람 · 30일</div><div class="v">${fmt(new30)}<small>명</small></div><div class="d light">새 기기 기준</div></div>
@@ -775,7 +847,7 @@ function renderPC() {
     return;
   }
   $app.className = "pcwrap";
-  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 송골랩</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${top}${body}</main></div>`;
+  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 라그릴스</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${top}${body}</main></div>`;
 }
 function pcSeg() { return `<div class="seg">${[["all", "전체 " + CITIES.length], ...SIDO_LIST.map(x => [x, x + " " + CITIES.filter(c => sidoOf(c) === x).length])].map(([k, l]) => `<button class="${pcSido === k ? "on" : ""}" onclick="pcSet('sido','${k}')">${l}</button>`).join("")}</div>`; }
 let pcWas = null;
