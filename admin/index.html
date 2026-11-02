@@ -202,7 +202,22 @@ const kstYmd = d => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10
 const kstMidnight = daysAgo => { const k = new Date(Date.now() + 9 * 3600e3); k.setUTCHours(0, 0, 0, 0); return new Date(k.getTime() - 9 * 3600e3 - daysAgo * 86400e3); };
 const iso = d => d.toISOString().slice(0, 19) + "Z";
 const days7 = (n = 7) => [...Array(n)].map((_, i) => { const d = new Date(Date.now() - (n - 1 - i) * 86400e3); const y = kstYmd(d); return { y, l: (+y.slice(5, 7)) + "/" + (+y.slice(8)) }; });
-async function pinHash(pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("airang-daejeon-admin:" + pin + ":" + (ls.get(KEY) || ""))); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+// ───── 키 보관 (2026-11-02 작업 가지): API 키를 평문으로 두지 않고 비밀번호로 잠가서(AES-GCM) 저장. 풀린 키는 메모리(SESS)에만 ─────
+const VAULT = "airang.admin.vault";   // {salt, iv, ct} base64
+let SESS = null;                      // 풀린 API 키 (화면 잠그면 지움)
+const b64 = u => btoa(String.fromCharCode(...u)), unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function kdf(pass, salt) { const base = await crypto.subtle.importKey("raw", new TextEncoder().encode("airang-daejeon-admin:" + pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 600000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]); }
+async function vaultSeal(apiKey, pass) { const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await kdf(pass, salt), new TextEncoder().encode(apiKey));
+  ls.set(VAULT, JSON.stringify({ v: 1, salt: b64(salt), iv: b64(iv), ct: b64(new Uint8Array(ct)) })); }
+async function vaultOpen(pass) { const o = JSON.parse(ls.get(VAULT) || "null"); if (!o) return null;
+  try { const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(o.iv) }, await kdf(pass, unb64(o.salt)), unb64(o.ct)); return new TextDecoder().decode(pt); } catch (e) { return null; } }
+const passOk = p => /^\d{6,}$/.test(p) || p.length >= 8;   // 숫자 6자리 이상 또는 아무 글자 8자 이상
+const apiKey = () => SESS || "";
+let idleTimer = null; function touchIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(() => { if (unlocked) lock(); }, 10 * 60e3); }   // 10분 안 쓰면 잠금
+["click", "keydown", "touchstart"].forEach(ev => document.addEventListener(ev, touchIdle, { passive: true }));
+document.addEventListener("visibilitychange", () => { if (document.hidden && unlocked) lock(); });   // 다른 앱으로 가면 잠금
 
 let unlocked = false, tab = "one", DATA = null, busy = false, prog = 0;
 try { tab = sessionStorage.getItem("airang.admin.tab") || "one"; } catch (e) {}
@@ -214,7 +229,7 @@ async function gc(c, path, params, tries = 0) {
   const now = Date.now(); slot = Math.max(now, slot + 340); await sleep(slot - now);   // 1초 4번 제한보다 조금 천천히
   const q = new URLSearchParams(params).toString();
   let r;
-  try { r = await fetch(gcSite(c) + "/api/v0/" + path + (q ? "?" + q : ""), { headers: { Authorization: "Bearer " + ls.get(KEY), "Content-Type": "application/json" } }); }
+  try { r = await fetch(gcSite(c) + "/api/v0/" + path + (q ? "?" + q : ""), { headers: { Authorization: "Bearer " + apiKey(), "Content-Type": "application/json" } }); }
   catch (e) { if (tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); } throw e; }   // 끊김: 너무 빨라 막힌 경우(429에 CORS 없음)도 여기로 와서 기다렸다 다시
   if (r.status === 429 && tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); }
   if (r.status === 401 || r.status === 403) throw new Error("키 권한 없음 (" + r.status + ")");
@@ -338,7 +353,7 @@ function freshLevel(v, hours) {
   return [h > hours * 2 ? "bad" : h > hours ? "warn" : "ok", label];
 }
 function cityHealth(c) {
-  const f = DATA.fresh[c.k] || {}; let worst = "ok";
+  const f = (DATA && DATA.fresh && DATA.fresh[c.k]) || {}; let worst = "ok";   // 잠금 직후 DATA 비어 있을 때 보호
   for (const [k, , hrs] of FILES) { if (k === "deals" && f[k] === null) continue; const [lv] = freshLevel(f[k], hrsOf(c, k, hrs)); if (lv === "bad") worst = "bad"; else if (lv === "warn" && worst === "ok") worst = "warn"; }
   return worst;
 }
@@ -346,7 +361,8 @@ function cityHealth(c) {
 // ───── 화면 ─────
 function render() {
   $app.className = "wrap";
-  if (!ls.get(KEY) || !ls.get(PIN)) return viewSetup();
+  if (ls.get(KEY)) { ls.del(KEY); ls.del(PIN); }   // 예전 평문 키가 남아 있으면 지우고 다시 등록(안전 전환)
+  if (!ls.get(VAULT)) return viewSetup();
   if (!unlocked) return viewPin();
   if (!DATA) { const c = ls.get(CACHE); if (c) { try { DATA = JSON.parse(c); } catch (e) {} } if (DATA && !busy && !snapTried && CITIES.some(x => (DATA.city[x.k] || {}).err)) setTimeout(loadSnap, 30); if (!DATA && !busy && !snapTried) { loadSnap().then(() => { if (!DATA && !busy) loadAll(); }); } else if (!DATA && !busy) { loadAll(); } else if (DATA && !busy && Date.now() - DATA.at > 20 * 60e3 && !snapTried) setTimeout(() => loadSnap().then(() => { if (DATA && Date.now() - DATA.at > 40 * 60e3 && !busy) loadAll(); }), 50); }
   pcWas = isPC(); return renderPC();   // PC·휴대폰 같은 화면 구성 (휴대폰은 위쪽 버튼·한 줄 배치)
@@ -362,7 +378,7 @@ function render() {
   $app.innerHTML = head + body();
 }
 function setTab(k) { tab = k; try { sessionStorage.setItem("airang.admin.tab", k); } catch (e) {} render(); window.scrollTo(0, 0); }
-function lock() { unlocked = false; render(); }
+function lock() { unlocked = false; SESS = null; render(); }
 
 function kpi(label, v, unit, prev) {
   const d = prev === undefined ? "" : v - prev;
@@ -584,7 +600,7 @@ function kwBox() {
       · <b>KWANJE_URL</b> = 관제 바깥 주소 (관제는 보류 — 비워 둠)<br>· <b>KWANJE_TOKEN</b> = 관제 설정 → 연결의 API 토큰<br>넣은 뒤 Claude에게 "넣었어"라고 말하면 바로 적용해요.</div>`}${res}`;
 }
 async function kwCall(path, opt = {}) {
-  const r = await fetch(KW + path, { ...opt, headers: { Authorization: "Bearer " + ls.get(KEY) } });
+  const r = await fetch(KW + path, { ...opt, headers: { Authorization: "Bearer " + apiKey() } });
   const j = await r.json().catch(() => ({})); if (!r.ok && !j.data) throw new Error(j.error || ("응답 " + r.status)); return j;
 }
 async function kwLoad() { try { kwState = await kwCall("/preview"); } catch (e) { kwState = { err: String(e.message || e) }; } const b = document.getElementById("kw"); if (b) b.innerHTML = kwBox(); }
@@ -768,29 +784,36 @@ window.addEventListener("resize", () => { const w = isPC(); if (w !== pcWas) { p
 // ───── 로그인 ─────
 function viewSetup() {
   $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1>
-    <p class="note">GoatCounter API 키를 이 브라우저에 한 번 넣어 주세요. 키는 이 브라우저에만 저장돼요. (앱 관리자에서 쓰던 <b>admin</b> 키 — 도시 7곳을 다 읽을 수 있는 키)</p>
+    <p class="note">GoatCounter API 키를 한 번 넣어 주세요. 키는 비밀번호로 잠가서 이 브라우저에만 저장되고, 서버로 보내지 않아요.<br><b>권한은 "Stats(통계 읽기)"만 있는 키</b>를 쓰세요. 만드는 곳: <a href="https://airang-daejeon.goatcounter.com/user/api" target="_blank" rel="noopener">GoatCounter → API 토큰</a></p>
     <input id="k" type="password" autocomplete="off" placeholder="API 키 붙여 넣기">
-    <div class="k">관리자 비밀번호 (숫자 4자리)</div>
-    <input id="p1" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리"><input id="p2" type="password" inputmode="numeric" maxlength="4" placeholder="한 번 더">
+    <div class="k">관리자 비밀번호 (숫자 6자리 이상, 또는 글자 8자 이상)</div>
+    <input id="p1" type="password" autocomplete="new-password" placeholder="비밀번호"><input id="p2" type="password" autocomplete="new-password" placeholder="한 번 더">
     <button class="btn" style="width:100%;justify-content:center;height:46px" onclick="saveKey()">등록</button></div>`;
 }
 async function saveKey() {
   const k = document.getElementById("k").value.trim(), a = document.getElementById("p1").value, b = document.getElementById("p2").value;
   if (k.length < 10) return alertMsg("API 키를 붙여 넣어 주세요");
-  if (!/^\d{4}$/.test(a)) return alertMsg("비밀번호는 숫자 4자리예요");
+  if (!passOk(a)) return alertMsg("비밀번호는 숫자 6자리 이상 또는 글자 8자 이상이에요");
   if (a !== b) return alertMsg("두 번 넣은 비밀번호가 달라요");
-  ls.set(KEY, k); ls.set(PIN, await pinHash(a)); unlocked = true; DATA = null; ls.del(CACHE); render();
+  if (/^(\d)\1+$|^123456|^654321/.test(a)) return alertMsg("너무 쉬운 비밀번호예요");
+  await vaultSeal(k, a); SESS = k; unlocked = true; DATA = null; ls.del(CACHE); touchIdle(); render();
 }
 function viewPin() {
   $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1><p class="note">비밀번호를 넣어 주세요.</p>
-    <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리" autofocus>
+    <input id="pin" type="password" autocomplete="current-password" placeholder="비밀번호" autofocus><button class="btn" style="width:100%;justify-content:center;height:46px;margin-top:8px" onclick="unlockNow()">열기</button>
     <div id="msg" class="note" style="color:var(--coral-ink)"></div>
     <button class="btn soft" style="margin-top:6px" onclick="forget()">비밀번호를 잊었어요 (키 지우고 다시 등록)</button></div>`;
   const el = document.getElementById("pin");
-  el.addEventListener("input", async () => { if (/^\d{4}$/.test(el.value)) { if (await pinHash(el.value) === ls.get(PIN)) { unlocked = true; render(); } else { el.value = ""; document.getElementById("msg").textContent = "비밀번호가 달라요"; } } });
+  el.addEventListener("keydown", e => { if (e.key === "Enter") unlockNow(); });
   setTimeout(() => el.focus(), 50);
 }
-function forget() { ls.del(KEY); ls.del(PIN); ls.del(CACHE); DATA = null; unlocked = false; render(); }
+let tries = 0;
+async function unlockNow() { const el = document.getElementById("pin"), m = document.getElementById("msg"); if (!el.value) return;
+  m.textContent = "확인 중…"; const k = await vaultOpen(el.value);
+  if (k) { SESS = k; unlocked = true; tries = 0; touchIdle(); render(); }
+  else { tries++; el.value = ""; m.textContent = "비밀번호가 달라요"; if (tries >= 5) { m.textContent = "5번 틀려서 30초 쉬어요"; el.disabled = true; setTimeout(() => { el.disabled = false; tries = 0; m.textContent = ""; }, 30000); } }
+}
+function forget() { ls.del(VAULT); ls.del(KEY); ls.del(PIN); ls.del(CACHE); DATA = null; SESS = null; unlocked = false; render(); }
 function alertMsg(t) { let m = document.getElementById("amsg"); if (!m) { m = document.createElement("div"); m.id = "amsg"; m.className = "note"; m.style.color = "var(--coral-ink)"; document.querySelector(".login").appendChild(m); } m.textContent = t; }
 
 // ───── 시안용 예시 숫자 (?demo=1) ─────
@@ -813,7 +836,7 @@ if (DEMO) {
     DATA.fresh[c.k] = { latest: ago(5), meals: ago(5), kinder: ago(6), events: ago(5), jobs: ago(5), weather: ago(2), academies: ago(c.k === "yongin" ? 96 : 5), deals: ["yongin", "suwon"].includes(c.k) ? null : ago(4) };
     if (c.k === "goyang") DATA.fresh[c.k].events = ago(50);
   }
-  unlocked = true; ls.get = (k) => k === KEY || k === PIN ? "demo" : null;
+  unlocked = true; SESS = "demo"; ls.get = (k) => k === VAULT ? "{}" : null;
   const m = location.search.match(/tab=(\w+)/); if (m) tab = m[1];
 }
 render();
