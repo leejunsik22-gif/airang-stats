@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
     inputs:
       force: { description: "바뀌지 않아도 올리기", default: "no" }
-  # schedule: (대표 승인 전 자동 실행 비활성 — 2026-11-02)
-  #   - cron: "7 */6 * * *"    # 6시간마다 한 번 확인 (보통은 바꾼 뒤 바로 손으로 실행) — GitHub 무료 실행 시간 아끼기
+  schedule:   # 2026-11-02 대표 승인으로 자동 실행 켬
+    - cron: "7 */6 * * *"    # 6시간마다 한 번 확인 (보통은 바꾼 뒤 바로 손으로 실행) — GitHub 무료 실행 시간 아끼기
 permissions:
   contents: write
   actions: read

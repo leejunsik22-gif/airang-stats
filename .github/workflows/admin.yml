@@ -1,9 +1,9 @@
 name: admin (관리자 사이트를 Cloudflare Pages로)
 on:
   workflow_dispatch:
-  # push: (대표 승인 전 자동 배포 비활성 — 2026-11-02)
-  #  branches: [main]
-  #  paths: ["admin/**", ".github/workflows/admin.yml"]
+  push:   # 2026-11-02 대표 승인으로 자동 배포 켬
+    branches: [main]
+    paths: ["admin/**", ".github/workflows/admin.yml"]
 permissions:
   contents: write
 jobs:
