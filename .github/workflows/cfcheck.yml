@@ -1,0 +1,30 @@
+name: cfcheck
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          A: fdf0f693700c270e15a856ec9453fde7
+        run: |
+          set +e
+          { for p in seongnam anyang goyang hwaseong bucheon; do
+              curl -s -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+                "https://api.cloudflare.com/client/v4/accounts/$A/pages/projects/airang-$p/domains" -d "{\"name\":\"$p.daejeon.example.invalid\"}" >/dev/null
+            done
+            sleep 60
+            for t in $(seq 1 16); do
+              line=""; for p in seongnam anyang goyang hwaseong bucheon; do
+                st=$(curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$A/pages/projects/airang-$p/domains/$p.daejeon.example.invalid" | python3 -c "import json,sys;print(json.load(sys.stdin)['result']['status'])" 2>/dev/null)
+                [ "$st" != active ] && curl -s -X PATCH -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$A/pages/projects/airang-$p/domains/$p.daejeon.example.invalid" >/dev/null
+                line="$line $p=$st"; done
+              echo "$t$line"; echo "$line" | grep -qv "=[^a]" && ! echo "$line" | grep -q pending && break; sleep 30
+            done
+            for p in seongnam anyang goyang hwaseong bucheon; do echo "$p $(curl -sS -m 20 -o /dev/null -w '%{http_code}' https://$p.daejeon.example.invalid/data/x.json 2>/dev/null) $(curl -sS -m 20 -o /dev/null -w '%{http_code}' https://$p.daejeon.example.invalid/)"; done
+          } > data/cfcheck.txt 2>&1
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cfcheck.txt && git commit -m "cf 점검" && for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

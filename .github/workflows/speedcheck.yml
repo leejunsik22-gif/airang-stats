@@ -1,0 +1,33 @@
+name: speedcheck (아이랑 7개 도시 열림·속도 점검)
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set +e; mkdir -p data
+          t() { curl -s -o /dev/null -m 30 -w "%{http_code} %{time_total}s %{size_download}B" "$1"; }
+          {
+          date -u; echo "(GitHub 서버=미국에서 잰 값. 한국 휴대폰은 더 빠르거나 비슷함. 비교용)"
+          for c in yongin suwon seongnam anyang goyang hwaseong bucheon; do
+            d=https://$c.daejeon.example.invalid
+            case $c in
+              yongin) raw=https://raw.githubusercontent.com/leejunsik22-gif/yongin-edu-collector/main/output; gio=https://leejunsik22-gif.github.io/yongin-edu-collector/data;;
+              suwon) raw=https://raw.githubusercontent.com/leejunsik22-gif/suwon-edu-collector/main/output; gio=https://leejunsik22-gif.github.io/suwon-edu-collector/data;;
+              *) raw=https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/$c; gio="";;
+            esac
+            echo "== $c"
+            echo "  첫 화면(index)     $(t $d/)"
+            echo "  풍경 그림          $(t $d/assets/hero-$c-800.webp)"
+            echo "  ./data/latest.json $(t $d/data/latest.json)   ← 앱이 먼저 묻는 곳(용인 제외)"
+            echo "  RAW latest.json    $(t $raw/latest.json)"
+            [ -n "$gio" ] && echo "  github.io latest   $(t $gio/latest.json)"
+            for f in events meals books libs weather hospitals benefits elite; do echo "    $f.json  RAW $(t $raw/$f.json)"; done
+          done
+          } > data/speedcheck.txt 2>&1
+          cat data/speedcheck.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/speedcheck.txt; git commit -qm "속도 점검 기록" && for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

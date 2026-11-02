@@ -1,0 +1,2 @@
+{"name":"아이랑 관리자","short_name":"아이랑 관리자","start_url":"/","scope":"/","display":"standalone","background_color":"#EEF1F8","theme_color":"#4B5BF0",
+ "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}

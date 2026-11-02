@@ -1,0 +1,12 @@
+# 관제 작업(Worker) 설정 — kwanje.yml 이 이 파일로 올린다
+name = "airang-kwanje"
+main = "kwanje.js"
+compatibility_date = "2026-09-01"
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+# 관리자 화면용 미리 모은 통계 (암호화된 채로 저장). adminsnap.yml 이 'snap' 키에 넣는다.
+[[kv_namespaces]]
+binding = "SNAP"
+id = "209aba818b064846ac7cdb268c4d7515"

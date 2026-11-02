@@ -1,0 +1,71 @@
+name: cf-move 도시 주소를 사이트 하나(airang-all)로 옮기기
+# 도시마다: 예전 사이트에서 주소 떼기 → airang-all 에 붙이기 → DNS 대상 바꾸기 → 열리는지 확인.
+# 실패하면 그 도시는 예전 사이트로 되돌림.
+on:
+  workflow_dispatch:
+    inputs:
+      cities: { description: "옮길 도시 키 (띄어쓰기로, all = 전부·용인 마지막)", default: "osan" }
+      dry: { description: "yes = 확인만 (바꾸지 않음)", default: "yes" }
+permissions:
+  contents: read
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    env:
+      T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      ACC: fdf0f693700c270e15a856ec9453fde7
+      NEW: airang-all
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: leejunsik22-gif/airang-cities, sparse-checkout: app }
+      - run: |
+          set -u
+          API=https://api.cloudflare.com/client/v4
+          cf() { curl -s "$@" -H "Authorization: Bearer $T" -H "Content-Type: application/json"; }
+          ZONE=$(cf "$API/zones?name=daejeon.example.invalid" | jq -r '.result[0].id // empty')
+          [ -n "$ZONE" ] || { echo "::error::DNS 구역을 못 읽음 (토큰에 DNS 권한 필요)"; exit 1; }
+          python3 - "${{ github.event.inputs.cities }}" > /tmp/list.txt <<'PY'
+          import json, sys
+          c = json.load(open("app/cities.json"))
+          rows = {k: (v["domain"], v["pages"]) for k, v in c["cities"].items()}
+          rows["entry"] = (c["entry"]["domain"], c["entry"]["pages"])
+          want = sys.argv[1].split()
+          if want == ["all"]:
+              want = [k for k in rows if k not in ("yongin", "suwon", "entry")] + ["entry", "suwon", "yongin"]
+          for k in want: print(k, *rows[k])
+          PY
+          for d in $(cut -d' ' -f2 /tmp/list.txt); do echo "지금 $d: $(curl -s -o /dev/null -w '%{http_code}' https://$d/?nocount=1)"; done
+          cf "$API/zones/$ZONE/dns_records?per_page=100" | jq -c '{success,errors,n:.result_info.total_count,r:[.result[]?|"\(.type) \(.name|split(".")[0]) \(.content|split(".")[0])"]}'
+          # 1) 전부 옮기기 (도시마다 새 사이트 주소가 켜지는 데 3~5분 걸림 → 한꺼번에 옮기고 함께 기다림)
+          : > /tmp/moved.txt
+          while read key dom old; do
+            echo "=== $key ($dom: $old → $NEW)"
+            rec=$(cf "$API/zones/$ZONE/dns_records?type=CNAME&name=$dom" | jq -r '.result[0] | "\(.id) \(.content) \(.proxied)"')
+            echo "DNS: $rec"
+            for pj in $old $NEW; do echo "  $pj 주소상태: $(cf "$API/accounts/$ACC/pages/projects/$pj/domains/$dom" | jq -c '[.result.status, .result.verification_data.status, .result.validation_data.status, .result.verification_data.error_message]')"; done
+            [ "${{ github.event.inputs.dry }}" = "yes" ] && continue
+            rid=${rec%% *}; prox=${rec##* }
+            cf -X DELETE "$API/accounts/$ACC/pages/projects/$old/domains/$dom" | jq -c '{success,errors}'
+            cf -X POST "$API/accounts/$ACC/pages/projects/$NEW/domains" -d "{\"name\":\"$dom\"}" | jq -c '{success,errors}'
+            cf -X PATCH "$API/zones/$ZONE/dns_records/$rid" -d "{\"content\":\"$NEW.pages.dev\",\"proxied\":true}" | jq -c '{success,content:.result.content}'
+            echo "$key $dom $old $rid $prox" >> /tmp/moved.txt
+          done < /tmp/list.txt
+          [ -s /tmp/moved.txt ] || exit 0
+          # 2) 모두 열릴 때까지 최대 12분 기다림
+          for i in $(seq 1 24); do sleep 30; left=0
+            while read key dom old rid prox; do
+              [ -f /tmp/ok.$key ] && continue
+              code=$(curl -s -o /tmp/b -w "%{http_code}" "https://$dom/?nocount=1"); t=$(grep -o '<title>[^<]*' /tmp/b | head -1)
+              if [ "$code" = 200 ] && [ -n "$t" ]; then touch /tmp/ok.$key; echo "  $((i*30))초: $key 열림 ($t)"; else left=$((left+1)); fi
+            done < /tmp/moved.txt
+            [ $left = 0 ] && break
+          done
+          # 3) 끝내 안 열린 도시는 예전 사이트로 되돌림
+          while read key dom old rid prox; do
+            [ -f /tmp/ok.$key ] && continue
+            echo "::warning::$key 안 열림 → 예전 사이트로 되돌림"
+            cf -X DELETE "$API/accounts/$ACC/pages/projects/$NEW/domains/$dom" >/dev/null
+            cf -X POST "$API/accounts/$ACC/pages/projects/$old/domains" -d "{\"name\":\"$dom\"}" | jq -c '{success}'
+            cf -X PATCH "$API/zones/$ZONE/dns_records/$rid" -d "{\"content\":\"$old.pages.dev\",\"proxied\":$prox}" | jq -c '{success}'
+          done < /tmp/moved.txt
+          echo "옮김: $(ls /tmp/ok.* 2>/dev/null | wc -l) / $(wc -l < /tmp/moved.txt)"

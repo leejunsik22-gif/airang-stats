@@ -1,0 +1,43 @@
+name: kwanje (관제로 방문 통계 보내는 Cloudflare 작업 올리기)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["worker/kwanje.js", "worker/wrangler.toml", ".github/workflows/kwanje.yml"]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+      GC_KEY_ADMIN: ${{ secrets.GC_KEY_ADMIN }}
+      GC_KEY_YONGIN: ${{ secrets.GC_KEY_YONGIN }}
+      GC_KEY_SUWON: ${{ secrets.GC_KEY_SUWON }}
+      KWANJE_URL: ${{ secrets.KWANJE_URL }}
+      KWANJE_TOKEN: ${{ secrets.KWANJE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: 올리기 + 비밀값 넣기 + 시험
+        run: |
+          mkdir -p data; exec > >(tee data/kwanje.txt) 2>&1
+          echo "== $(TZ=Asia/Seoul date '+%F %T')"
+          npm i -g wrangler@3 >/dev/null 2>&1
+          wrangler deploy --config worker/wrangler.toml 2>&1 | grep -v -i token | tail -6
+          RUN_KEY=$(openssl rand -hex 24)
+          put() { if [ -n "$2" ]; then printf '%s' "$2" | wrangler secret put "$1" --name airang-kwanje >/dev/null 2>&1 && echo "비밀값 $1: 넣음 (끝 ${2: -4})" || echo "비밀값 $1: 실패"; else echo "비밀값 $1: 없음"; fi; }
+          put GC_KEY_ADMIN "$GC_KEY_ADMIN"; put GC_KEY_YONGIN "$GC_KEY_YONGIN"; put GC_KEY_SUWON "$GC_KEY_SUWON"
+          put KWANJE_URL "$KWANJE_URL"; put KWANJE_TOKEN "$KWANJE_TOKEN"; put RUN_KEY "$RUN_KEY" | sed 's/(끝.*)//'
+          [ -n "$KWANJE_URL" ] && echo "관제 주소: $(echo "$KWANJE_URL" | sed -E 's#^(https?://[^/]+).*#\1#')"
+          sleep 15
+          W=https://airang-kwanje.leejunsik22-gif-lee.workers.dev
+          echo "-- 미리보기 (보내지 않고 숫자만)"; curl -s -m 60 -H "Authorization: Bearer $RUN_KEY" $W/preview | python3 -c "import sys,json;d=json.load(sys.stdin);print(json.dumps({k:d.get(k) for k in ('url_set','token_last4','errs','error')},ensure_ascii=False));print(json.dumps(d.get('data'),ensure_ascii=False))"
+          if [ -n "$KWANJE_URL" ] && [ -n "$KWANJE_TOKEN" ]; then echo "-- 한 번 보내기"; curl -s -m 60 -X POST -H "Authorization: Bearer $RUN_KEY" $W/send | python3 -c "import sys,json;d=json.load(sys.stdin);print(json.dumps({k:d.get(k) for k in ('sent','status','reply','why')},ensure_ascii=False))"; fi
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/kwanje.txt; git diff --cached --quiet && exit 0
+          git commit -m "관제 연동 배포 기록"; for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

@@ -1,0 +1,21 @@
+name: probe (체육 강좌 사이트 살펴보기)
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set +e; mkdir -p data/probe; rm -f data/probe/index.txt; cd data/probe
+          UA="Mozilla/5.0 (airang-probe; +https://daejeon.example.invalid)"
+          g() { curl -sSL -m 25 -A "$UA" -o "$1" -w "$1 code=%{http_code} size=%{size_download} url=%{url_effective}\n" "$2" >> index.txt 2>&1; sleep 1; }
+          g gylib_list.html "https://www.goyanglib.or.kr/center/menu/10045/program/30013/lectureList.do?statusCd=apply&currentPageNo=1"
+          g ayac_edu.html "https://ayac.or.kr/base/menu/baseView?menuLevel=1&menuNo=4"
+          g ayac_show.html "https://ayac.or.kr/base/menu/baseView?menuLevel=1&menuNo=1"
+          cat index.txt
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/probe; git commit -qm "체육 사이트 살펴보기" && for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

@@ -1,0 +1,26 @@
+name: adminsnap (관리자·관제 통계 미리 모아 두기)
+# 30분마다 26곳 통계·수집 시각을 모아 관제 작업 저장소(Cloudflare KV)에 넣는다.
+#  - snap: 관리자 화면용 (암호화) / vis: 관제로 보낼 방문·광고 숫자 (관제 작업이 10분마다 꺼내 씀)
+on:
+  schedule:
+    - cron: "4 * * * *"     # 1시간마다 (도시 50곳 — GitHub 무료 실행 시간 아끼기)
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency: { group: adminsnap, cancel-in-progress: true }
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      GC_KEY_YONGIN: ${{ secrets.GC_KEY_YONGIN }}
+      CF: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      KV: https://api.cloudflare.com/client/v4/accounts/fdf0f693700c270e15a856ec9453fde7/storage/kv/namespaces/209aba818b064846ac7cdb268c4d7515/values
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: snap, fetch-depth: 1 }
+      - run: |
+          for r in airang-cities airang-stats; do GH_TOKEN=${{ github.token }} gh api "repos/leejunsik22-gif/$r/actions/runs?per_page=40" --jq "[.workflow_runs[] | {repo:\"$r\", name, title:.display_title, st:.status, ok:.conclusion, at:.created_at, url:.html_url}]" || true; done | python3 -c "import sys,json;print(json.dumps([x for l in sys.stdin if l.strip().startswith('[') for x in json.loads(l) if isinstance(x,dict)],ensure_ascii=False))" > /tmp/runs.json
+          node snap/adminsnap.mjs x x /tmp/runs.json
+          for k in snap vis; do curl -s -X PUT "$KV/$k" -H "Authorization: Bearer $CF" --data-binary @$k.json | python3 -c "import sys,json;print('$k 저장', json.load(sys.stdin).get('success'))"; done

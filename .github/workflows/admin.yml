@@ -1,0 +1,32 @@
+name: admin (관리자 사이트를 Cloudflare Pages로)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["admin/**", ".github/workflows/admin.yml"]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: |
+          mkdir -p data; exec > >(tee data/admin.txt) 2>&1
+          npm i -g wrangler@3 >/dev/null 2>&1
+          wrangler pages project create airang-admin --production-branch main >/dev/null 2>&1 || true
+          wrangler pages deploy admin --project-name airang-admin --branch main --commit-dirty=true 2>&1 | tail -3
+          A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-admin/domains
+          curl -s -X POST $A -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d '{"name":"admin.daejeon.example.invalid"}' | head -c 300; echo
+          curl -s -X PATCH $A/admin.daejeon.example.invalid -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | head -c 300; echo
+          echo "DNS: $(dig +short admin.daejeon.example.invalid CNAME @1.1.1.1)"; sleep 20; echo "admin: $(curl -s -o /dev/null -w %{http_code} https://admin.daejeon.example.invalid/)"; echo "pages.dev: $(curl -s -o /tmp/p.html -w '%{http_code}' https://airang-admin.pages.dev/) $(grep -o '<title>[^<]*' /tmp/p.html)"
+          curl -s $A/admin.daejeon.example.invalid -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | grep -o '"status":"[^"]*"' | head -3
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/admin.txt; git diff --cached --quiet && exit 0
+          git commit -m "관리자 배포 기록"; for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

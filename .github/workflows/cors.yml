@@ -1,0 +1,31 @@
+name: cors (관리자 사이트 연결 확인)
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  cors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      K: ${{ secrets.GC_KEY_YONGIN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set +e; mkdir -p data
+          S=https://yongin-edu-app.goatcounter.com/api/v0
+          {
+            for o in https://admin.daejeon.example.invalid https://yongin.daejeon.example.invalid; do
+              for p in paths "stats/hits?limit=5" stats/toprefs; do
+                echo "== OPTIONS $p from $o"
+                curl -s -m 20 -o /dev/null -D - -X OPTIONS -H "Origin: $o" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization,content-type" "$S/$p" | grep -i "^HTTP\|access-control"
+              done
+            done
+            echo "== GET paths from admin"
+            curl -s -m 20 -o /tmp/p.json -D - -H "Origin: https://admin.daejeon.example.invalid" -H "Authorization: Bearer $K" "$S/paths?limit=5" | grep -i "^HTTP\|access-control\|x-rate"; head -c 150 /tmp/p.json | sed 's/"path":"[^"]*"/"path":".."/g'; echo
+            echo "== burst 10 (0.1초 간격)"
+            for i in $(seq 10); do curl -s -m 20 -o /dev/null -D /tmp/h$i -w "%{http_code} " -H "Origin: https://admin.daejeon.example.invalid" -H "Authorization: Bearer $K" "$S/stats/toprefs?limit=1" & sleep 0.1; done; wait; echo
+            for i in $(seq 10); do grep -qi "^HTTP.* 429" /tmp/h$i && { echo "429 headers:"; grep -i "access-control\|retry\|x-rate" /tmp/h$i; break; }; done
+          } > data/cors.txt 2>&1
+          cat data/cors.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cors.txt; git commit -qm "연결 확인 기록" && for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

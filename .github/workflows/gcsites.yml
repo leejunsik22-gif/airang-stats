@@ -1,0 +1,29 @@
+name: gcsites (GoatCounter 도시 사이트 만들기)
+# cities.json 의 도시마다 <도시>-edu-app.goatcounter.com 이 있는지 보고, 없으면 같은 계정에 만든다 (make=yes 일 때만).
+on:
+  workflow_dispatch:
+    inputs:
+      make: { description: "yes = 없는 사이트 만들기", default: "no" }
+      ref: { description: "airang-cities 가지 (새 도시 미리 만들 때)", default: "main" }
+permissions:
+  contents: read
+jobs:
+  s:
+    runs-on: ubuntu-latest
+    env:
+      K: ${{ secrets.GC_SITE_KEY }}   # 사이트 읽기·만들기 권한 키 (사장님이 직접 넣음)
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: leejunsik22-gif/airang-cities, sparse-checkout: app, ref: "${{ github.event.inputs.ref }}" }
+      - run: |
+          A=https://yongin-edu-app.goatcounter.com/api/v0
+          h=(-H "Authorization: Bearer $K" -H "Content-Type: application/json")
+          echo "키 길이: ${#K}"; echo "me: $(curl -s -o /dev/null -w '%{http_code}' "$A/me" "${h[@]}")"
+          code=$(curl -s -o /tmp/s.json -w "%{http_code}" "$A/sites" "${h[@]}"); echo "사이트 목록 읽기: $code"
+          jq -r '.sites[]?.code' /tmp/s.json | sort > /tmp/have.txt; echo "있는 사이트 $(wc -l < /tmp/have.txt)개"; [ "$code" = 200 ] || head -c 300 /tmp/s.json
+          for k in $(jq -r '.cities | keys[]' app/cities.json); do
+            grep -qx "$k-edu-app" /tmp/have.txt && continue
+            echo "없음: $k-edu-app"
+            [ "${{ github.event.inputs.make }}" = "yes" ] || continue
+            curl -s -X PUT "$A/sites" "${h[@]}" -d "{\"code\":\"$k-edu-app\"}" | jq -c '{id,code,error,errors}'
+          done

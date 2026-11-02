@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>아이랑 관리자</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4B5BF0">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="아이랑 관리자">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{--ground:#EEF1F8;--card:#fff;--ink:#141A2E;--muted:#5C6478;--line:#E6E9F2;--indigo:#4B5BF0;--indigo-ink:#3442C9;--indigo-bg:#E8EBFF;
+--coral:#FF7A59;--coral-ink:#C93D22;--coral-bg:#FFE9E2;--mint-ink:#13795F;--mint-bg:#E2F6F0;--sun-ink:#8A5300;--sun-bg:#FFF0E0;--shadow:0 1px 2px rgba(20,26,46,.06),0 6px 20px rgba(20,26,46,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0E1220;--card:#171C2E;--ink:#EEF1FA;--muted:#9AA3BC;--line:#262D45;--indigo-bg:#232A55;--indigo-ink:#AEB6FF;--coral-bg:#3A221C;--coral-ink:#FF9C82;--mint-bg:#14302A;--mint-ink:#6FD8B6;--sun-bg:#33281A;--sun-ink:#F5C26B;--shadow:none}}
+:root[data-theme="dark"]{--ground:#0E1220;--card:#171C2E;--ink:#EEF1FA;--muted:#9AA3BC;--line:#262D45;--indigo-bg:#232A55;--indigo-ink:#AEB6FF;--coral-bg:#3A221C;--coral-ink:#FF9C82;--mint-bg:#14302A;--mint-ink:#6FD8B6;--sun-bg:#33281A;--sun-ink:#F5C26B;--shadow:none}
+*{box-sizing:border-box}html,body{margin:0}
+.apps-pick{display:flex;flex-direction:column;gap:10px}.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp b{width:40px;font-size:13px;color:var(--muted)}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.chip small{font-weight:800;opacity:.7;margin-left:2px}.chip .dot{display:inline-block;width:8px;height:8px;margin-right:6px;vertical-align:1px}
+.apps{display:grid;grid-template-columns:400px 1fr;gap:16px;margin-top:14px;align-items:start}
+.phone{width:400px;height:820px;border-radius:44px;background:#111;padding:12px;box-shadow:var(--shadow)}
+.phone iframe{width:100%;height:100%;border:0;border-radius:34px;background:#fff}
+.apps-side{display:flex;flex-direction:column;gap:14px}
+.routes{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.rt{border:0;background:var(--indigo-bg);color:var(--indigo-ink);border-radius:10px;padding:7px 11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.rt.on{background:var(--indigo);color:#fff}
+.apps .mini{grid-template-columns:repeat(4,1fr)}
+.frow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}.frow:last-child{border:0}
+@media (max-width:760px){.apps{grid-template-columns:1fr}.phone{width:100%;max-width:400px;height:76vh;margin:0 auto;border-radius:36px;padding:8px}.phone iframe{border-radius:28px}}
+body{background:var(--ground);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--indigo-ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#8C97FF,var(--indigo));display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px}
+h1{font-size:20px;margin:0;font-weight:800}.sub{color:var(--muted);font-size:12.5px}
+.sp{flex:1}
+.btn{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--indigo);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.soft{background:var(--card);color:var(--ink);box-shadow:var(--shadow);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;margin:4px 0 16px;padding-bottom:2px}
+nav.mtabs{position:sticky;top:0;z-index:5;background:var(--ground);padding:8px 0 8px;margin:0 0 12px;scrollbar-width:none}nav.mtabs::-webkit-scrollbar{display:none}
+.mconn .conn{margin:0 0 6px;color:#C9CFF0}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+nav.tabs button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);padding:16px}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(4,1fr)}
+.cities{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.two{grid-template-columns:1fr 1fr}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+.k{color:var(--muted);font-size:12px;font-weight:500}.v{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.v small{font-size:13px;font-weight:700;color:var(--muted);margin-left:2px}
+.delta{font-size:12px;font-weight:700}.up{color:var(--mint-ink)}.down{color:var(--coral-ink)}
+h2{font-size:16px;margin:22px 2px 10px;font-weight:800;display:flex;align-items:center;gap:8px}
+h3{font-size:15px;margin:0;font-weight:800}
+.city-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mint-ink);flex:none}.dot.warn{background:#E0A100}.dot.bad{background:var(--coral)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.mini div{background:var(--ground);border-radius:10px;padding:8px 6px;text-align:center}
+.mini b{display:block;font-size:18px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:92px;padding-top:14px}
+.bars .c{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.bars .n{font-size:10px;font-weight:700}
+.bars .b{width:70%;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#8C97FF,var(--indigo));overflow:hidden;display:flex;flex-direction:column}
+.bars .b i{display:block;background:linear-gradient(180deg,#FFB199,var(--coral))}
+.bars .l{font-size:10px;color:var(--muted)}
+.legend{font-size:11.5px;color:var(--muted);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:700;font-size:12px}
+tr:last-child td{border-bottom:0}
+.tbl{overflow-x:auto}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700}
+.p-ok{background:var(--mint-bg);color:var(--mint-ink)}.p-warn{background:var(--sun-bg);color:var(--sun-ink)}.p-bad{background:var(--coral-bg);color:var(--coral-ink)}.p-ad{background:var(--sun-bg);color:var(--sun-ink)}
+.ad{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.ad .thumb{width:120px;height:68px;border-radius:10px;background:linear-gradient(135deg,var(--sun-bg),var(--coral-bg));display:grid;place-items:center;font-size:28px;flex:none;overflow:hidden}
+.ad .thumb img{width:100%;height:100%;object-fit:cover}
+.ad .meta{flex:1;min-width:200px}
+.note{font-size:12.5px;color:var(--muted);line-height:1.7}
+.login{max-width:420px;margin:8vh auto 0}
+input{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--ground);color:var(--ink);margin:6px 0 10px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0}
+.bar-row .t{width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .track{flex:1;height:8px;background:var(--ground);border-radius:6px;overflow:hidden}
+.bar-row .track i{display:block;height:100%;background:var(--indigo);border-radius:6px}
+.bar-row .num{width:46px;text-align:right;font-weight:700}
+.links{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.links a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.links .ic{width:34px;height:34px;border-radius:10px;background:var(--indigo-bg);display:grid;place-items:center;font-size:17px;flex:none}
+.progress{height:4px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 14px}.progress i{display:block;height:100%;background:var(--indigo);transition:width .3s}
+.demo{background:var(--sun-bg);color:var(--sun-ink);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:700;margin-bottom:12px}
+.hide{display:none}
+
+/* ── PC 화면 ── */
+.pcwrap{padding:0}.pc{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.pside{background:#151B3B;color:#C9CFF0;padding:22px 14px;display:flex;flex-direction:column;gap:3px;position:sticky;top:0;height:100vh}
+.pbrand{display:flex;gap:10px;align-items:center;margin:0 6px 20px}.pbrand b{color:#fff;font-size:16px;display:block}.pbrand small{font-size:11.5px;opacity:.7}
+.pnav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;font:inherit;font-size:14.5px;font-weight:700;background:none;border:0;color:inherit;cursor:pointer;text-align:left}
+.pnav:hover{background:#222A5A}.pnav.on{background:#2B3470;color:#fff}.pnav .n{margin-left:auto;font-size:11.5px;background:#2B3470;border-radius:8px;padding:1px 7px}.pnav.on .n{background:var(--indigo)}.pnav .n.warn{background:#7A4A00;color:#FFD27A}
+.psep{font-size:11px;letter-spacing:.5px;opacity:.5;margin:14px 12px 4px}
+.conn{margin-top:auto;background:#1D2450;border-radius:14px;padding:13px}.conn h4{margin:0 0 6px;font-size:12px;color:#fff}.conn div{display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:3px 0}
+.conn .g{color:#5BE0A8}.conn .y{color:#FFD27A}.conn .r{color:#FF9C82}
+.pmain{padding:22px 26px 60px;min-width:0}
+.ptop{display:flex;align-items:center;gap:12px;margin-bottom:16px}.ptop h1{margin:0;font-size:23px}.ptop .sp{flex:1}
+.psearch{margin-left:auto;width:320px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);padding:0 14px;font:inherit;color:var(--ink)}
+.pcard{background:var(--card);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.pkpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px}.pkpis .k{font-size:12.5px;color:var(--muted)}.pkpis .v{font-size:29px;font-weight:900;margin-top:2px}.pkpis .v small{font-size:13px;color:var(--muted);margin-left:3px}
+.pkpis .d{font-size:12px;font-weight:800;margin-top:2px}.up{color:var(--mint-ink)}.dn{color:var(--coral-ink)}.light{color:var(--muted)!important;font-weight:700!important}
+:root{--ok-c:#13A06F;--warn-c:#D08A00}
+.pmid{display:grid;grid-template-columns:1fr 352px;gap:16px;align-items:start}
+.pcard .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}.pcard .hd .sp{flex:1}.pcard h3{margin:0;font-size:15.5px}
+.seg{display:flex;gap:6px}.seg button{border:0;padding:6px 12px;border-radius:9px;font:inherit;font-size:12.5px;font-weight:800;background:var(--ground);color:var(--muted);cursor:pointer}.seg button.on{background:#151B3B;color:#fff}
+.ptbl{width:100%;border-collapse:collapse;font-size:13.5px}.ptbl th{text-align:left;color:var(--muted);font-weight:700;font-size:12px;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ptbl th.sortable{cursor:pointer}.ptbl th.on{color:var(--indigo-ink)}.ptbl td{padding:6px 8px;border-bottom:1px solid var(--line)}.ptbl tr{cursor:pointer}.ptbl tr:hover td{background:var(--ground)}.ptbl tr.sel td{background:var(--indigo-bg)}
+.cn{display:flex;align-items:center;gap:9px;font-weight:800}.cn i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--ground);color:var(--muted)}.tag.s{background:#FDE9EF;color:#B03A62}.tag.i{background:#E3FAF2;color:#0B7A5A}.tag.c{background:#FBF0E1;color:#8A5A1C}
+.num{font-weight:900;text-align:right}.ptbl .more{text-align:center;color:var(--muted);font-size:12.5px;cursor:pointer}
+.pdot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;flex:none}.pdot.ok{background:#13A06F}.pdot.wa{background:#E0A100}.pdot.ba{background:#E8553F}
+.lnk{color:var(--indigo-ink);font-weight:800;font-size:12.5px;text-decoration:none;cursor:pointer}
+.phonebox{display:flex;flex-direction:column;align-items:center;position:sticky;top:16px}.phonebox .hd{width:100%}
+.pphone{width:300px;border-radius:40px;background:#111;padding:10px;overflow:hidden}.pphone iframe{width:100%;height:100%;border:0;border-radius:31px;background:#fff}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+.pbot{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:16px}
+.rbars{display:flex;align-items:flex-end;gap:7px;height:170px;margin-top:4px}.rbars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch}.rbars b{display:block}.rbars b:last-of-type{border-radius:5px 5px 0 0}
+.rbars em{font-style:normal;font-size:10.5px;font-weight:800;text-align:center;color:var(--muted)}.rbars small{font-size:10.5px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap}
+.lg{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:6px}.lg i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.feedrow{display:grid;grid-template-columns:62px 16px 1fr auto;align-items:center;gap:6px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none}.feedrow:last-child{border:0}
+.feedrow span{color:var(--muted);font-size:12px}.feedrow em{font-style:normal;font-size:12px;color:var(--muted)}.feedrow small{grid-column:3/5;color:var(--muted);font-size:11.5px;margin-top:-4px}
+.newcity ol{line-height:2;padding-left:20px;margin:8px 0 14px}.newcity code{background:var(--ground);border-radius:6px;padding:1px 6px}.row2{display:flex;gap:8px}
+@media (max-width:1350px){.pkpis{grid-template-columns:repeat(3,1fr)}.pbot{grid-template-columns:1fr 1fr}}
+
+.refhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:22px 0 10px}.refhead h2{margin:0}.refhead .seg small{opacity:.7;font-weight:700;margin-left:2px}
+.pd .pdhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}.pd .seg button{white-space:nowrap}
+.pddate{display:flex;align-items:center;gap:6px;font-size:13px}.pddate input{font:inherit;border:1px solid var(--line);border-radius:9px;padding:5px 8px;background:var(--card);color:var(--ink)}
+.pdlist div{display:grid;grid-template-columns:22px 52px 38px 1fr 54px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}.pdlist div:last-child{border:0}
+.pdlist .sub{grid-column:2/6;margin-top:-4px;font-size:11.5px}.pdlist u{display:block;height:8px;border-radius:5px;background:var(--ground);text-decoration:none;overflow:hidden}.pdlist u i{display:block;height:100%;border-radius:5px}
+.pd .rbars{display:flex;align-items:flex-end;gap:3px}.pd .rbars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:0}.pd .rbars b{display:block}
+.pd .rbars em{font-style:normal;font-size:10px;font-weight:800;text-align:center;color:var(--muted)}.pd .rbars small{font-size:10px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap}
+
+/* ── 휴대폰 (가로 1100px 아래) ── */
+.pcwrap.m{padding:0 0 40px}
+.mtop{display:flex;align-items:center;gap:10px;padding:14px 14px 8px}.mtop b{font-size:16px}.mtop .sub{font-size:12px}.btn.sm{height:36px;padding:0 12px;font-size:13px}
+.mnav{position:sticky;top:0;z-index:6;display:flex;gap:6px;overflow-x:auto;padding:8px 14px;background:var(--ground);scrollbar-width:none;border-bottom:1px solid var(--line)}.mnav::-webkit-scrollbar{display:none}
+.mnav button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 13px;font:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer}
+.mnav button.on{background:#151B3B;color:#fff;border-color:#151B3B}.mnav .nb{background:#E0A100;color:#fff;border-radius:8px;padding:0 6px;font-size:11px}
+.mmain{padding:6px 14px}.mh1{font-size:20px;margin:6px 2px 12px}
+.pcwrap.m .pkpis{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.pcwrap.m .pkpis .pcard:last-child{grid-column:1/3}.pcwrap.m .pkpis .v{font-size:24px}
+.pcwrap.m .pcard{padding:14px;border-radius:16px}.pcwrap.m .pbot{grid-template-columns:1fr;gap:12px;margin-top:12px}.pcwrap.m .pcard .hd{flex-wrap:wrap}
+.mrow{display:grid;grid-template-columns:6px 1fr auto 44px;gap:10px;align-items:center;width:100%;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 2px;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.mrow>i{height:34px;border-radius:3px}.mrow .mn{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}.mrow .mn small{flex-basis:100%;color:var(--muted);font-size:11.5px;display:flex;align-items:center}
+.mrow svg{width:80px;height:24px}.mrow .mt{font-size:20px;font-weight:900;text-align:right}
+.mmore{width:100%;border:0;background:var(--ground);border-radius:12px;padding:11px;margin-top:10px;font:inherit;font-weight:800;color:var(--indigo-ink);cursor:pointer}
+.psearch.m{width:100%;margin:0 0 12px;height:44px}
+.mframe{border-radius:18px;overflow:hidden;border:1px solid var(--line);height:72vh;background:#fff}.mframe iframe{width:100%;height:100%;border:0}
+.mdata{margin-bottom:10px}.mdata .hd{margin-bottom:6px}.mpills{display:flex;flex-wrap:wrap;gap:6px}.mpills .pill{font-size:11.5px}
+.mconn .conn{margin:12px 0 0;color:#C9CFF0}
+.pcwrap.m .pd .pdlist div{grid-template-columns:22px 52px 38px 1fr 48px}
+.pcwrap.m .grid.two,.pcwrap.m .grid.cities{grid-template-columns:1fr}
+.pcwrap.m .rbars{gap:3px}.pcwrap.m .rbars div{min-width:0}.pcwrap.m .rbars em{font-size:9px}.pcwrap.m .rbars small{font-size:8.5px;overflow:hidden}
+.pcwrap.m .lg{flex-wrap:wrap;gap:4px 12px}.pcwrap.m .lg span:last-child{flex-basis:100%;margin-left:0!important}
+.pcwrap.m .feedrow{grid-template-columns:54px 14px 1fr auto}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// ───── 설정 ─────
+const CITIES = [   // airang-cities app/cities.json 과 같은 순서 (도시를 열면 여기도 추가)
+  { k: "djdonggu", name: "대전 동구", sido: "대전", site: "https://djdonggu.daejeon.example.invalid", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/djdonggu/" },
+  { k: "djjunggu", name: "대전 중구", sido: "대전", site: "https://djjunggu.daejeon.example.invalid", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/djjunggu/" },
+  { k: "djseogu", name: "대전 서구", sido: "대전", site: "https://djseogu.daejeon.example.invalid", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/djseogu/" },
+  { k: "yuseong", name: "유성", sido: "대전", site: "https://yuseong.daejeon.example.invalid", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/yuseong/" },
+  { k: "daedeok", name: "대덕", sido: "대전", site: "https://daedeok.daejeon.example.invalid", raw: "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/daedeok/" },
+];
+const gcSite = c => "https://" + c.k + "-edu-app.goatcounter.com";
+// 수집 파일과 '늦음' 기준(시간)
+const FILES = [["latest", "학교 일정", 36], ["meals", "급식", 36], ["kinder", "유치원", 36], ["events", "행사", 36], ["jobs", "채용", 36], ["weather", "날씨", 9], ["academies", "학원", 24 * 8], ["deals", "동네 할인", 36]];
+// 2026-10-30부터 7개 도시 모두 매일 받음 (airang-cities)
+const WEEKLY = {};
+const hrsOf = (c, f, h) => (WEEKLY[f] || []).includes(c.k) ? 24 * 8 : h;
+const ADS_URL = "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/ads/ads.json";
+const ADS_EDIT = "https://github.com/leejunsik22-gif/airang-cities/edit/main/ads/ads.json";
+// ads.json 을 아직 못 읽을 때 쓰는 기본값 (지금 앱에 들어 있는 광고)
+const ADS_FALLBACK = { ads: [{ id: "lagrills", name: "라그릴스 셀프바베큐", where: "용인 처인구 포곡읍", line: "아이랑 가기 좋은 가족 바베큐", cities: ["all"], start: "2026-10-01", end: "", status: "on", contact: "010-3768-2246" }] };
+const AD_KIND = { book: "네이버 예약", tel: "전화", info: "가게 정보", map: "길찾기", site: "홈페이지", stay: "펜션 예약" };
+const EV_NAME = { "행사-시청": "행사 원문 (시청)", "행사-도서관": "행사 원문 (도서관)" };
+const KEY = "airang.admin.key", PIN = "airang.admin.pin", CACHE = "airang.admin.cache";
+const DEMO = /[?&]demo=1/.test(location.search);
+const LAUNCH = "2026-10-01";   // 아이랑 시작 (이 날부터 누적)
+
+// ───── 도구 ─────
+const $app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
+const fmt = n => (n ?? 0).toLocaleString("ko-KR");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const kstYmd = d => new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10);
+const kstMidnight = daysAgo => { const k = new Date(Date.now() + 9 * 3600e3); k.setUTCHours(0, 0, 0, 0); return new Date(k.getTime() - 9 * 3600e3 - daysAgo * 86400e3); };
+const iso = d => d.toISOString().slice(0, 19) + "Z";
+const days7 = (n = 7) => [...Array(n)].map((_, i) => { const d = new Date(Date.now() - (n - 1 - i) * 86400e3); const y = kstYmd(d); return { y, l: (+y.slice(5, 7)) + "/" + (+y.slice(8)) }; });
+async function pinHash(pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("airang-admin:" + pin + ":" + (ls.get(KEY) || ""))); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); }
+
+let unlocked = false, tab = "one", DATA = null, busy = false, prog = 0;
+try { tab = sessionStorage.getItem("airang.admin.tab") || "one"; } catch (e) {}
+
+// ───── 통계 읽기 (GoatCounter, 1초에 4번 제한 → 하나씩 차례로) ─────
+// GoatCounter는 1초에 4번까지만 받아서, 요청 시작 간격을 0.28초로 맞추고 여러 도시를 함께 받는다
+let slot = 0;
+async function gc(c, path, params, tries = 0) {
+  const now = Date.now(); slot = Math.max(now, slot + 340); await sleep(slot - now);   // 1초 4번 제한보다 조금 천천히
+  const q = new URLSearchParams(params).toString();
+  let r;
+  try { r = await fetch(gcSite(c) + "/api/v0/" + path + (q ? "?" + q : ""), { headers: { Authorization: "Bearer " + ls.get(KEY), "Content-Type": "application/json" } }); }
+  catch (e) { if (tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); } throw e; }   // 끊김: 너무 빨라 막힌 경우(429에 CORS 없음)도 여기로 와서 기다렸다 다시
+  if (r.status === 429 && tries < 4) { await sleep(2500 * (tries + 1)); return gc(c, path, params, tries + 1); }
+  if (r.status === 401 || r.status === 403) throw new Error("키 권한 없음 (" + r.status + ")");
+  if (!r.ok) { const e = new Error("통계 서버 오류 " + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+// 방문·광고 기록의 번호(path id)만 골라 두면 한 번에 받을 수 있다 (6시간 동안 이 브라우저에 기억)
+async function wantedIds(c) {
+  const ck = "airang.admin.ids." + c.k;
+  try { const o = JSON.parse(ls.get(ck) || "null"); if (o && Date.now() - o.at < 6 * 3600e3 && o.ids.length) return o.ids; } catch (e) {}
+  let ids = [], after = 0;
+  for (let pg = 0; pg < 5; pg++) {
+    const res = await gc(c, "paths", after ? { limit: 200, after } : { limit: 200 }); const ps = res.paths || [];
+    ids = ids.concat(ps.filter(x => /^(방문-|광고-)/.test(x.path) || x.path === "/ad").map(x => x.id));
+    if (!res.more || !ps.length) break; after = ps[ps.length - 1].id;
+  }
+  ls.set(ck, JSON.stringify({ at: Date.now(), ids }));
+  return ids;
+}
+async function loadCity(c) {
+  const end = iso(new Date(Math.ceil(Date.now() / 3600e3) * 3600e3)), start = iso(new Date(Math.max(Date.parse(LAUNCH + "T00:00:00+09:00"), kstMidnight(364).getTime())));
+  const out = { hits: [], refs: [], err: "" };
+  try {
+    const first = await gc(c, "stats/hits", { start, end, limit: 100 });
+    if (!first.more) {   // 대부분 도시: 한 번에 다 옴 → 유입만 더 물으면 끝
+      out.hits = first.hits || [];
+      out.refs = (((await gc(c, "stats/toprefs", { start: iso(kstMidnight(6)), end, limit: 8 })).stats) || []).map(x => [x.name || "(직접 방문 · 앱)", x.count]);
+      return out;
+    }
+    const top = Promise.resolve({ hits: (first.hits || []).slice(0, 40) });   // 많이 쓴 기능
+    const refs = gc(c, "stats/toprefs", { start: iso(kstMidnight(6)), end, limit: 8 });
+    top.catch(() => {}); refs.catch(() => {});
+    let need = [];
+    try { const ids = await wantedIds(c); if (ids.length) need = (await gc(c, "stats/hits", { start, end, limit: 100, include_paths: ids.join(",") })).hits || []; }
+    catch (e) { if (/권한/.test(e.message)) throw e; }
+    const seen = new Set(need.map(h => h.path));
+    out.hits = need.concat(((await top).hits || []).filter(h => !seen.has(h.path)));
+    out.refs = (((await refs).stats) || []).map(x => [x.name || "(직접 방문 · 앱)", x.count]);
+  } catch (e) { out.err = String(e.message || e) === "Failed to fetch" ? "연결 실패: 이 브라우저가 통계 서버(goatcounter.com) 연결을 막고 있어요" : String(e.message || e); }
+  return out;
+}
+async function loadFresh(c) {
+  const r = {};
+  await Promise.all(FILES.map(async ([f]) => {
+    try {
+      const head = await fetch(c.raw + f + ".json", { cache: "no-cache", headers: { Range: "bytes=0-1500" } });   // 앞부분만 (학원 파일은 수 MB)
+      if (!head.ok) { r[f] = null; return; }
+      const m = (await head.text()).match(/"updated(?:_at)?"\s*:\s*"([^"]*)"/);
+      if (m) { r[f] = m[1]; return; }
+      const j = await (await fetch(c.raw + f + ".json", { cache: "no-cache" })).json(); r[f] = j.updated_at || j.updated || "";
+    }
+    catch (e) { r[f] = null; }
+  }));
+  return r;
+}
+async function loadAds() {
+  try { const r = await fetch(ADS_URL, { cache: "no-cache" }); if (r.ok) return { ...(await r.json()), from: "file" }; } catch (e) {}
+  return { ...ADS_FALLBACK, from: "fallback" };
+}
+// 미리 모아 둔 통계: 관제 작업에서 열쇠를 한 번 받아 두고(이 기기에 저장), snap 가지의 파일을 풀어서 바로 보여 준다
+const SNAP_URL = "https://raw.githubusercontent.com/leejunsik22-gif/airang-stats/snap/snap.json", SNAPKEY = "airang.admin.snapkey";
+let snapTried = false, snapAt = 0;
+async function loadSnap() {
+  if (snapTried || DEMO) return; snapTried = true;
+  try {
+    let s, k;
+    try { s = await kwCall("/snap"); k = s.key; if (k) ls.set(SNAPKEY, k); }   // 관제 작업을 거쳐서 (GitHub가 막힌 인터넷에서도 됨)
+    catch (e) {
+      k = ls.get(SNAPKEY); if (!k) { k = (await kwCall("/snapkey")).key; if (!k) return; ls.set(SNAPKEY, k); }
+      s = await fetch(SNAP_URL + "?t=" + Math.floor(Date.now() / 60e3), { cache: "no-cache" }).then(r => r.ok ? r.json() : Promise.reject(r.status));
+    }
+    snapAt = s.at;
+    if (DATA && DATA.at >= s.at && !DATA.part && !CITIES.some(x => (DATA.city[x.k] || {}).err)) return;
+    const b64 = x => Uint8Array.from(atob(x), ch => ch.charCodeAt(0));
+    const key = await crypto.subtle.importKey("raw", b64(k), "AES-GCM", false, ["decrypt"]);
+    let plain;
+    try { plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(s.iv) }, key, b64(s.data)); }
+    catch (e) { ls.del(SNAPKEY); snapTried = false; return; }   // 열쇠가 바뀐 경우 다음에 새로 받음
+    const txt = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+    const snap = JSON.parse(txt);
+    if (busy && DATA && DATA.part) return;   // 이미 새로 받는 중
+    DATA = { at: snap.at, city: snap.city, fresh: snap.fresh, ads: (DATA && DATA.ads) || ADS_FALLBACK, snap: true };
+    if (snap.runs && snap.runs.length && (!Array.isArray(RUNS) || RUNS_FROM)) { RUNS = snap.runs.filter(r => !RUN_SKIP.test(r.name)).sort((a, b) => b.at.localeCompare(a.at)); RUNS_FROM = "모음"; runsAt = Date.now(); }
+    ls.set(CACHE, JSON.stringify(DATA)); render();
+    if (!(DATA.ads && DATA.ads.from !== "fallback")) loadAds().then(a => { if (a && DATA) { DATA.ads = a; render(); } }).catch(() => {});
+  } catch (e) { /* 못 받으면 예전처럼 직접 불러옴 */ }
+}
+async function refreshAll() { snapTried = false; await loadSnap(); loadAll(); }
+async function loadAll() {
+  if (busy) return; busy = true; prog = 0;
+  const out = { at: Date.now(), city: {}, fresh: {}, ads: ADS_FALLBACK, part: 1 };
+  if (DATA) { out.city = { ...DATA.city }; out.fresh = { ...DATA.fresh }; }   // 받는 동안엔 지난 숫자를 보여 줌
+  DATA = out; render();
+  try {
+    await Promise.all([
+      ...CITIES.map(async c => { out.fresh[c.k] = await loadFresh(c); }),
+      ...CITIES.map(async c => { const prev = out.city[c.k]; const got = await loadCity(c); out.city[c.k] = got.err && prev && !prev.err ? { ...prev, stale: got.err } : got; prog++; render(); }),
+    ]);
+    out.at = Date.now(); delete out.part;
+    ls.set(CACHE, JSON.stringify(out));
+  } finally { busy = false; render(); }
+}
+
+// ───── 숫자 만들기 ─────
+function dayCount(hits, path, y) { const h = hits.find(x => x.path === path); return h ? ((h.stats || []).find(s => s.day === y) || {}).daily || 0 : 0; }
+function opens(hits, y) { return hits.filter(h => /^방문-열기-\d+$/.test(h.path)).reduce((a, h) => a + (((h.stats || []).find(s => s.day === y) || {}).daily || 0), 0); }
+function cityStats(c) {
+  const d = (DATA.city[c.k] || {}), hits = d.hits || [];
+  const ds = days7(), t = ds[6].y, y = ds[5].y;
+  const week = ds.map(x => ({ ...x, v: dayCount(hits, "방문-하루", x.y), n: dayCount(hits, "방문-새로", x.y), o: opens(hits, x.y) }));
+  const ad = hits.filter(h => h.event && /^광고-/.test(h.path));
+  const ev = hits.filter(h => h.event && !/^(방문-|광고-)/.test(h.path));
+  return { err: d.err, today: dayCount(hits, "방문-하루", t), yest: dayCount(hits, "방문-하루", y), newT: dayCount(hits, "방문-새로", t), retT: dayCount(hits, "방문-다시", t),
+    opT: opens(hits, t), opY: opens(hits, y), week, w7: week.reduce((a, x) => a + x.v, 0), o7: week.reduce((a, x) => a + x.o, 0), ad, ev, refs: d.refs || [] };
+}
+function freshLevel(v, hours) {
+  if (v === null || v === undefined) return ["bad", "파일 없음"];
+  if (!v) return ["warn", "시간 없음"];
+  const t = new Date(v.replace(" ", "T") + "+09:00").getTime(), h = (Date.now() - t) / 3600e3;
+  const label = h < 1 ? Math.max(1, Math.round(h * 60)) + "분 전" : h < 48 ? Math.round(h) + "시간 전" : Math.round(h / 24) + "일 전";
+  return [h > hours * 2 ? "bad" : h > hours ? "warn" : "ok", label];
+}
+function cityHealth(c) {
+  const f = DATA.fresh[c.k] || {}; let worst = "ok";
+  for (const [k, , hrs] of FILES) { if (k === "deals" && f[k] === null) continue; const [lv] = freshLevel(f[k], hrsOf(c, k, hrs)); if (lv === "bad") worst = "bad"; else if (lv === "warn" && worst === "ok") worst = "warn"; }
+  return worst;
+}
+
+// ───── 화면 ─────
+function render() {
+  $app.className = "wrap";
+  if (!ls.get(KEY) || !ls.get(PIN)) return viewSetup();
+  if (!unlocked) return viewPin();
+  if (!DATA) { const c = ls.get(CACHE); if (c) { try { DATA = JSON.parse(c); } catch (e) {} } if (DATA && !busy && !snapTried && CITIES.some(x => (DATA.city[x.k] || {}).err)) setTimeout(loadSnap, 30); if (!DATA && !busy && !snapTried) { loadSnap().then(() => { if (!DATA && !busy) loadAll(); }); } else if (!DATA && !busy) { loadAll(); } else if (DATA && !busy && Date.now() - DATA.at > 20 * 60e3 && !snapTried) setTimeout(() => loadSnap().then(() => { if (DATA && Date.now() - DATA.at > 40 * 60e3 && !busy) loadAll(); }), 50); }
+  pcWas = isPC(); return renderPC();   // PC·휴대폰 같은 화면 구성 (휴대폰은 위쪽 버튼·한 줄 배치)
+  $app.className = "wrap"; pcWas = false;
+  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">송골랩 · 도시 ${CITIES.length}곳 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
+    <button class="btn" onclick="loadAll()" ${busy ? "disabled" : ""}>${busy ? "불러오는 중 " + prog + "/" + CITIES.length : "↻ 새로고침"}</button>
+    <button class="btn soft" onclick="lock()">잠그기</button></header>
+    ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}
+    ${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}
+    <nav class="tabs mtabs">${M_TABS.map(([k, l]) => `<button class="${tab === k ? "on" : ""}" onclick="setTab('${k}')">${l}</button>`).join("")}</nav>`;
+  if (!DATA) { $app.innerHTML = head + `<div class="card note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`; return; }
+  const body = { one: viewOne, home: viewHome, apps: viewApps, ads: viewAds, traffic: viewTraffic, data: viewData, links: viewLinks, log: viewLog }[tab] || viewOne;
+  $app.innerHTML = head + body();
+}
+function setTab(k) { tab = k; try { sessionStorage.setItem("airang.admin.tab", k); } catch (e) {} render(); window.scrollTo(0, 0); }
+function lock() { unlocked = false; render(); }
+
+function kpi(label, v, unit, prev) {
+  const d = prev === undefined ? "" : v - prev;
+  return `<div class="card"><div class="k">${label}</div><div class="v">${fmt(v)}<small>${unit}</small></div>${d === "" ? "" : `<div class="delta ${d >= 0 ? "up" : "down"}">어제보다 ${d >= 0 ? "+" : ""}${fmt(d)}</div>`}</div>`;
+}
+// 막대 = 그날 전체 방문 (30분 기준 횟수)
+function bars(week, tall) {
+  const max = Math.max(1, ...week.map(x => x.o)), H = tall ? 150 : 60, last = week.length - 1;
+  return `<div class="bars" style="height:${H + 40}px">${week.map((x, i) => { const h = Math.max(3, Math.round(x.o / max * H));
+    return `<div class="c"><div class="n">${x.o || ""}</div><div class="b" style="height:${h}px;${i === last ? "background:linear-gradient(180deg,#FFB199,var(--coral))" : ""}"></div><div class="l" style="${i === last ? "color:var(--coral-ink);font-weight:800" : ""}">${i === last ? "오늘" : x.l}</div>${tall ? `<div class="l">${x.v ? x.v + "명" : ""}</div>` : ""}</div>`; }).join("")}</div>`;
+}
+function viewHome() {
+  const S = CITIES.map(c => [c, cityStats(c)]);
+  const sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
+  const adClicks = S.reduce((a, [, s]) => a + s.ad.reduce((b, h) => b + h.count, 0), 0);
+  return `<div class="grid kpis">${kpi("오늘 방문한 사람", sum("today"), "명", sum("yest"))}${kpi("오늘 방문 · 30분 기준", sum("opT"), "회", sum("opY"))}${kpi("최근 7일 방문 · 30분 기준", sum("o7"), "회")}${kpi("광고 누름 · 30일", adClicks, "회")}</div>
+  <h2>전체 방문 <span class="sub" style="font-weight:500">7개 도시 합 · 최근 14일 · 30분 기준 횟수</span></h2>
+  <div class="card">${bars(days7(14).map(x => ({ ...x, o: S.reduce((a, [c]) => a + opens((DATA.city[c.k] || {}).hits || [], x.y), 0), v: S.reduce((a, [c]) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-하루", x.y), 0) })), true)}
+    <p class="legend" style="margin:6px 0 0">막대 위 숫자는 그날 전체 방문 횟수, 아래 숫자는 그날 방문한 사람 수예요.</p></div>
+  <h2>도시별</h2>
+  <div class="grid cities">${S.map(([c, s]) => { const hl = cityHealth(c); return `<div class="card">
+    <div class="city-head"><span class="dot ${hl === "ok" ? "" : hl}" title="수집 상태"></span><h3>${c.name}</h3><div class="sp"></div><a href="${c.site}" target="_blank" rel="noopener" class="sub">앱 ↗</a></div>
+    ${!DATA.city[c.k] ? `<div class="note" style="padding:30px 0;text-align:center">불러오는 중…</div>` : s.err ? `<div class="pill p-bad">${esc(s.err)}</div>` : `
+    <div class="mini"><div><span class="k">오늘 사람</span><b>${fmt(s.today)}</b></div><div><span class="k">30분 방문</span><b>${fmt(s.opT)}</b></div><div><span class="k">새로 · 다시</span><b>${fmt(s.newT)}·${fmt(s.retT)}</b></div></div>
+    ${bars(s.week)}`}</div>`; }).join("")}</div>
+  <p class="legend">막대 위 숫자는 그날 방문 횟수(30분 기준)예요. 점 색은 데이터 수집 상태(초록 정상, 노랑 늦음, 빨강 멈춤)예요.</p>`;
+}
+function viewAds() {
+  const ads = (DATA.ads && DATA.ads.ads) || [];
+  const S = CITIES.map(c => [c, cityStats(c)]);
+  const clicks = (id, kind, s) => s.ad.filter(h => h.path === "광고-" + id + "-" + kind).reduce((a, h) => a + h.count, 0);
+  const viewsOf = (s, id) => (DATA.city[s] && DATA.city[s].hits || []).filter(h => !h.event && h.path === "/ad").reduce((a, h) => a + h.count, 0);
+  const block = ad => {
+    const kinds = Object.keys(AD_KIND);
+    const rows = S.map(([c, s]) => { const v = kinds.map(k => clicks(ad.id, k, s)); return { c, v, t: v.reduce((a, b) => a + b, 0), pv: viewsOf(c.k, ad.id) }; });
+    const tot = kinds.map((_, i) => rows.reduce((a, r) => a + r.v[i], 0)), all = tot.reduce((a, b) => a + b, 0), pvAll = rows.reduce((a, r) => a + r.pv, 0);
+    const on = ad.status !== "off" && (!ad.end || ad.end >= kstYmd(new Date()));
+    return `<div class="card" style="margin-bottom:12px">
+      <div class="ad"><div class="thumb">${ad.img ? `<img src="${esc(ad.img)}" alt="">` : "🍖"}</div>
+        <div class="meta"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="pill p-ad">광고</span><span class="pill ${on ? "p-ok" : "p-warn"}">${on ? "노출 중" : "꺼짐"}</span><h3>${esc(ad.name)}</h3></div>
+          <div class="note" style="margin-top:4px">${esc(ad.line || "")} · ${esc(ad.where || "")}<br>기간 ${esc(ad.start || "-")} ~ ${esc(ad.end || "계속")} · 노출 도시 ${ad.cities && ad.cities[0] !== "all" ? esc(ad.cities.join(", ")) : "전체 " + CITIES.length + "곳"}</div></div>
+        <div style="text-align:right"><div class="k">30일 누름</div><div class="v">${fmt(all)}<small>회</small></div><div class="k">광고 화면 열람 ${fmt(pvAll)}회</div></div></div>
+      <div class="tbl" style="margin-top:12px"><table><tr><th>도시</th><th>광고 화면</th>${kinds.map(k => `<th>${AD_KIND[k]}</th>`).join("")}<th>합계</th></tr>
+        ${rows.map(r => `<tr><td>${r.c.name}</td><td>${fmt(r.pv)}</td>${r.v.map(x => `<td>${x ? fmt(x) : '<span class="sub">0</span>'}</td>`).join("")}<td><b>${fmt(r.t)}</b></td></tr>`).join("")}
+        <tr><td><b>전체</b></td><td><b>${fmt(pvAll)}</b></td>${tot.map(x => `<td><b>${fmt(x)}</b></td>`).join("")}<td><b>${fmt(all)}</b></td></tr></table></div></div>`;
+  };
+  return `<h2 style="margin-top:4px">광고 성과 <span class="sub" style="font-weight:500">최근 30일 · 관리자 휴대폰 제외</span></h2>
+    ${ads.length ? ads.map(block).join("") : `<div class="card note">등록된 광고가 없어요.</div>`}
+    <h2>광고 관리</h2>
+    <div class="card note">
+      지금 광고는 앱 7곳에 같은 내용으로 들어 있어요. 광고를 바꾸거나 새로 넣을 땐 Claude에게 말해 주세요.<br>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn soft" href="mailto:leejunsik22-gif.lee@gmail.com?subject=${encodeURIComponent("[아이랑] 광고 문의")}">광고 문의 메일 양식</a></div>
+      <p style="margin:12px 0 0">광고는 앱에서 항상 <span class="pill p-ad">광고</span> 표시가 붙어요. 사람 수·누른 횟수만 세고, 누가 눌렀는지는 모아지지 않아요.</p>
+    </div>`;
+}
+function bl(rows, max) { const m = Math.max(1, ...rows.map(r => r[1])); return rows.slice(0, max).map(([t, n]) => `<div class="bar-row"><span class="t" title="${esc(t)}">${esc(t)}</span><span class="track"><i style="width:${Math.round(n / m * 100)}%"></i></span><span class="num">${fmt(n)}</span></div>`).join("") || `<div class="note">아직 없어요</div>`; }
+// ───── 기간별 누적 방문 (7일 · 한 달 · 3개월 · 직접 지정) ─────
+let PD = { k: "7", from: "", to: "" };
+try { Object.assign(PD, JSON.parse(sessionStorage.getItem("airang.admin.pd") || "{}")); } catch (e) {}
+function setPD(k, v) { if (k === "k") PD.k = v; else PD[k] = v; if (k !== "k") PD.k = "c"; try { sessionStorage.setItem("airang.admin.pd", JSON.stringify(PD)); } catch (e) {} render(); }
+function pdRange() {
+  const today = kstYmd(new Date());
+  if (PD.k === "c" && PD.from && PD.to) return PD.from <= PD.to ? [PD.from, PD.to] : [PD.to, PD.from];
+  const n = { "7": 7, "30": 30, "90": 90, "all": 9999 }[PD.k] || 7;
+  const from = kstYmd(new Date(Date.now() - (n - 1) * 86400e3));
+  return [from < LAUNCH ? LAUNCH : from, today];
+}
+function daysBetween(a, b) { const out = []; for (let t = Date.parse(a + "T12:00:00Z"); t <= Date.parse(b + "T12:00:00Z"); t += 86400e3) { const y = new Date(t).toISOString().slice(0, 10); out.push({ y, l: (+y.slice(5, 7)) + "/" + (+y.slice(8)) }); } return out; }
+const sumDay = (s, y) => CITIES.filter(c => sidoOf(c) === s).reduce((t, c) => t + dayCount((DATA.city[c.k] || {}).hits || [], "방문-하루", y), 0);
+const stackBars = (x, mx, h) => SIDO_LIST.slice().reverse().map(s => `<b style="height:${x[s] / mx * h}px;background:${SIDO_COLOR[s]}"></b>`).join("");
+const barTitle = x => x.l + " " + SIDO_LIST.map(s => `${s} ${x[s]}`).join(" · ");
+const barSum = x => SIDO_LIST.reduce((t, s) => t + x[s], 0);
+function periodBox() {
+  const [a, b] = pdRange(), ds = daysBetween(a, b), today = kstYmd(new Date());
+  const sumPath = (hits, test) => hits.filter(h => test(h.path)).reduce((t, h) => t + (h.stats || []).filter(x => x.day >= a && x.day <= b).reduce((u, x) => u + (x.daily || 0), 0), 0);
+  const rows = CITIES.map(c => { const h = (DATA.city[c.k] || {}).hits || [];
+    return { c, v: sumPath(h, p => p === "방문-하루"), n: sumPath(h, p => p === "방문-새로"), ad: sumPath(h, p => /^광고-/.test(p)) }; }).sort((x, y) => y.v - x.v);
+  const tot = k => rows.reduce((t, r) => t + r[k], 0), V = tot("v"), N = tot("n"), A = tot("ad");
+  const g = ds.map(x => { const o = { ...x }; SIDO_LIST.forEach(s => o[s] = sumDay(s, x.y)); return o; });
+  const mx = Math.max(1, ...g.map(barSum)), step = Math.ceil(ds.length / 15);
+  const sid = s => rows.filter(r => sidoOf(r.c) === s).reduce((t, r) => t + r.v, 0);
+  const btn = (k, l) => `<button class="${PD.k === k ? "on" : ""}" onclick="setPD('k','${k}')">${l}</button>`;
+  return `<div class="card pd"><div class="pdhead"><div class="seg">${btn("7", "일주일")}${btn("30", "한 달")}${btn("90", "3개월")}${btn("all", "처음부터")}${btn("c", "지정")}</div>
+      <div class="pddate"><input type="date" min="${LAUNCH}" max="${today}" value="${PD.k === "c" ? PD.from || a : a}" onchange="setPD('from',this.value)"> ~ <input type="date" min="${LAUNCH}" max="${today}" value="${PD.k === "c" ? PD.to || b : b}" onchange="setPD('to',this.value)"></div></div>
+    <div class="sub" style="margin:6px 0 10px">${a.slice(5).replace("-", "/")} ~ ${b.slice(5).replace("-", "/")} · ${ds.length}일${a === LAUNCH ? " (아이랑 시작 10/1부터)" : ""}</div>
+    <div class="grid kpis">${kpi("누적 방문 (하루 1번씩 셈)", V, "명")}${kpi("처음 온 사람", N, "명")}${kpi("하루 평균", Math.round(V / Math.max(1, ds.length)), "명")}${kpi("광고 누름", A, "회")}</div>
+    <div class="rbars" style="height:150px;margin-top:12px">${g.map((x, i) => `<div title="${barTitle(x)}"><em>${ds.length <= 31 ? (barSum(x) || "") : ""}</em>${stackBars(x, mx, 120)}<small>${i % step === 0 || i === ds.length - 1 ? x.l : "&nbsp;"}</small></div>`).join("")}</div>
+    <div class="lg">${SIDO_LIST.map(x => `<span><i style="background:${SIDO_COLOR[x]}"></i>${x} ${fmt(sid(x))}</span>`).join("")}</div>
+    <h3 style="margin:16px 0 6px">도시별 누적</h3>
+    <div class="pdlist">${rows.map((r, i) => `<div><span>${i + 1}</span><b>${r.c.name}</b><span class="tag ${tagCls(r.c)}">${sidoOf(r.c)}</span><u><i style="width:${V ? r.v / rows[0].v * 100 : 0}%;background:${(typeof COLOR !== "undefined" && COLOR[r.c.k]) || "#4B5BF0"}"></i></u><b class="num">${fmt(r.v)}</b><span class="sub">${V ? Math.round(r.v / V * 100) : 0}% · 새로 ${fmt(r.n)}${r.ad ? " · 광고 " + fmt(r.ad) : ""}</span></div>`).join("")}</div>
+    <p class="legend" style="margin:8px 0 0">누적 방문 = 날마다 '그날 들어온 사람'을 더한 값이에요 (같은 사람이 이틀 오면 2). 처음 온 사람 = 이 기기에서 처음 연 수.</p></div>`;
+}
+let refSido = "경기";
+try { refSido = sessionStorage.getItem("airang.admin.refsido") || refSido; } catch (e) {}
+function setRefSido(x) { refSido = x; try { sessionStorage.setItem("airang.admin.refsido", x); } catch (e) {} render(); }
+function viewTraffic() {
+  const S = CITIES.map(c => [c, cityStats(c)]);
+  const refAll = {}, evAll = {};
+  S.forEach(([, s]) => { s.refs.forEach(([k, n]) => refAll[k] = (refAll[k] || 0) + n); s.ev.forEach(h => { const k = EV_NAME[h.path] || h.path; evAll[k] = (evAll[k] || 0) + h.count; }); });
+  const sorted = o => Object.entries(o).sort((a, b) => b[1] - a[1]);
+  return periodBox() + `<div class="grid two"><div class="card"><h3>어디서 왔나 · 7일 전체</h3><div style="margin-top:8px">${bl(sorted(refAll), 10)}</div><p class="note" style="margin:8px 0 0">"직접 방문 · 앱"은 홈 화면 아이콘, 카톡·블라인드 앱 안 링크처럼 출처가 안 남는 경우예요.</p></div>
+    <div class="card"><h3>많이 누른 기능 · 30일 전체</h3><div style="margin-top:8px">${bl(sorted(evAll), 10)}</div></div></div>
+    <div class="refhead"><h2>도시별 유입 경로 · 7일</h2><div class="seg">${SIDO_LIST.map(x => `<button class="${refSido === x ? "on" : ""}" onclick="setRefSido('${x}')">${x} <small>${CITIES.filter(c => sidoOf(c) === x).length}</small></button>`).join("")}</div></div>
+    <div class="grid cities">${S.filter(([c]) => sidoOf(c) === refSido).sort((a, b) => b[1].w7 - a[1].w7).map(([c, s]) => `<div class="card"><h3>${c.name} <span class="sub">7일 ${fmt(s.w7)}명</span></h3><div style="margin-top:6px">${bl(s.refs, 5)}</div></div>`).join("")}</div>`;
+}
+function viewData() {
+  const cell = (c, f, hrs) => { const v = (DATA.fresh[c.k] || {})[f]; if (v === null && f === "deals") return `<td><span class="sub">준비 중</span></td>`; const [lv, l] = freshLevel(v, hrsOf(c, f, hrs)); return `<td><span class="pill p-${lv}" title="${esc(v || "")}">${l}</span></td>`; };
+  return `<div class="card tbl"><table><tr><th>도시</th>${FILES.map(([, n]) => `<th>${n}</th>`).join("")}</tr>
+    ${CITIES.map(c => `<tr><td><b>${c.name}</b></td>${FILES.map(([f, , h]) => cell(c, f, h)).join("")}</tr>`).join("")}</table></div>
+    <p class="legend">마지막으로 받아 온 시간이에요. <span class="pill p-ok">초록</span> 정상 · <span class="pill p-warn">노랑</span> 늦음 · <span class="pill p-bad">빨강</span> 멈춤(기준의 2배 넘게 안 바뀜). 기준: 날씨 9시간, 학원 8일, 유치원(용인·수원은 매주 월요일 수집) 8일, 나머지 하루 반.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <a class="btn soft" href="https://github.com/leejunsik22-gif/airang-cities/actions" target="_blank" rel="noopener">수집 기록 ↗</a>
+</div>`;
+}
+// ───── 앱 보기: 어느 도시 앱이든 관리자 화면 안에서 바로 열어 보기 (방문 수에는 안 셈) ─────
+const sidoOf = c => c.sido || "경기";
+const SIDO_LIST = ["대전"].filter(x => CITIES.some(c => sidoOf(c) === x));   // 열린 시도만
+const SIDO_COLOR = { 대전: "#2F6FB5" };
+const tagCls = c => ({ 서울: "s", 인천: "i", 충남: "c" }[sidoOf(c)] || "");
+let appCity = "yuseong", appRoute = "home", appSido = "대전";
+try { appCity = sessionStorage.getItem("airang.admin.app") || appCity; } catch (e) {}
+const ROUTES = [["home", "홈"], ["all", "전체 메뉴"], ["schools", "학교 일정"], ["acas", "학원"], ["kinders", "유치원"], ["library", "도서관"], ["events", "행사"], ["hosp", "병원"], ["bene", "혜택"], ["elite", "특목·자사고"]];
+function pickApp(k) { appCity = k; try { sessionStorage.setItem("airang.admin.app", k); } catch (e) {} render(); }
+function pickRoute(r) { appRoute = r; const f = document.getElementById("appframe"); if (f) f.src = appUrl(); document.querySelectorAll(".rt").forEach(b => b.classList.toggle("on", b.dataset.r === r)); }
+function appUrl() { const c = CITIES.find(x => x.k === appCity) || CITIES[0]; return c.site + "/?nocount=1#" + appRoute; }
+function viewApps() {
+  const c = CITIES.find(x => x.k === appCity) || CITIES[0]; appSido = sidoOf(c);
+  const f = DATA.fresh[c.k] || {};
+  const chip = x => `<button class="chip ${x.k === c.k ? "on" : ""}" onclick="pickApp('${x.k}')">${x.name}</button>`;
+  const group = s => `<div class="grp"><b>${s}</b>${CITIES.filter(x => sidoOf(x) === s).map(chip).join("")}</div>`;
+  const fr = FILES.map(([k, n, h]) => { const [lv, l] = freshLevel(f[k], hrsOf(c, k, h)); return `<div class="frow"><span>${n}</span><span class="pill p-${lv}">${l}</span></div>`; }).join("");
+  const v = (DATA.city[c.k] || {}).hits || []; const today = (v.find(x => x.path === "방문-하루") || { stats: [] }).stats.slice(-1)[0];
+  return `<div class="card apps-pick">${SIDO_LIST.map(group).join("")}</div>
+    <div class="apps">
+      <div class="phone"><iframe id="appframe" src="${appUrl()}" title="아이랑 ${c.name}"></iframe></div>
+      <div class="apps-side">
+        <div class="card"><h2 style="margin:0 0 4px">아이랑 ${c.name} <span class="sub">${appSido}</span></h2>
+          <div class="sub">${c.site.replace("https://", "")} · 오늘 방문 ${today ? today.daily : 0}명</div>
+          <div class="routes">${ROUTES.map(([r, l]) => `<button class="rt ${appRoute === r ? "on" : ""}" data-r="${r}" onclick="pickRoute('${r}')">${l}</button>`).join("")}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <a class="btn" href="${appUrl()}" target="_blank" rel="noopener">새 창으로 열기 ↗</a>
+            <a class="btn soft" href="${c.raw.replace("raw.githubusercontent.com/", "github.com/").replace("/main/", "/tree/main/")}" target="_blank" rel="noopener">수집 파일 ↗</a></div>
+          <p class="sub" style="margin:10px 0 0">관리자 화면에서 연 앱은 방문 수에 들어가지 않아요.</p></div>
+        <div class="card"><h2 style="margin:0 0 8px">수집 상태</h2>${fr}</div>
+      </div>
+    </div>`;
+}
+// ───── 한 화면: 위 전체 숫자 · 도시 버튼(오늘 방문·수집 점) · 왼쪽 앱 화면 · 오른쪽 그 도시 방문·유입·광고·수집 ─────
+function viewOne() {
+  const S = CITIES.map(c => [c, cityStats(c)]);
+  const sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
+  const adAll = S.reduce((a, [, s]) => a + s.ad.reduce((b, h) => b + h.count, 0), 0);
+  const bad = CITIES.filter(c => cityHealth(c) !== "ok").length;
+  const c = CITIES.find(x => x.k === appCity) || CITIES[0], s = cityStats(c), f = DATA.fresh[c.k] || {};
+  const chip = ([x, st]) => { const hl = cityHealth(x); return `<button class="chip ${x.k === c.k ? "on" : ""}" onclick="pickApp('${x.k}')"><span class="dot ${hl === "ok" ? "" : hl}"></span>${x.name} <small>${fmt(st.today)}</small></button>`; };
+  const group = g => `<div class="grp"><b>${g}</b>${S.filter(([x]) => sidoOf(x) === g).map(chip).join("")}</div>`;
+  const fr = FILES.map(([k, n, h]) => { const [lv, l] = freshLevel(f[k], hrsOf(c, k, h)); return `<div class="frow"><span>${n}</span><span class="pill p-${lv}">${l}</span></div>`; }).join("");
+  const ev = s.ev.map(h => [EV_NAME[h.path] || h.path, h.count]).sort((a, b) => b[1] - a[1]);
+  const ads = s.ad.map(h => [h.path.replace(/^광고-/, "").replace(/-(\w+)$/, (m, k) => " · " + (AD_KIND[k] || k)), h.count]).sort((a, b) => b[1] - a[1]);
+  const more = [["home", "전체 도시 표"], ["ads", "광고 관리"], ["traffic", "유입·기능 전체"], ["data", "수집 표"], ["links", "바로가기·관제"]];
+  return `<div class="grid kpis">${kpi("오늘 방문한 사람 · 전체", sum("today"), "명", sum("yest"))}${kpi("최근 7일 방문 · 전체", sum("w7"), "명")}${kpi("광고 누름 · 30일", adAll, "회")}${kpi("수집 이상", bad, "곳")}</div>
+    <div class="card apps-pick">${SIDO_LIST.map(group).join("")}<p class="legend" style="margin:0">숫자는 오늘 방문한 사람, 점은 수집 상태(초록 정상 · 노랑 늦음 · 빨강 멈춤)</p></div>
+    <div class="apps">
+      <div><div class="phone"><iframe id="appframe" src="${appUrl()}" title="아이랑 ${c.name}"></iframe></div>
+        <div class="routes" style="justify-content:center">${ROUTES.map(([r, l]) => `<button class="rt ${appRoute === r ? "on" : ""}" data-r="${r}" onclick="pickRoute('${r}')">${l}</button>`).join("")}</div></div>
+      <div class="apps-side">
+        <div class="card"><div class="city-head"><h2 style="margin:0">아이랑 ${c.name}</h2><span class="sub">${sidoOf(c)} · ${c.site.replace("https://", "")}</span><div class="sp"></div>
+          <a class="btn soft" href="${appUrl()}" target="_blank" rel="noopener">새 창 ↗</a></div>
+          ${s.err ? `<div class="pill p-bad">${esc(s.err)}</div>` : `<div class="mini"><div><span class="k">오늘 사람</span><b>${fmt(s.today)}</b></div><div><span class="k">어제</span><b>${fmt(s.yest)}</b></div><div><span class="k">새로 · 다시</span><b>${fmt(s.newT)}·${fmt(s.retT)}</b></div><div><span class="k">7일</span><b>${fmt(s.w7)}</b></div></div>
+          ${bars(s.week)}`}
+          <p class="sub" style="margin:8px 0 0">관리자 화면에서 연 앱은 방문 수에 들어가지 않아요.</p></div>
+        <div class="grid two" style="gap:14px"><div class="card"><h3>어디서 왔나 · 7일</h3><div style="margin-top:6px">${bl(s.refs, 5) || '<span class="sub">아직 없어요</span>'}</div></div>
+          <div class="card"><h3>많이 누른 기능 · 30일</h3><div style="margin-top:6px">${bl(ev, 5) || '<span class="sub">아직 없어요</span>'}</div></div></div>
+        <div class="grid two" style="gap:14px"><div class="card"><h3>수집 상태</h3>${fr}<a class="sub" href="${c.raw.replace("raw.githubusercontent.com/", "github.com/").replace("/main/", "/tree/main/")}" target="_blank" rel="noopener">수집 파일 보기 ↗</a></div>
+          <div class="card"><h3>광고 누름 · 30일</h3><div style="margin-top:6px">${bl(ads, 6) || '<span class="sub">이 도시엔 아직 없어요</span>'}</div></div></div>
+      </div>
+    </div>
+    `;
+}
+// 휴대폰 위쪽 버튼 (아래로 내리지 않고 바로 이동)
+const M_TABS = [["one", "한눈에"], ["home", "도시별"], ["data", "수집"], ["traffic", "유입"], ["ads", "광고"], ["log", "연결·기록"], ["links", "바로가기"]];
+function viewLog() {
+  loadRuns(); if (!kwState) setTimeout(kwLoad, 50);
+  return `<div class="mconn">${pcConn()}</div><h2>최근 수집·배포</h2><div class="card">${Array.isArray(RUNS) ? RUNS.slice(0, 20).map(runRow).join("") : `<span class="sub">${RUNS && RUNS.err ? "기록을 못 읽었어요" : "불러오는 중…"}</span>`}</div>
+    <p class="legend">GitHub Actions 기록이에요. 줄을 누르면 자세한 기록이 열려요.</p>`;
+}
+function viewLinks() {
+  const L = (ic, t, s, u) => `<a class="card" href="${u}" target="_blank" rel="noopener"><span class="ic">${ic}</span><span><b>${t}</b><br><span class="sub">${s}</span></span></a>`;
+  return `<h2 style="margin-top:4px">앱</h2><div class="grid links">${CITIES.map(c => L("📱", "아이랑 " + c.name, c.site.replace("https://", ""), c.site)).join("")}</div>
+    <h2>홍보</h2><div class="grid links">
+    
+    ${L("📅", "Metricool", "인스타 예약·게시 관리", "https://app.metricool.com/planner")}
+    ${L("▶️", "유튜브 스튜디오", "쇼츠 조회수·예약", "https://studio.youtube.com/channel/UCDEJ8hzgEEN52QtiqdF8-ew/videos/short")}</div>
+    <h2>관리</h2><div class="grid links">
+    ${L("📊", "GoatCounter", "원본 통계", "https://www.goatcounter.com/login")}
+    ${L("☁️", "Cloudflare Pages", "앱 서버", "https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/workers-and-pages")}
+    ${L("🐙", "GitHub", "코드·수집기", "https://github.com/leejunsik22-gif")}
+    ${L("🌐", "Cloudflare DNS", "도메인 주소 (daejeon.example.invalid)", "https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/daejeon.example.invalid/dns/records")}
+    ${L("🏷️", "가비아", "도메인 등록·연장", "https://www.gabia.com/")}
+    ${L("🔑", "Bitwarden", "키 보관함", "https://vault.bitwarden.com/")}
+    ${L("💬", "카카오 개발자", "검색 API 키", "https://developers.kakao.com/console/app")}</div>
+    <h2>설정</h2><div class="card note">이 브라우저에만 통계 키가 저장돼요. 다른 컴퓨터·휴대폰에서는 처음 한 번 다시 넣어야 해요.<br>
+      <button class="btn soft" style="margin-top:10px;color:var(--coral-ink)" onclick="forget()">이 브라우저에서 키 지우기</button></div>
+    <h2>관제 연결 (방문 통계 보내기)</h2><div class="card note" id="kw">${kwBox()}</div>`;
+}
+// ───── 관제로 방문 통계 보내기 (Cloudflare 작업 airang-kwanje 가 10분마다 보냄) ─────
+const KW = "https://airang-kwanje.leejunsik22-gif-lee.workers.dev", KW_SECRETS = "https://github.com/leejunsik22-gif/airang-stats/settings/secrets/actions";
+let kwState = null;
+function kwBox() {
+  const st = kwState;
+  if (!st) { setTimeout(kwLoad, 30); return "연결 상태를 확인하고 있어요…"; }
+  if (st.err) return `연결 상태를 못 읽었어요: ${esc(st.err)} <button class="btn soft" style="margin-left:6px" onclick="kwState=null;kwLoad()">다시</button>`;
+  const v = (st.data || {}).visits || {}, ok = st.url_set && st.token_last4;
+  const res = st.sent === undefined ? "" : `<div style="margin-top:8px;font-weight:700;color:${st.sent ? "var(--mint-ink,#13795F)" : "var(--coral-ink)"}">${st.sent ? "보냈어요 ✓ (관제 응답 " + st.status + ")" : "못 보냈어요 — " + esc(st.why || ("관제 응답 " + st.status + " " + (st.reply || "")))}</div>`;
+  return `<div>관제 주소: <b>${st.url_set ? esc(st.host) : "아직 없음"}</b> · 토큰: <b>${st.token_last4 ? "····" + esc(st.token_last4) : "아직 없음"}</b> · 10분마다 자동</div>
+    <div style="margin-top:4px">보낼 숫자: 오늘 방문 <b>${fmt(v.total)}</b>명 · 광고 <b>${fmt(v.ad)}</b> ${(st.errs || []).length ? "· 못 읽은 도시 " + st.errs.length + "곳" : ""}</div>
+    ${ok ? `<button class="btn" style="margin-top:10px" onclick="kwSend()">지금 한 번 보내기</button>` :
+      `<div style="margin-top:8px">넣는 곳: <a href="${KW_SECRETS}" target="_blank" rel="noopener">GitHub 비밀값 (airang-stats)</a> → <b>New repository secret</b><br>
+      · <b>KWANJE_URL</b> = 관제 바깥 주소 (예: https://home.daejeon.example.invalid)<br>· <b>KWANJE_TOKEN</b> = 관제 설정 → 연결의 API 토큰<br>넣은 뒤 Claude에게 "넣었어"라고 말하면 바로 적용해요.</div>`}${res}`;
+}
+async function kwCall(path, opt = {}) {
+  const r = await fetch(KW + path, { ...opt, headers: { Authorization: "Bearer " + ls.get(KEY) } });
+  const j = await r.json().catch(() => ({})); if (!r.ok && !j.data) throw new Error(j.error || ("응답 " + r.status)); return j;
+}
+async function kwLoad() { try { kwState = await kwCall("/preview"); } catch (e) { kwState = { err: String(e.message || e) }; } const b = document.getElementById("kw"); if (b) b.innerHTML = kwBox(); }
+async function kwSend() { const b = document.getElementById("kw"); if (b) b.insertAdjacentHTML("beforeend", "<div>보내는 중…</div>"); try { kwState = await kwCall("/send", { method: "POST" }); } catch (e) { kwState = { ...(kwState || {}), sent: false, why: String(e.message || e) }; } if (b) b.innerHTML = kwBox(); }
+
+// ───── PC 화면 (가로 1100px 이상): 왼쪽 메뉴 · 대시보드 · 도시 표 · 앱 보기 · 배포 기록 ─────
+const isPC = () => window.innerWidth >= 1100 && !/[?&]mobile=1/.test(location.search);
+let RUNS_FROM = "";
+let pcTab = "dash", pcSido = "all", pcQ = "", pcSort = "today", RUNS = null, runsAt = 0;
+try { pcTab = sessionStorage.getItem("airang.admin.pc") || "dash"; } catch (e) {}
+function pcGo(t) { pcTab = t; try { sessionStorage.setItem("airang.admin.pc", t); } catch (e) {} render(); window.scrollTo(0, 0); }
+function pcSet(k, v) { if (k === "sido") pcSido = v; if (k === "sort") pcSort = v; if (k === "city") { appCity = v; try { sessionStorage.setItem("airang.admin.app", v); } catch (e) {} } render(); }
+function pcSearch(v) { pcQ = v.trim(); const t = document.getElementById("pctable"); if (t) t.innerHTML = pcTable(pcTab === "dash" ? 14 : 99); }
+const REPOS = ["leejunsik22-gif/airang-cities", "leejunsik22-gif/airang-stats"];
+const RUN_SKIP = /^(relay|stats|speedcheck|cors|cfcheck|dnscheck|gccheck|probe|diag)/;
+async function loadRuns() {
+  if (RUNS_FROM === "모음" && Array.isArray(RUNS)) return;   // 관제 작업으로 받은 기록 사용 (10분마다 새로)
+  if (RUNS && Date.now() - runsAt < (RUNS.err ? 30e3 : 5 * 60e3)) return;
+  runsAt = Date.now();
+  let list = null, why = "";
+  try {
+    const all = await Promise.all(REPOS.map(r => fetch(`https://api.github.com/repos/${r}/actions/runs?per_page=40`).then(x => x.ok ? x.json() : Promise.reject("GitHub " + x.status))));
+    list = all.flatMap((j, i) => (j.workflow_runs || []).map(w => ({ repo: REPOS[i].split("/")[1], name: w.name, title: w.display_title, st: w.status, ok: w.conclusion, at: w.created_at, url: w.html_url })));
+  } catch (e) { why = String(e); }
+  if (!list) try { list = await fetch("https://raw.githubusercontent.com/leejunsik22-gif/airang-stats/main/data/runs.json", { cache: "no-cache" }).then(x => x.ok ? x.json() : Promise.reject("runs.json " + x.status)); RUNS_FROM = "매시간 기록"; }
+    catch (e) { why += " / " + e; }
+  if (!list && Array.isArray(RUNS)) return;   // 그사이 모음에서 받았으면 그대로
+  RUNS = list ? list.filter(r => !RUN_SKIP.test(r.name)).sort((a, b) => b.at.localeCompare(a.at)) : { err: why };
+  if (isPC()) render();
+}
+const runName = n => n.split(" (")[0];
+const RUN_KO = { adminsnap: "관리자·관제 통계 모으기", daily: "매일 수집", events: "행사 수집", weather: "날씨 수집", hospitals: "병원 수집", deals: "할인 수집", extra: "용인·수원 좌석", newcity: "새 도시 첫 수집", "cf-apps": "앱 배포", admin: "관리자 배포", kwanje: "관제 작업 배포" };
+const ago2 = t => { const m = Math.round((Date.now() - Date.parse(t)) / 60e3); return m < 60 ? m + "분 전" : m < 1440 ? Math.round(m / 60) + "시간 전" : Math.round(m / 1440) + "일 전"; };
+function runRow(r) {
+  const lv = r.st !== "completed" ? "wa" : r.ok === "success" ? "ok" : "ba";
+  const label = r.st !== "completed" ? "도는 중" : r.ok === "success" ? "정상" : "실패";
+  return `<a class="feedrow" href="${r.url}" target="_blank" rel="noopener"><span>${ago2(r.at)}</span><i class="pdot ${lv}"></i><b>${esc(RUN_KO[runName(r.name)] || runName(r.name))}</b><em>${label}</em></a>`;
+}
+function spark(week, col) {
+  const v = week.map(x => x.v), mx = Math.max(1, ...v);
+  return `<svg width="110" height="26" viewBox="0 0 110 26"><polyline fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" points="${v.map((x, j) => `${j * 18 + 2},${24 - x / mx * 20}`).join(" ")}"/></svg>`;
+}
+const COLOR = { djdonggu: "#E8590C", djjunggu: "#7048E8", djseogu: "#1C7ED6", yuseong: "#0CA678", daedeok: "#C2255C" };
+function pcRows() {
+  let S = CITIES.map(c => [c, cityStats(c)]);
+  if (pcSido !== "all") S = S.filter(([c]) => sidoOf(c) === pcSido);
+  if (pcQ) S = S.filter(([c]) => c.name.includes(pcQ) || c.k.includes(pcQ.toLowerCase()));
+  const key = { today: s => s.today, w7: s => s.w7, ad: s => s.ad.reduce((a, h) => a + h.count, 0) }[pcSort] || (s => s.today);
+  return S.sort((a, b) => key(b[1]) - key(a[1]) || a[0].name.localeCompare(b[0].name));
+}
+function pcTable(limit) {
+  const rows = pcRows(), th = (k, l) => `<th class="sortable ${pcSort === k ? "on" : ""}" style="text-align:right" onclick="pcSet('sort','${k}')">${l}${pcSort === k ? " ▾" : ""}</th>`;
+  return `<tr><th>도시</th><th>지역</th>${th("today", "오늘")}<th>7일 추이</th>${th("w7", "7일")}<th style="text-align:right">새로·다시</th><th>수집</th>${th("ad", "광고 30일")}<th></th></tr>` +
+    rows.slice(0, limit).map(([c, s]) => { const hl = cityHealth(c), adn = s.ad.reduce((a, h) => a + h.count, 0);
+      return `<tr class="${c.k === appCity ? "sel" : ""}" onclick="pcSet('city','${c.k}')"><td><div class="cn"><i style="background:${COLOR[c.k] || "#4B5BF0"}"></i>${c.name}</div></td>
+        <td><span class="tag ${tagCls(c)}">${sidoOf(c)}</span></td><td class="num">${s.err ? "—" : fmt(s.today)}</td><td>${s.err ? `<span class="pill p-bad">못 읽음</span>` : spark(s.week, COLOR[c.k] || "#4B5BF0")}</td>
+        <td class="num">${fmt(s.w7)}</td><td class="num light">${fmt(s.newT)}·${fmt(s.retT)}</td><td><i class="pdot ${hl === "ok" ? "ok" : hl === "warn" ? "wa" : "ba"}"></i>${hl === "ok" ? "정상" : hl === "warn" ? "늦음" : "멈춤"}</td>
+        <td class="num">${fmt(adn)}</td><td><a class="lnk" href="${c.site}/?nocount=1" target="_blank" rel="noopener" onclick="event.stopPropagation()">열기 ↗</a></td></tr>`; }).join("") +
+    (rows.length > limit ? `<tr><td colspan="9" class="more" onclick="pcGo('cities')">… ${rows.length - limit}곳 더 보기</td></tr>` : "") +
+    (!rows.length ? `<tr><td colspan="9" class="more">찾는 도시가 없어요</td></tr>` : "");
+}
+function pcPhone(h = 600) {
+  const c = CITIES.find(x => x.k === appCity) || CITIES[0];
+  return `<div class="pcard phonebox"><div class="hd"><h3>앱 보기 · ${c.name}</h3><span class="sp"></span><a class="lnk" href="${appUrl()}" target="_blank" rel="noopener">새 창 ↗</a></div>
+    <div class="pphone" style="height:${h}px"><iframe id="appframe" src="${appUrl()}" title="아이랑 ${c.name}" style="width:390px;height:${Math.round((h - 20) * 390 / 280)}px;transform:scale(${280 / 390});transform-origin:0 0;border-radius:43px"></iframe></div>
+    <div class="pchips">${ROUTES.map(([r, l]) => `<button class="rt ${appRoute === r ? "on" : ""}" data-r="${r}" onclick="pickRoute('${r}')">${l}</button>`).join("")}</div>
+    <p class="sub" style="margin:8px 0 0;text-align:center">여기서 연 앱은 방문 수에 안 세요</p></div>`;
+}
+function pcRegionBars() {
+  const ds = days7(14);
+  const g = ds.map(x => { const o = { ...x }; SIDO_LIST.forEach(s => o[s] = sumDay(s, x.y)); return o; });
+  const mx = Math.max(1, ...g.map(barSum));
+  return `<div class="rbars">${g.map((x, i) => `<div title="${barTitle(x)}"><em>${barSum(x) || ""}</em>${stackBars(x, mx, 130)}<small>${i === 13 ? "오늘" : (isPC() || i % 2 === 1 ? x.l : "&nbsp;")}</small></div>`).join("")}</div>
+    <div class="lg">${SIDO_LIST.map(x => `<span><i style="background:${SIDO_COLOR[x]}"></i>${x}</span>`).join("")}<span style="margin-left:auto">하루 방문한 사람 · 막대에 마우스를 올리면 나눠 보여요</span></div>`;
+}
+function pcRefs() {
+  const all = {}; CITIES.forEach(c => (cityStats(c).refs || []).forEach(([k, n]) => all[k] = (all[k] || 0) + n));
+  const rows = Object.entries(all).sort((a, b) => b[1] - a[1]); return bl(rows, 7) || `<span class="sub">아직 없어요</span>`;
+}
+function pcConn() {
+  const errs = CITIES.filter(c => (DATA.city[c.k] || {}).err).length;
+  const last = n => Array.isArray(RUNS) ? RUNS.find(r => runName(r.name) === n && r.st === "completed") : null;
+  const cf = last("cf-apps"), dl = last("daily");
+  const kw = snapAt && !(kwState && !kwState.err) ? ["g", "연결됨"] : kwState && !kwState.err ? (kwState.url_set && kwState.token_last4 ? ["g", "연결됨"] : ["y", "설정 필요"]) : kwState ? ["r", "못 읽음"] : ["y", "확인 중"];
+  const row = (n, [c, t]) => `<div>${n}<span class="${c}">● ${t}</span></div>`;
+  return `<div class="conn"><h4>연결 상태</h4>
+    ${row("GoatCounter (통계)", errs ? ["r", errs + "곳 못 읽음 ↻"] : ["g", "정상"]).replace("<div>", errs ? `<div title="${esc(CITIES.filter(c => (DATA.city[c.k] || {}).err).map(c => c.name + ": " + DATA.city[c.k].err).join("\n"))}" style="cursor:pointer" onclick="loadAll()">` : "<div>")}
+    ${(RUNS && RUNS.err ? (x => x.replace("<div>", `<div title="${esc(RUNS.err)}" style="cursor:pointer" onclick="RUNS=null;loadRuns()">`)) : (x => x))(row("GitHub (수집)", !RUNS ? ["y", "확인 중"] : RUNS.err ? ["y", "못 읽음"] : dl ? [dl.ok === "success" ? "g" : "r", (dl.ok === "success" ? "" : "실패 · ") + ago2(dl.at)] : ["y", "기록 없음"]))}
+    ${row("Cloudflare (앱 배포)", !RUNS || RUNS.err ? ["y", "확인 중"] : cf ? [cf.ok === "success" ? "g" : "r", (cf.ok === "success" ? "" : "실패 · ") + ago2(cf.at)] : ["y", "기록 없음"])}
+    ${row("관제 (10분마다)", kw)}</div>`;
+}
+const PC_NAV = [["dash", "📊", "대시보드"], ["cities", "🏙️", "도시"], ["apps", "📱", "앱 보기"], ["traffic", "👥", "방문 통계"], ["data", "🔄", "수집 상태"], ["ads", "📣", "광고"],
+  ["sep", "", "운영"], ["newcity", "➕", "새 도시 열기"], ["deploy", "🚀", "배포·수집 기록"], ["settings", "🔑", "바로가기·관제"]];
+function pcList(limit) {   // 휴대폰: 도시 카드 줄 (누르면 앱 보기로)
+  const rows = pcRows();
+  return rows.slice(0, limit).map(([c, s]) => { const hl = cityHealth(c);
+    return `<button class="mrow" onclick="pcSet('city','${c.k}');pcGo('apps')"><i style="background:${COLOR[c.k] || "#4B5BF0"}"></i>
+      <span class="mn"><b>${c.name}</b><span class="tag ${tagCls(c)}">${sidoOf(c)}</span><small><i class="pdot ${hl === "ok" ? "ok" : hl === "warn" ? "wa" : "ba"}"></i>7일 ${fmt(s.w7)} · 새로 ${fmt(s.newT)}</small></span>
+      ${spark(s.week, COLOR[c.k] || "#4B5BF0")}<b class="mt">${s.err ? "—" : fmt(s.today)}</b></button>`; }).join("") +
+    (rows.length > limit ? `<button class="mmore" onclick="pcGo('cities')">${rows.length - limit}곳 더 보기 ›</button>` : "") + (!rows.length ? `<div class="sub" style="padding:12px">찾는 도시가 없어요</div>` : "");
+}
+function pcSortChips() { return `<div class="seg">${[["today", "오늘순"], ["w7", "7일순"], ["ad", "광고순"]].map(([k, l]) => `<button class="${pcSort === k ? "on" : ""}" onclick="pcSet('sort','${k}')">${l}</button>`).join("")}</div>`; }
+function mApps() {   // 휴대폰: 도시 고르기 + 앱 화면을 화면 폭 가득
+  const c = CITIES.find(x => x.k === appCity) || CITIES[0], s = cityStats(c);
+  const chip = x => `<button class="chip ${x.k === c.k ? "on" : ""}" onclick="pcSet('city','${x.k}')">${x.name}</button>`;
+  return `<div class="pcard">${SIDO_LIST.map((sd, i) => `<div class="grp"${i ? ' style="margin-top:8px"' : ""}><b>${sd}</b>${CITIES.filter(x => sidoOf(x) === sd).map(chip).join("")}</div>`).join("")}</div>
+    <div class="pcard" style="margin-top:12px"><div class="hd"><h3>아이랑 ${c.name}</h3><span class="sub">오늘 ${fmt(s.today)} · 7일 ${fmt(s.w7)}</span><span class="sp"></span><a class="lnk" href="${appUrl()}" target="_blank" rel="noopener">새 창 ↗</a></div>
+      <div class="pchips" style="justify-content:flex-start;margin:0 0 10px">${ROUTES.map(([r, l]) => `<button class="rt ${appRoute === r ? "on" : ""}" data-r="${r}" onclick="pickRoute('${r}')">${l}</button>`).join("")}</div>
+      <div class="mframe"><iframe id="appframe" src="${appUrl()}" title="아이랑 ${c.name}"></iframe></div>
+      <p class="sub" style="margin:8px 0 0">여기서 연 앱은 방문 수에 안 세요</p></div>`;
+}
+function mData() {   // 휴대폰: 수집 상태를 도시 카드로
+  return CITIES.map(c => { const f = DATA.fresh[c.k] || {}, hl = cityHealth(c);
+    return `<div class="pcard mdata"><div class="hd"><i class="pdot ${hl === "ok" ? "ok" : hl === "warn" ? "wa" : "ba"}"></i><h3>${c.name}</h3><span class="tag ${tagCls(c)}">${sidoOf(c)}</span></div>
+      <div class="mpills">${FILES.map(([k, n, h]) => { const v = f[k]; if (v === null && k === "deals") return `<span class="pill">${n} 준비 중</span>`; const [lv, l] = freshLevel(v, hrsOf(c, k, h)); return `<span class="pill p-${lv}">${n} ${l}</span>`; }).join("")}</div></div>`; }).join("") +
+    `<p class="legend">초록 정상 · 노랑 늦음 · 빨강 멈춤. <a class="lnk" href="https://github.com/leejunsik22-gif/airang-cities/actions" target="_blank" rel="noopener">수집 기록 ↗</a></p>`;
+}
+function renderPC() {
+  const M = !isPC();
+  loadRuns(); if (!kwState) setTimeout(kwLoad, 50);
+  const bad = CITIES.filter(c => cityHealth(c) !== "ok").length;
+  const nav = PC_NAV.map(([k, ic, l]) => k === "sep" ? `<div class="psep">${l}</div>` : `<button class="pnav ${pcTab === k ? "on" : ""}" onclick="pcGo('${k}')">${ic} ${l}${k === "cities" ? `<span class="n">${CITIES.length}</span>` : k === "data" && bad ? `<span class="n warn">${bad}</span>` : ""}</button>`).join("");
+  const title = (PC_NAV.find(x => x[0] === pcTab) || [, , "대시보드"])[2];
+  const when = DATA ? new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" }) : "";
+  const top = `<div class="ptop"><div><h1>${title}</h1><div class="sub">${when} 기준 · ${SIDO_LIST.map(x => `${x} ${CITIES.filter(c => sidoOf(c) === x).length}곳`).join(" · ")}${busy ? ` · 불러오는 중 ${prog}/${CITIES.length}` : ""}</div></div>
+    ${pcTab === "cities" ? `<input class="psearch" placeholder="🔍 도시 이름으로 찾기" value="${esc(pcQ)}" oninput="pcSearch(this.value)">` : `<span class="sp"></span>`}
+    <button class="btn soft" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻ 새로고침</button><button class="btn soft" onclick="lock()">잠그기</button></div>
+    ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}`;
+  let body = "";
+  if (!DATA) body = `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;
+  else if (pcTab === "dash") {
+    const S = CITIES.map(c => [c, cityStats(c)]), sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
+    const errC = CITIES.filter(c => (DATA.city[c.k] || {}).err);
+    var errBox = errC.length ? `<div class="pcard" style="border:2px solid #E8553F;margin-bottom:14px"><b style="color:#C93D22">통계를 못 읽은 도시 ${errC.length}곳</b> <button class="btn soft" style="margin-left:8px;height:30px" onclick="snapTried=false;loadSnap()">15분 전 모음으로 보기</button>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.7">${errC.map(c => `${c.name}: ${esc(DATA.city[c.k].err)}`).join("<br>")}</div></div>` : "";
+    const adAll = S.reduce((a, [, s]) => a + s.ad.reduce((b, h) => b + h.count, 0), 0);
+    const new30 = CITIES.reduce((t, c) => t + days7(30).reduce((a, x) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-새로", x.y), 0), 0);
+    const pct = (a, b) => b ? Math.round((a - b) / b * 100) : 0, d1 = pct(sum("today"), sum("yest"));
+    const worst = CITIES.filter(c => cityHealth(c) !== "ok").map(c => c.name);
+    body = errBox + `<div class="pkpis">
+      <div class="pcard"><div class="k">오늘 방문한 사람</div><div class="v">${fmt(sum("today"))}<small>명</small></div><div class="d ${d1 >= 0 ? "up" : "dn"}">어제(${fmt(sum("yest"))})보다 ${d1 >= 0 ? "+" : ""}${d1}%</div></div>
+      <div class="pcard"><div class="k">최근 7일 방문</div><div class="v">${fmt(sum("w7"))}<small>명</small></div><div class="d light">하루 평균 ${fmt(Math.round(sum("w7") / 7))}명</div></div>
+      <div class="pcard"><div class="k">처음 온 사람 · 30일</div><div class="v">${fmt(new30)}<small>명</small></div><div class="d light">새 기기 기준</div></div>
+      <div class="pcard"><div class="k">광고 누름 · 30일</div><div class="v">${fmt(adAll)}<small>회</small></div><div class="d light" style="cursor:pointer" onclick="pcGo('ads')">광고 관리 ›</div></div>
+      <div class="pcard"><div class="k">수집 이상</div><div class="v" style="color:${worst.length ? "var(--warn-c)" : "var(--ok-c)"}">${worst.length}<small>곳</small></div><div class="d" style="cursor:pointer;color:${worst.length ? "var(--warn-c)" : "var(--ok-c)"}" onclick="pcGo('data')">${worst.length ? esc(worst.slice(0, 3).join("·")) + " ›" : "모두 정상"}</div></div></div>
+      <div class="pbot"><div class="pcard"><div class="hd"><h3>지역별 방문 · 14일</h3></div>${pcRegionBars()}</div>
+        <div class="pcard"><div class="hd"><h3>최근 수집·배포</h3><span class="sp"></span><a class="lnk" onclick="pcGo('deploy')">모두 ›</a></div>${Array.isArray(RUNS) ? RUNS.slice(0, 7).map(runRow).join("") : `<span class="sub">${RUNS && RUNS.err ? "GitHub 기록을 못 읽었어요" : "불러오는 중…"}</span>`}</div></div>${M ? `<div class="mconn">${pcConn()}</div>` : ""}`;
+  } else if (pcTab === "cities") body = M ? `<input class="psearch m" placeholder="🔍 도시 이름으로 찾기" value="${esc(pcQ)}" oninput="pcQ=this.value.trim();document.getElementById('mlist').innerHTML=pcList(99)"><div class="pcard"><div class="hd">${pcSeg()}<span class="sp"></span>${pcSortChips()}</div><div id="mlist">${pcList(99)}</div></div>` : `<div class="pmid"><div class="pcard"><div class="hd"><h3>도시 ${CITIES.length}곳</h3>${pcSeg()}<span class="sp"></span><span class="sub">제목(오늘·7일·광고)을 누르면 정렬</span></div><table class="ptbl" id="pctable">${pcTable(99)}</table></div>${pcPhone(620)}</div>`;
+  else if (pcTab === "apps") body = M ? mApps() : viewOne();
+  else if (pcTab === "traffic") body = viewTraffic() + `<h2>도시별 7일</h2>` + viewHome().split("<h2>도시별</h2>")[1];
+  else if (pcTab === "data") body = M ? mData() : viewData();
+  else if (pcTab === "ads") body = viewAds();
+  else if (pcTab === "deploy") body = (M ? `<div class="mconn">${pcConn()}</div>` : "") + `<div class="pcard">${Array.isArray(RUNS) ? RUNS.slice(0, 40).map(r => runRow(r).replace("</em>", `</em><small>${esc(r.repo)} · ${esc((r.title || "").slice(0, 40))}</small>`)).join("") : "불러오는 중…"}</div>
+    <p class="legend">GitHub Actions 기록이에요 (5분마다 새로). 줄을 누르면 자세한 기록이 열려요.</p>`;
+  else if (pcTab === "newcity") body = `<div class="pcard newcity"><h3>새 도시 여는 순서</h3><ol>
+    <li><b>Claude에게</b> "○○ 열어 줘"라고 말해요 — 도시 설정·첫 수집·앱 화면은 Claude가 해요.</li>
+    <li><b>DNS</b> 한 줄: <a href="https://dash.cloudflare.com/fdf0f693700c270e15a856ec9453fde7/daejeon.example.invalid/dns/records" target="_blank" rel="noopener">Cloudflare DNS ↗</a> → CNAME <code>도시</code> → <code>airang-도시.pages.dev</code> (주황 구름 켬)</li>
+    <li><b>GoatCounter</b> 사이트 하나: <a href="https://yongin-edu-app.goatcounter.com/settings/sites" target="_blank" rel="noopener">사이트 추가 ↗</a> → <code>도시-edu-app</code></li>
+    <li><b>그림</b> (나중에 해도 돼요): GPT에 한 장씩 <b>1200×500</b> — 동화풍 3D, 엄마·아이 뒷모습, 글자 없이</li>
+    <li>미리보기를 보고 <b>"올려"</b> 하면 앱·입구·관리자·관제에 한꺼번에 들어가요.</li></ol>
+    <div class="row2"><a class="btn soft" href="https://github.com/leejunsik22-gif/airang-cities/actions/workflows/newcity.yml" target="_blank" rel="noopener">첫 수집 기록 ↗</a><a class="btn soft" href="https://github.com/leejunsik22-gif/airang-cities/blob/main/app/cities.json" target="_blank" rel="noopener">도시 설정 파일 ↗</a></div>
+    <h3 style="margin-top:18px">남은 곳</h3><p class="sub">서울·경기: 모두 열었어요<br>인천: 서해·검단·영종·제물포 (2026-07 새로 생긴 구)</p></div>`;
+  else if (pcTab === "settings") body = viewLinks();
+  $app.className = "pcwrap" + (M ? " m" : "");
+  if (M) {
+    const mnav = PC_NAV.filter(x => x[0] !== "sep").map(([k, ic, l]) => `<button class="${pcTab === k ? "on" : ""}" onclick="pcGo('${k}')">${ic} ${l.replace("배포·수집 기록", "기록").replace("바로가기·관제", "바로가기").replace("새 도시 열기", "새 도시")}${k === "data" && bad ? ` <b class="nb">${bad}</b>` : ""}</button>`).join("");
+    $app.innerHTML = `<div class="mtop"><div class="logo">아</div><div style="flex:1;min-width:0"><b>아이랑 관리자</b><div class="sub">${when} 기준${busy ? ` · 불러오는 중 ${prog}/${CITIES.length}` : ""}</div></div>
+      <button class="btn soft sm" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻</button><button class="btn soft sm" onclick="lock()">잠금</button></div>
+      <nav class="mnav">${mnav}</nav>${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}
+      <main class="mmain"><h1 class="mh1">${title}</h1>${body}</main>`;
+    setTimeout(() => { const on = document.querySelector(".mnav .on"); if (on) on.scrollIntoView({ inline: "center", block: "nearest" }); }, 0);
+    return;
+  }
+  $app.className = "pcwrap";
+  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 송골랩</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${top}${body}</main></div>`;
+}
+function pcSeg() { return `<div class="seg">${[["all", "전체 " + CITIES.length], ...SIDO_LIST.map(x => [x, x + " " + CITIES.filter(c => sidoOf(c) === x).length])].map(([k, l]) => `<button class="${pcSido === k ? "on" : ""}" onclick="pcSet('sido','${k}')">${l}</button>`).join("")}</div>`; }
+let pcWas = null;
+window.addEventListener("resize", () => { const w = isPC(); if (w !== pcWas) { pcWas = w; if (unlocked) render(); } });
+
+// ───── 로그인 ─────
+function viewSetup() {
+  $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1>
+    <p class="note">GoatCounter API 키를 이 브라우저에 한 번 넣어 주세요. 키는 이 브라우저에만 저장돼요. (앱 관리자에서 쓰던 <b>admin</b> 키 — 도시 7곳을 다 읽을 수 있는 키)</p>
+    <input id="k" type="password" autocomplete="off" placeholder="API 키 붙여 넣기">
+    <div class="k">관리자 비밀번호 (숫자 4자리)</div>
+    <input id="p1" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리"><input id="p2" type="password" inputmode="numeric" maxlength="4" placeholder="한 번 더">
+    <button class="btn" style="width:100%;justify-content:center;height:46px" onclick="saveKey()">등록</button></div>`;
+}
+async function saveKey() {
+  const k = document.getElementById("k").value.trim(), a = document.getElementById("p1").value, b = document.getElementById("p2").value;
+  if (k.length < 10) return alertMsg("API 키를 붙여 넣어 주세요");
+  if (!/^\d{4}$/.test(a)) return alertMsg("비밀번호는 숫자 4자리예요");
+  if (a !== b) return alertMsg("두 번 넣은 비밀번호가 달라요");
+  ls.set(KEY, k); ls.set(PIN, await pinHash(a)); unlocked = true; DATA = null; ls.del(CACHE); render();
+}
+function viewPin() {
+  $app.innerHTML = `<div class="login card"><div class="logo" style="margin-bottom:12px">아</div><h1>아이랑 관리자</h1><p class="note">비밀번호를 넣어 주세요.</p>
+    <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리" autofocus>
+    <div id="msg" class="note" style="color:var(--coral-ink)"></div>
+    <button class="btn soft" style="margin-top:6px" onclick="forget()">비밀번호를 잊었어요 (키 지우고 다시 등록)</button></div>`;
+  const el = document.getElementById("pin");
+  el.addEventListener("input", async () => { if (/^\d{4}$/.test(el.value)) { if (await pinHash(el.value) === ls.get(PIN)) { unlocked = true; render(); } else { el.value = ""; document.getElementById("msg").textContent = "비밀번호가 달라요"; } } });
+  setTimeout(() => el.focus(), 50);
+}
+function forget() { ls.del(KEY); ls.del(PIN); ls.del(CACHE); DATA = null; unlocked = false; render(); }
+function alertMsg(t) { let m = document.getElementById("amsg"); if (!m) { m = document.createElement("div"); m.id = "amsg"; m.className = "note"; m.style.color = "var(--coral-ink)"; document.querySelector(".login").appendChild(m); } m.textContent = t; }
+
+// ───── 시안용 예시 숫자 (?demo=1) ─────
+if (DEMO) {
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const ds = [...Array(30)].map((_, i) => kstYmd(new Date(Date.now() - (29 - i) * 86400e3)));
+  const base = { yuseong: 3, djseogu: 3, djjunggu: 2, djdonggu: 2, daedeok: 2 };   // 가상 기본값(대전)
+  const ser = f => ds.map((day, i) => ({ day, daily: f(i) }));
+  DATA = { at: Date.now(), city: {}, fresh: {}, ads: { ...ADS_FALLBACK, from: "fallback" } };
+  for (const c of CITIES) {
+    const b = base[c.k] || 1, v = ds.map((_, i) => Math.max(0, Math.round(b * (0.5 + i / 40) + rnd(-2, 3))));
+    const n = v.map(x => Math.round(x * 0.4));
+    DATA.city[c.k] = { err: "", refs: [["(직접 방문 · 앱)", b * 5], ["teamblind.com", Math.round(b * 2.1)], ["m.search.naver.com", Math.round(b * .8)], ["kakao", Math.round(b * .5)], ["google.com", Math.round(b * .3)]],
+      hits: [{ path: "방문-하루", event: true, count: 0, stats: ser(i => v[i]) }, { path: "방문-새로", event: true, stats: ser(i => n[i]) }, { path: "방문-다시", event: true, stats: ser(i => v[i] - n[i]) },
+        { path: "방문-열기-1", event: true, stats: ser(i => v[i]) }, { path: "방문-열기-2", event: true, stats: ser(i => Math.round(v[i] * .5)) }, { path: "방문-열기-3", event: true, stats: ser(i => Math.round(v[i] * .2)) },
+        { path: "광고-lagrills-info", event: true, count: Math.round(b * .9) }, { path: "광고-lagrills-book", event: true, count: Math.round(b * .25) }, { path: "광고-lagrills-tel", event: true, count: Math.round(b * .1) }, { path: "광고-lagrills-map", event: true, count: Math.round(b * .15) },
+        { path: "/ad", event: false, count: Math.round(b * 1.6) }, { path: "급식-보기", event: true, count: b * 3 }, { path: "학원-비교", event: true, count: b * 2 }, { path: "행사-도서관", event: true, count: b }, { path: "날씨-보기", event: true, count: Math.round(b * 1.5) }] };
+    const now = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace("T", " ");
+    const ago = h => new Date(Date.now() + 9 * 3600e3 - h * 3600e3).toISOString().slice(0, 16).replace("T", " ");
+    DATA.fresh[c.k] = { latest: ago(5), meals: ago(5), kinder: ago(6), events: ago(5), jobs: ago(5), weather: ago(2), academies: ago(c.k === "yongin" ? 96 : 5), deals: ["yongin", "suwon"].includes(c.k) ? null : ago(4) };
+    if (c.k === "goyang") DATA.fresh[c.k].events = ago(50);
+  }
+  unlocked = true; ls.get = (k) => k === KEY || k === PIN ? "demo" : null;
+  const m = location.search.match(/tab=(\w+)/); if (m) tab = m[1];
+}
+render();
+if ("serviceWorker" in navigator && !DEMO) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>

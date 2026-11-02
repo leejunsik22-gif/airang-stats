@@ -1,0 +1,25 @@
+name: gccheck (GoatCounter 도시 사이트 확인 — 상태 코드만)
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      K: ${{ secrets.GC_KEY_YONGIN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set +e; mkdir -p data
+          for c in seocho; do
+            code=$(curl -s -o /tmp/r.json -m 20 -w "%{http_code}" "https://$c-edu-app.goatcounter.com/api/v0/paths?limit=50" -H "Authorization: Bearer $K" -H "Content-Type: application/json")
+            n=$(python3 -c "import json;print(len(json.load(open('/tmp/r.json')).get('paths',[])))" 2>/dev/null)
+            echo "$c-edu-app  API=$code  기록종류=$n"
+          done | tee data/gccheck.txt
+          for c in gangnam yangcheon nowon seocho songpa gangdong gwangjin mapo seongdong namyangju ansan pyeongtaek osan; do
+            curl -s -m 30 "https://$c-edu-app.goatcounter.com/api/v0/stats/hits?start=2026-10-30T00:00:00Z&limit=100" -H "Authorization: Bearer $K" -H "Content-Type: application/json" -o /tmp/h.json
+            curl -s -m 30 "https://$c-edu-app.goatcounter.com/api/v0/stats/toprefs?start=2026-10-30T00:00:00Z&limit=6" -H "Authorization: Bearer $K" -H "Content-Type: application/json" -o /tmp/r.json
+            C=$c python3 -c "import json,os;h=json.load(open('/tmp/h.json')).get('hits',[]);r=json.load(open('/tmp/r.json')).get('stats',[]);v=[x for x in h if x['path']=='방문-하루'];d={s['day']:s['daily'] for x in v for s in x.get('stats',[]) if s['daily']};print(os.environ['C'],'날짜별',d,'| 유입',[(x.get('name') or '(직접)',x.get('count')) for x in r])" | tee -a data/gccheck.txt
+          done
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/gccheck.txt; git commit -qm "GoatCounter 확인" && for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done

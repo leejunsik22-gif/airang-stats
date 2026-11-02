@@ -1,0 +1,53 @@
+name: cf-apps (아이랑 앱들을 Cloudflare Pages로)
+# 앱 화면만 올린다(데이터는 앱이 GitHub에서 바로 읽음). 앱이 바뀐 경우에만 다시 올려 배포 횟수를 아낀다.
+# 2026-11-01부터: 도시마다 사이트 하나 → 모든 도시를 사이트 하나(airang-all)에. 예전 airang-<도시> 사이트는 지우지 않고 둠.
+on:
+  workflow_dispatch:
+    inputs:
+      force: { description: "바뀌지 않아도 올리기", default: "no" }
+  schedule:
+    - cron: "7 */6 * * *"    # 6시간마다 한 번 확인 (보통은 바꾼 뒤 바로 손으로 실행) — GitHub 무료 실행 시간 아끼기
+permissions:
+  contents: write
+  actions: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: fdf0f693700c270e15a856ec9453fde7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4      # 앱 원본 1벌 (airang-cities/app) → 도시 7곳으로 만들어 올림
+        with: { repository: leejunsik22-gif/airang-cities, path: src-cities, sparse-checkout: "app\ndata" }   # data: 검색용 페이지 만들 때 씀
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: |
+          npm i -g wrangler@3 >/dev/null 2>&1
+          mkdir -p deployed data
+          # 도시 앱 전부를 사이트 하나(airang-all)에 올림 — 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js)
+          python3 src-cities/app/build.py --out all >/dev/null
+          python3 src-cities/app/seo.py --out all --data src-cities/data   # 검색용 페이지 (<도시>/guide/…, sitemap.xml, robots.txt)
+          python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js
+          { sha=$(cd all && find . -type f | sort | xargs sha256sum | sha256sum | cut -c1-16)
+            if [ "$(cat deployed/all 2>/dev/null)" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "yes" ]; then echo "앱 그대로 (올리지 않음)"
+            elif wrangler pages deploy all --project-name airang-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"
+            else tail -6 /tmp/d.log; echo "::warning::배포 실패 (다음 실행 때 다시 올림)"; fi
+            # 새 도시 주소: airang-all 에 아직 없으면 붙임 (DNS CNAME <도시> → airang-all.pages.dev 필요)
+            A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-all/domains
+            python3 -c "import json;c=json.load(open('src-cities/app/cities.json'));print('\n'.join([v['domain'] for v in c['cities'].values()]+[c['entry']['domain']]))" | while read dom; do
+              st=$(curl -s "$A/$dom" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result.status // empty' || true)
+              [ -n "$st" ] && continue
+              echo "새 주소 붙이기: $dom"; curl -s -X POST $A -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"$dom\"}" | jq -c '{success,errors}'
+              # DNS 연결(CNAME)도 없으면 만듦 (토큰에 Zone·DNS·Edit 권한)
+              Z=https://api.cloudflare.com/client/v4/zones/$(curl -s "https://api.cloudflare.com/client/v4/zones?name=daejeon.example.invalid" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result[0].id')/dns_records
+              if [ "$(curl -s "$Z?name=$dom" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq '.result | length')" = 0 ]; then
+                curl -s -X POST $Z -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d "{\"type\":\"CNAME\",\"name\":\"$dom\",\"content\":\"airang-all.pages.dev\",\"proxied\":true}" | jq -c '{dns:.success,errors}'
+              fi
+            done
+          } 2>&1 | tee data/cf-apps.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 관리자 PC 화면의 '배포·수집 기록'용 (회사 인터넷에서 GitHub 바로 읽기가 막힐 때 이 파일을 읽음)
+          for r in airang-cities airang-stats; do GH_TOKEN=${{ github.token }} gh api "repos/leejunsik22-gif/$r/actions/runs?per_page=40" --jq "[.workflow_runs[] | {repo:\"$r\", name, title:.display_title, st:.status, ok:.conclusion, at:.created_at, url:.html_url}]"; done | python3 -c "import sys,json;print(json.dumps([x for l in sys.stdin if l.strip().startswith('[') for x in json.loads(l) if isinstance(x,dict)],ensure_ascii=False))" > data/runs.json || true
+          git add deployed data/cf-apps.txt data/runs.json; git diff --cached --quiet && exit 0
+          git commit -m "앱 배포 기록"; for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done
