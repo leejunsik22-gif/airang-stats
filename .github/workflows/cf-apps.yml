@@ -36,6 +36,7 @@ jobs:
             # 새 도시 주소: airang-daejeon-all 에 아직 없으면 붙임 (DNS CNAME <도시> → airang-daejeon-all.pages.dev 필요)
             A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-all/domains
             python3 -c "import json;c=json.load(open('src-cities/app/cities.json'));print('\n'.join([v['domain'] for v in c['cities'].values()]+[c['entry']['domain']]))" | while read dom; do
+              case "$dom" in *example.invalid) echo "임시 도메인 — 주소 연결 건너뜀: $dom (도메인 확정 후 cities.json 교체)"; continue;; esac
               st=$(curl -s "$A/$dom" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result.status // empty' || true)
               [ -n "$st" ] && continue
               echo "새 주소 붙이기: $dom"; curl -s -X POST $A -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d "{\"name\":\"$dom\"}" | jq -c '{success,errors}'

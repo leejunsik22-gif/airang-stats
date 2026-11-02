@@ -6,7 +6,7 @@ out, cfg, wjs = sys.argv[1:4]
 c = json.load(open(cfg, encoding="utf-8"))
 hosts = {v["domain"]: k for k, v in c["cities"].items()}
 hosts[c["entry"]["domain"]] = "entry"
-TEST = {"alltest.daejeon.example.invalid": "gangnam"}   # 시험용 주소 (실제 주소 옮기기 전 확인)
+TEST = {}   # 시험용 주소 없음 (pages.dev 에서는 /yuseong/ 처럼 경로로 확인)
 hosts.update(TEST)
 missing = [k for k in hosts.values() if not os.path.isdir(os.path.join(out, k))]
 assert not missing, f"앱 폴더 없음: {missing}"
