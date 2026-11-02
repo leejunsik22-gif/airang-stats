@@ -1,30 +1,4 @@
 ✨ Uploading _headers
 🌎 Deploying...
-✨ Deployment complete! Take a peek over at https://07d1823d.airang-daejeon-admin.pages.dev
-{
-  "result": null,
-  "success": false,
-  "errors": [
-    {
-      "code": 8000015,
-      "message": "The domain you have entered contains an invalid TLD."
-    }
-  ],
-  "messages": []
-}
-
-{
-  "result": null,
-  "success": false,
-  "errors": [
-    {
-      "code": 8000021,
-      "message": "The domain you have requested does not exist. Add a custom domain to your Pages project before continuing."
-    }
-  ],
-  "messages": []
-}
-
-DNS: 
-admin: 000
+✨ Deployment complete! Take a peek over at https://5ff97bf6.airang-daejeon-admin.pages.dev
 pages.dev: 200 <title>아이랑 관리자
