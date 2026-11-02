@@ -1,8 +1,8 @@
 name: relay
 on:
   workflow_dispatch:
-  push:
-    paths: ["worker/gc-relay.js", ".github/workflows/relay.yml"]
+  # push: (대표 승인 전 자동 배포 비활성 — 2026-11-02)
+  #  paths: ["worker/gc-relay.js", ".github/workflows/relay.yml"]
 permissions:
   contents: write
 jobs:

@@ -1,9 +1,9 @@
 name: kwanje (관제로 방문 통계 보내는 Cloudflare 작업 올리기)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ["worker/kwanje.js", "worker/wrangler.toml", ".github/workflows/kwanje.yml"]
+  # push: (대표 승인 전 자동 배포 비활성 — 2026-11-02)
+  #  branches: [main]
+  #  paths: ["worker/kwanje.js", "worker/wrangler.toml", ".github/workflows/kwanje.yml"]
 permissions:
   contents: write
 jobs:
