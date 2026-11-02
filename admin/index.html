@@ -868,7 +868,8 @@ function loadGates() { if (gatesLoading) return; gatesLoading = true;
 function opsPanel() {   // 2026-11-02: 방문 통계보다 먼저 — 검증 필요·승인 대기·공개 제외·운영 오류
   const real = !DEMO && GATES;
   const files = real ? CITIES.flatMap(c => Object.entries(((GATES[c.k] || {}).files) || {}).map(([f, v]) => ({ c: c.name, f, ...v }))) : [];
-  const fail = files.filter(x => /검사 실패/.test(x.reason || "")), ex = files.filter(x => !x.published && !/검사 실패/.test(x.reason || ""));
+  const fail = files.filter(x => /실패|만료/.test(x.auto_check || "") || /검사 실패/.test(x.reason || "")), ex = files.filter(x => !x.published && !/실패/.test(x.auto_check || ""));
+  const unverified = files.filter(x => x.published && x.official_verify && x.official_verify !== "확인 완료");   // 자동 통과했지만 기관 원문 검증은 미완료
   const noGate = real ? CITIES.filter(c => !GATES[c.k]).length : null;
   const failedRuns = Array.isArray(RUNS) ? RUNS.filter(r => r.ok === "failure").slice(0, 5) : [];
   const statErr = DATA ? CITIES.filter(c => (DATA.city[c.k] || {}).err).length : 0;
@@ -877,7 +878,7 @@ function opsPanel() {   // 2026-11-02: 방문 통계보다 먼저 — 검증 필
   const body = DEMO
     ? [card("검증 필요", na, "가상 시안 — 실제 값 없음", "var(--muted)"), card("승인 대기", na, "승인 기능 미구현(work 가지 수동 반영)", "var(--muted)"), card("공개 제외", na, "가상 시안 — 실제 값 없음", "var(--muted)"), card("운영 오류", na, "가상 시안 — 실제 값 없음", "var(--muted)")].join("")
     : GATES === null ? `<div class="pcard note">검문 결과를 읽는 중…</div>`
-    : [card("검증 필요", fail.length, fail.length ? fail.map(x => `${x.c} ${x.label}`).join(", ") : (noGate ? `검문 미적용 ${noGate}곳 — work 승인 전` : "없음"), fail.length || noGate ? "var(--warn-c)" : "var(--ok-c)"),
+    : [card("검증 필요", `${fail.length}<small style="font-size:13px;color:var(--muted);margin-left:6px">자동 실패·만료</small>`, (fail.length ? fail.map(x => `${x.c} ${x.label}(${x.auto_check})`).join(", ") : (noGate ? `검문 미적용 ${noGate}곳 — work 승인 전` : "자동 검사 실패 없음")) + `<br>원문 검증 미완료 ${unverified.length}건: ${[...new Set(unverified.map(x => `${x.label}(${x.official_verify})`))].join(", ") || "없음"}`, fail.length || noGate ? "var(--warn-c)" : "var(--ok-c)"),
        card("승인 대기", na, "승인 기능 미구현 — work 가지를 대표 승인 뒤 수동 반영", "var(--muted)"),
        card("공개 제외", ex.length, ex.length ? [...new Set(ex.map(x => x.label))].join(", ") : "없음", "var(--muted)"),
        card("운영 오류", failedRuns.length + statErr, [failedRuns.length ? `실패한 작업 ${failedRuns.length}` : "", statErr ? `통계 못 읽음 ${statErr}곳` : ""].filter(Boolean).join(" · ") || "없음", failedRuns.length + statErr ? "var(--warn-c)" : "var(--ok-c)")].join("");
@@ -886,14 +887,14 @@ function opsPanel() {   // 2026-11-02: 방문 통계보다 먼저 — 검증 필
 function gatePanel() {
   if (DEMO) {   // 가상 시안: 운영 숫자가 아님을 표시하고 예시 행만 보여 준다
     return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>공개 전 검문 현황</h3><span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안 · 실제 값 없음</span><span class="sp"></span><span class="sub">실제 운영 화면에서는 각 구의 _status.json(검문 결과)을 읽어 보여 줍니다</span></div>
-      <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>검사 실패</th><th>제외(미확인)</th><th>승인 대기</th></tr></thead><tbody>${CITIES.map(c => `<tr><td><b>${c.name}</b><div class="sub">가상 시안</div></td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">승인 기능 미구현</td></tr>`).join("")}</tbody></table></div>`;
+      <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>자동 검사 실패·만료</th><th>원문 검증 미완료</th><th>제외(비공개)</th><th>승인 대기</th></tr></thead><tbody>${CITIES.map(c => `<tr><td><b>${c.name}</b><div class="sub">가상 시안</div></td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">—</td><td class="sub">승인 기능 미구현</td></tr>`).join("")}</tbody></table></div>`;
   }
   if (GATES === null) { loadGates(); return `<div class="pcard note">검문 현황을 읽는 중…</div>`; }
   const rows = CITIES.map(c => { const g = GATES[c.k]; if (!g) return `<tr><td>${c.name}</td><td colspan="4" class="sub">검문 미적용 — 작업 가지(work) 승인 전</td></tr>`;
-    const fs = Object.values(g.files || {}); const pub = fs.filter(x => x.published), fail = fs.filter(x => /검사 실패/.test(x.reason || "")), ex = fs.filter(x => !x.published && !/검사 실패/.test(x.reason || ""));
-    return `<tr><td><b>${c.name}</b><div class="sub">${esc(g.checked_at || "")}</div></td><td style="color:var(--ok-c)">${pub.length}</td><td style="color:${fail.length ? "var(--warn-c)" : "inherit"}">${fail.length}${fail.length ? `<div class="sub">${fail.map(x => esc(x.label)).join(", ")}</div>` : ""}</td><td>${ex.length}<div class="sub">${ex.map(x => esc(x.label)).join(", ")}</div></td><td class="sub">${fail.length ? "확인 필요(수동)" : "—"}</td></tr>`; }).join("");
+    const fs = Object.values(g.files || {}); const pub = fs.filter(x => x.published), fail = fs.filter(x => /실패|만료/.test(x.auto_check || "") || /검사 실패/.test(x.reason || "")), ex = fs.filter(x => !x.published && !/실패/.test(x.auto_check || "")), unv = pub.filter(x => x.official_verify && x.official_verify !== "확인 완료");
+    return `<tr><td><b>${c.name}</b><div class="sub">${esc(g.checked_at || "")}</div></td><td style="color:var(--ok-c)">${pub.length}</td><td style="color:${fail.length ? "var(--warn-c)" : "inherit"}">${fail.length}${fail.length ? `<div class="sub">${fail.map(x => esc(x.label) + "(" + esc(x.auto_check || "실패") + ")").join(", ")}</div>` : ""}</td><td>${unv.length}<div class="sub">${unv.map(x => esc(x.label) + "(" + esc(x.official_verify) + ")").join(", ")}</div></td><td>${ex.length}<div class="sub">${ex.map(x => esc(x.label)).join(", ")}</div></td><td class="sub">${fail.length ? "확인 필요(수동)" : "—"}</td></tr>`; }).join("");
   return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>공개 전 검문 현황</h3><span class="pill" style="background:var(--sage-bg);color:var(--sage-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">운영 데이터</span><span class="sp"></span><span class="sub">공개 = 검사 통과해 고객 화면에 나감 · 실패 = 직전본 유지 · 제외 = 미확인 자료</span></div>
-    <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>검사 실패</th><th>제외(미확인)</th><th>승인 대기</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    <table class="ptbl"><thead><tr><th>구</th><th>공개</th><th>자동 검사 실패·만료</th><th>원문 검증 미완료(공개 중)</th><th>제외(비공개)</th><th>승인 대기</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function renderPC() {
   const M = !isPC();
