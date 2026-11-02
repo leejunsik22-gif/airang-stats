@@ -21,11 +21,7 @@ jobs:
           npm i -g wrangler@3 >/dev/null 2>&1
           wrangler pages project create airang-daejeon-admin --production-branch main >/dev/null 2>&1 || true
           wrangler pages deploy admin --project-name airang-daejeon-admin --branch main --commit-dirty=true 2>&1 | tail -3
-          A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-admin/domains
-          curl -s -X POST $A -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" -d '{"name":"admin.daejeon.example.invalid"}' | head -c 300; echo
-          curl -s -X PATCH $A/admin.daejeon.example.invalid -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | head -c 300; echo
-          echo "DNS: $(dig +short admin.daejeon.example.invalid CNAME @1.1.1.1)"; sleep 20; echo "admin: $(curl -s -o /dev/null -w %{http_code} https://admin.daejeon.example.invalid/)"; echo "pages.dev: $(curl -s -o /tmp/p.html -w '%{http_code}' https://airang-daejeon-admin.pages.dev/) $(grep -o '<title>[^<]*' /tmp/p.html)"
-          curl -s $A/admin.daejeon.example.invalid -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | grep -o '"status":"[^"]*"' | head -3
+          echo "pages.dev: $(curl -s -o /tmp/p.html -w '%{http_code}' https://airang-daejeon-admin.pages.dev/) $(grep -o '<title>[^<]*' /tmp/p.html)"   # 자체 도메인 없음 — pages.dev 주소만 (2026-11-02 대표 결정)
       - run: |
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/admin.txt; git diff --cached --quiet && exit 0
