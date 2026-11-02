@@ -1,10 +1,6 @@
-  Project not found. The specified project name does not match any of your existing projects. [code: 8000007]
-  
-  If you think this is a bug, please open an issue at: [4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose[0m
-
-
-🪵  Logs were written to "/home/runner/.config/.wrangler/logs/wrangler-2026-11-02_07-44-28_273.log"
-::warning::배포 실패 (다음 실행 때 다시 올림)
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://8bc6fcb7.airang-daejeon-all.pages.dev
+앱 6곳 한 번에 올림
 임시 도메인 — 주소 연결 건너뜀: djdonggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djjunggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djseogu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
