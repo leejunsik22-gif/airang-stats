@@ -913,6 +913,27 @@ function loadRegions() { if (regionsLoading) return; regionsLoading = true;
       REGIONS = rows; if (unlocked) render();
     }).catch(e => { REGIONS = { err: String(e) }; if (unlocked) render(); });
 }
+// ───── 운영 기록(2026-11-03 오후): 현재 오류 ↔ 복구 완료 이력 분리 · 시즌 디자인 적용 상태 · 대표 승인 기록 ─────
+let OPS = null, opsLoading = false;
+function loadOps() { if (opsLoading) return; opsLoading = true;
+  const get = (p) => fetch(CITIES_RAW + p, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
+  Promise.all([get("ops/recovery_log.json"), get("approvals/log.json"), get("app/themes/applied.json")]).then(([rec, apv, app]) => { OPS = { rec, apv, app }; if (unlocked) render(); }); }
+function opsLogPanel() {
+  const pill = (t, bg, ink) => `<span class="pill" style="background:${bg};color:${ink};font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">${t}</span>`;
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>운영 기록</h3>${pill("가상 시안 · 실제 값 없음", "var(--gold-bg)", "var(--gold-ink)")}</div><p class="sub">실제 화면: 현재 오류(실패한 자동 작업) / 복구 완료 이력 / 시즌 디자인 적용 상태 / 대표 승인 기록</p></div>`;
+  if (OPS === null) { loadOps(); return `<div class="pcard note">운영 기록을 읽는 중…</div>`; }
+  const failed = Array.isArray(RUNS) ? RUNS.filter(r => r.ok === "failure").slice(0, 8) : [];
+  const rec = ((OPS.rec || {}).items || []).slice().reverse(), apv = ((OPS.apv || {}).items || []).slice().reverse(), app = ((OPS.app || {}).cities) || {};
+  const cur = failed.length ? `<table class="ptbl ev"><thead><tr><th>작업</th><th>내용</th><th>때</th></tr></thead><tbody>${failed.map(r => `<tr class="ev-warn"><td>${esc(RUN_KO[runName(r.name)] || r.name)}</td><td class="sub">${esc(r.title || "")}</td><td class="sub"><a class="lnk" href="${r.url}" target="_blank" rel="noopener">${ago2(r.at)}</a></td></tr>`).join("")}</tbody></table>` : `<p class="sub">실패한 자동 작업 없음</p>`;
+  const recT = rec.length ? `<table class="ptbl ev"><thead><tr><th>때</th><th>오류</th><th>조치</th><th>누가 · 근거</th></tr></thead><tbody>${rec.map(x => `<tr class="ev-ok"><td class="sub">${esc(x.at)}</td><td>${esc(x.what)}</td><td class="sub">${esc(x.action)}</td><td class="sub">${esc(x.by || "")} · ${esc(x.evidence || "")}</td></tr>`).join("")}</tbody></table>` : `<p class="sub">기록 없음</p>`;
+  const sea = { spring: "봄", summer: "여름", autumn: "가을", winter: "겨울" };
+  const appT = `<table class="ptbl ev"><thead><tr><th>구</th><th>시즌</th><th>테마 버전</th><th>승인</th></tr></thead><tbody>${CITIES.map(c => { const a = app[c.k] || {}; const ok = a.season && a.approved_by && a.approved_at;
+    return `<tr><td><b>${c.name}</b></td><td>${a.season ? (sea[a.season] || esc(a.season)) + (ok ? "" : ` <span style="color:var(--warn-c)">(승인 기록 없음 → 빌드 무시)</span>`) : "기본 디자인"}</td><td class="sub">${esc(a.theme_version || "—")}</td><td class="sub">${ok ? esc(a.approved_by + " · " + a.approved_at) : "—"}</td></tr>`; }).join("")}</tbody></table>`;
+  const apvT = apv.length ? `<table class="ptbl ev"><thead><tr><th>때</th><th>종류</th><th>지역</th><th>승인자</th><th>메모</th></tr></thead><tbody>${apv.map(x => `<tr><td class="sub">${esc(x.at)}</td><td>${esc(x.kind)}</td><td>${esc(x.city || "")} <span class="sub">${esc(x.dir || "")}</span></td><td>${esc(x.by)}</td><td class="sub">${esc(x.note || "")}${x.published != null ? ` · 공개 ${x.published}파일` : ""}</td></tr>`).join("")}</tbody></table>` : `<p class="sub">승인 기록 없음 — 새 도시 공개(publish-city)와 시즌 교체 승인이 여기 쌓입니다</p>`;
+  const det = (t, body, open) => `<details class="evd" ${open ? "open" : ""}><summary><b>${t}</b></summary><div class="tbl">${body}</div></details>`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>운영 기록</h3>${pill("운영 데이터", "var(--sage-bg)", "var(--sage-ink)")}<span class="sp"></span><span class="sub">현재 오류와 복구 완료는 따로 셉니다</span></div>
+    ${det(`현재 오류 ${failed.length}`, cur, failed.length > 0)}${det(`복구 완료 이력 ${rec.length}`, recT, false)}${det("시즌 디자인 적용 상태", appT, false)}${det(`대표 승인 기록 ${apv.length}`, apvT, false)}</div>`;
+}
 function regionPanel() {
   const head = (extra) => `<div class="hd"><h3>지역별 현황</h3>${extra}<span class="sp"></span><span class="sub">운영 = 고객 공개 중 · 임시 수집 = staging(비공개) · 비공개 후보 = 설정만 있음. 서울·경기 제외</span></div>`;
   if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)">${head(`<span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안 · 실제 값 없음</span>`)}<p class="sub">실제 운영 화면에서는 airang-cities 의 regions/*.json 과 각 지역의 검문 결과를 읽어 보여 줍니다.</p></div>`;
@@ -963,7 +984,7 @@ function renderPC() {
     <button class="btn soft" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻ 새로고침</button><button class="btn soft" onclick="lock()">잠그기</button></div>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}`;
   let body = "";
-  if (!DATA) body = opsPanel() + gatePanel() + regionPanel() + evidencePanel() + `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;   // 통계보다 운영 점검을 먼저
+  if (!DATA) body = opsPanel() + gatePanel() + regionPanel() + opsLogPanel() + evidencePanel() + `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;   // 통계보다 운영 점검을 먼저
   else if (pcTab === "dash") {
     const S = CITIES.map(c => [c, cityStats(c)]), sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
     const errC = CITIES.filter(c => (DATA.city[c.k] || {}).err);
@@ -973,7 +994,7 @@ function renderPC() {
     const new30 = CITIES.reduce((t, c) => t + days7(30).reduce((a, x) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-새로", x.y), 0), 0);
     const pct = (a, b) => b ? Math.round((a - b) / b * 100) : 0, d1 = pct(sum("today"), sum("yest"));
     const worst = CITIES.filter(c => cityHealth(c) !== "ok").map(c => c.name);
-    body = opsPanel() + errBox + gatePanel() + regionPanel() + evidencePanel() + `<div class="hd" style="margin:0 0 8px"><h3>방문 통계</h3></div><div class="pkpis">
+    body = opsPanel() + errBox + gatePanel() + regionPanel() + opsLogPanel() + evidencePanel() + `<div class="hd" style="margin:0 0 8px"><h3>방문 통계</h3></div><div class="pkpis">
       <div class="pcard"><div class="k">오늘 방문한 사람</div><div class="v">${fmt(sum("today"))}<small>명</small></div><div class="d ${d1 >= 0 ? "up" : "dn"}">어제(${fmt(sum("yest"))})보다 ${d1 >= 0 ? "+" : ""}${d1}%</div></div>
       <div class="pcard"><div class="k">최근 7일 방문</div><div class="v">${fmt(sum("w7"))}<small>명</small></div><div class="d light">하루 평균 ${fmt(Math.round(sum("w7") / 7))}명</div></div>
       <div class="pcard"><div class="k">처음 온 사람 · 30일</div><div class="v">${fmt(new30)}<small>명</small></div><div class="d light">새 기기 기준</div></div>
