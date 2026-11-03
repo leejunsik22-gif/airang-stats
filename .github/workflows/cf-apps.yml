@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4      # 앱 원본 1벌 (airang-cities/app) → 도시 7곳으로 만들어 올림
-        with: { repository: leejunsik22-gif/airang-cities, path: src-cities, sparse-checkout: "app\ndata" }   # data: 검색용 페이지 만들 때 씀
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src-cities, sparse-checkout: "app\ndata" }   # 2026-11-04: 앱 원본은 운영 가지 main 고정(기본 가지 daejeon-setup 아님 — 앱이 읽는 data도 main)   # data: 검색용 페이지 만들 때 씀
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: |
