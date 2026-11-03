@@ -901,7 +901,7 @@ const CITIES_REPO = "leejunsik22-gif/airang-cities", CITIES_RAW = `https://raw.g
 let REGIONS = null, regionsLoading = false;
 function loadRegions() { if (regionsLoading) return; regionsLoading = true;
   fetch(`https://api.github.com/repos/${CITIES_REPO}/contents/regions`).then(r => r.ok ? r.json() : Promise.reject("regions " + r.status))
-    .then(list => Promise.all(list.filter(f => /\.json$/.test(f.name)).map(f => fetch(CITIES_RAW + "regions/" + f.name, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null))))
+    .then(list => Promise.all(list.filter(f => /\.json$/.test(f.name) && !f.name.startsWith("_")).map(f => fetch(CITIES_RAW + "regions/" + f.name, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null))))
     .then(async rs => {
       const rows = [];
       for (const r of rs.filter(Boolean)) for (const [k, c] of Object.entries(r.cities || {})) rows.push({ k, sido: r.sido_key, full: (r.sido || {}).full || r.sido_key, name: c.area || k, dir: c.dir || "", stage: c.stage || r.stage || "후보", codes: r._verify ? `${Object.values(r._verify).filter(v => String(v).startsWith("확인")).length}/${Object.keys(r._verify).length} 확인` : (r.sido || {}).neis ? "운영 중" : "미확인" });
