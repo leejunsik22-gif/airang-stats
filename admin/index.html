@@ -896,6 +896,48 @@ function evidencePanel() {   // 검증 필요·공개 제외·보류 숫자의 �
       <div class="tbl"><table class="ptbl ev"><thead><tr><th>파일</th><th>상태</th><th>자동 검사</th><th>원문 확인</th><th>근거(사유)</th></tr></thead><tbody>${rows}</tbody></table></div></details>`; }).join("");
   return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>파일별 근거</h3><span class="sp"></span><span class="sub">위 숫자는 아래 파일 목록에서 그대로 셉니다 · 구 이름을 누르면 펼쳐요</span></div>${blocks}</div>`;
 }
+// ───── 지역별 현황 (2026-11-03 전국 확대 준비) — airang-cities regions/*.json(시·도별 설정)을 읽어 운영·임시 수집·비공개 후보를 한 표로 ─────
+const CITIES_REPO = "leejunsik22-gif/airang-cities", CITIES_RAW = `https://raw.githubusercontent.com/${CITIES_REPO}/main/`;
+let REGIONS = null, regionsLoading = false;
+function loadRegions() { if (regionsLoading) return; regionsLoading = true;
+  fetch(`https://api.github.com/repos/${CITIES_REPO}/contents/regions`).then(r => r.ok ? r.json() : Promise.reject("regions " + r.status))
+    .then(list => Promise.all(list.filter(f => /\.json$/.test(f.name)).map(f => fetch(CITIES_RAW + "regions/" + f.name, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null))))
+    .then(async rs => {
+      const rows = [];
+      for (const r of rs.filter(Boolean)) for (const [k, c] of Object.entries(r.cities || {})) rows.push({ k, sido: r.sido_key, full: (r.sido || {}).full || r.sido_key, name: c.area || k, dir: c.dir || "", stage: c.stage || r.stage || "후보", codes: r._verify ? `${Object.values(r._verify).filter(v => String(v).startsWith("확인")).length}/${Object.keys(r._verify).length} 확인` : (r.sido || {}).neis ? "운영 중" : "미확인" });
+      await Promise.all(rows.map(async x => {
+        if (!x.dir) return;
+        x.status = await fetch(CITIES_RAW + `data/${x.dir}/_status.json`, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
+        x.pre = await fetch(CITIES_RAW + `staging/${x.dir}/_precheck.json`, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
+      }));
+      REGIONS = rows; if (unlocked) render();
+    }).catch(e => { REGIONS = { err: String(e) }; if (unlocked) render(); });
+}
+function regionPanel() {
+  const head = (extra) => `<div class="hd"><h3>지역별 현황</h3>${extra}<span class="sp"></span><span class="sub">운영 = 고객 공개 중 · 임시 수집 = staging(비공개) · 비공개 후보 = 설정만 있음. 서울·경기 제외</span></div>`;
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)">${head(`<span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안 · 실제 값 없음</span>`)}<p class="sub">실제 운영 화면에서는 airang-cities 의 regions/*.json 과 각 지역의 검문 결과를 읽어 보여 줍니다.</p></div>`;
+  if (REGIONS === null) { loadRegions(); return `<div class="pcard note">지역 설정을 읽는 중…</div>`; }
+  if (REGIONS.err) return `<div class="pcard note">지역 설정을 못 읽었어요: ${esc(REGIONS.err)}</div>`;
+  const failedRuns = Array.isArray(RUNS) ? RUNS.filter(r => r.ok === "failure") : [];
+  const sidos = [...new Set(REGIONS.map(x => x.sido))];
+  const pct = (a, b) => b ? Math.round(a / b * 100) + "%" : "—";
+  const blocks = sidos.map(sd => {
+    const rows = REGIONS.filter(x => x.sido === sd).map(x => {
+      const st = x.status, fs = st ? Object.values(st.files || {}) : [];
+      const pub = fs.filter(f => f.published).length, hold = fs.filter(f => f.hold).length, fail = fs.filter(f => /실패|만료/.test(f.auto_check || "")).length;
+      const grade = fs.filter(f => ["확인 완료", "부분 확인"].includes(f.verify_status)), off = grade.filter(f => ["확인 완료", "부분 확인"].includes(f.official_verify)).length;
+      const errs = failedRuns.filter(r => (r.title || "").includes(x.name) || (r.title || "").includes(x.k)).length;
+      const stageCls = x.stage === "운영" ? "var(--ok-c)" : x.pre ? "var(--warn-c)" : "var(--muted)";
+      const stageTxt = x.stage === "운영" ? "운영" : x.pre ? esc(x.pre.stage || "임시 수집(비공개)") : "비공개 후보";
+      const collect = st ? `공개 ${pub} · 보류 ${hold}${fail ? ` · <span style="color:var(--warn-c)">검사 실패 ${fail}</span>` : ""}` : x.pre ? `임시 ${(x.pre.files || []).length}파일 · 지역 검사 ${Object.values(x.pre.region_check || {}).filter(v => v === "실패").length ? "<span style='color:var(--warn-c)'>실패 있음</span>" : "통과"}` : "수집 전";
+      const last = st ? esc(st.checked_at || "") : x.pre ? esc(x.pre.collected_at || "") : "—";
+      return `<tr><td><b>${esc(x.name)}</b><div class="sub">${esc(x.dir || x.k)}</div></td><td style="color:${stageCls};font-weight:700">${stageTxt}</td><td class="sub">${collect}</td><td>${st ? `${pct(off, grade.length)}<div class="sub">${off}/${grade.length} 파일</div>` : `<span class="sub">— (시·도 코드 ${esc(x.codes)})</span>`}</td><td>${st ? hold : "—"}</td><td class="sub">${last}</td><td style="color:${errs ? "var(--warn-c)" : "inherit"}">${errs || "0"}</td></tr>`; }).join("");
+    const n = REGIONS.filter(x => x.sido === sd), nOp = n.filter(x => x.stage === "운영").length;
+    return `<details class="evd" ${nOp ? "open" : ""}><summary><b>${esc(sd)}</b> <span class="sub">${n.length}곳 · 운영 ${nOp} · 임시 수집 ${n.filter(x => x.pre && x.stage !== "운영").length} · 후보 ${n.filter(x => !x.pre && x.stage !== "운영").length}</span></summary>
+      <div class="tbl"><table class="ptbl ev"><thead><tr><th>구·군</th><th>단계</th><th>수집 상태</th><th>공식 검증률</th><th>보류</th><th>마지막 갱신</th><th>운영 오류</th></tr></thead><tbody>${rows}</tbody></table></div></details>`; }).join("");
+  return `<div class="pcard" style="margin-bottom:14px">${head(`<span class="pill" style="background:var(--sage-bg);color:var(--sage-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">운영 데이터</span>`)}${blocks}
+    <p class="sub" style="margin:8px 0 0">공식 검증률 = 공개 등급 파일 중 기관 원문과 표본 대조(확인 완료·부분 확인)가 끝난 비율 · 운영 오류 = 최근 실패한 자동 작업 중 이 지역 이름이 든 것</p></div>`;
+}
 function gatePanel() {
   if (DEMO) {   // 가상 시안: 운영 숫자가 아님을 표시하고 예시 행만 보여 준다
     return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>공개 전 검문 현황</h3><span class="pill" style="background:var(--gold-bg);color:var(--gold-ink);font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">가상 시안 · 실제 값 없음</span><span class="sp"></span><span class="sub">실제 운영 화면에서는 각 구의 _status.json(검문 결과)을 읽어 보여 줍니다</span></div>
@@ -921,7 +963,7 @@ function renderPC() {
     <button class="btn soft" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻ 새로고침</button><button class="btn soft" onclick="lock()">잠그기</button></div>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}`;
   let body = "";
-  if (!DATA) body = opsPanel() + gatePanel() + evidencePanel() + `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;   // 통계보다 운영 점검을 먼저
+  if (!DATA) body = opsPanel() + gatePanel() + regionPanel() + evidencePanel() + `<div class="pcard note">도시 ${CITIES.length}곳 통계를 불러오고 있어요.</div>`;   // 통계보다 운영 점검을 먼저
   else if (pcTab === "dash") {
     const S = CITIES.map(c => [c, cityStats(c)]), sum = f => S.reduce((a, [, s]) => a + (s[f] || 0), 0);
     const errC = CITIES.filter(c => (DATA.city[c.k] || {}).err);
@@ -931,7 +973,7 @@ function renderPC() {
     const new30 = CITIES.reduce((t, c) => t + days7(30).reduce((a, x) => a + dayCount((DATA.city[c.k] || {}).hits || [], "방문-새로", x.y), 0), 0);
     const pct = (a, b) => b ? Math.round((a - b) / b * 100) : 0, d1 = pct(sum("today"), sum("yest"));
     const worst = CITIES.filter(c => cityHealth(c) !== "ok").map(c => c.name);
-    body = opsPanel() + errBox + gatePanel() + evidencePanel() + `<div class="hd" style="margin:0 0 8px"><h3>방문 통계</h3></div><div class="pkpis">
+    body = opsPanel() + errBox + gatePanel() + regionPanel() + evidencePanel() + `<div class="hd" style="margin:0 0 8px"><h3>방문 통계</h3></div><div class="pkpis">
       <div class="pcard"><div class="k">오늘 방문한 사람</div><div class="v">${fmt(sum("today"))}<small>명</small></div><div class="d ${d1 >= 0 ? "up" : "dn"}">어제(${fmt(sum("yest"))})보다 ${d1 >= 0 ? "+" : ""}${d1}%</div></div>
       <div class="pcard"><div class="k">최근 7일 방문</div><div class="v">${fmt(sum("w7"))}<small>명</small></div><div class="d light">하루 평균 ${fmt(Math.round(sum("w7") / 7))}명</div></div>
       <div class="pcard"><div class="k">처음 온 사람 · 30일</div><div class="v">${fmt(new30)}<small>명</small></div><div class="d light">새 기기 기준</div></div>
