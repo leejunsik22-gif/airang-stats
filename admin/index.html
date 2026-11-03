@@ -224,6 +224,95 @@ input[type=text],input[type=search],.search{min-height:44px;border-radius:var(--
 :root[data-theme="dark"]{--ground:#0E1220;--paper:#171C2E;--card:#171C2E;--ink:#EEF1FA;--navy-ink:#EEF1FA;--navy:#AEB6FF;--navy-soft:#232A55;--muted:#9AA3BC;--line:#262D45;--ivory-2:#1F2538;--shadow:none}
 .bi{display:inline-flex;align-items:center;justify-content:center;border-radius:28%;color:currentColor;flex:0 0 auto;vertical-align:middle}.bi svg{display:block}.pnav .bi{margin-right:6px}.bi-inl{display:inline-flex;vertical-align:-3px;margin-right:4px}
 .pc .pmain{min-width:0;overflow-x:hidden}.pkpis .pcard{min-width:0}.pkpis .d{overflow-wrap:anywhere;word-break:keep-all;line-height:1.5;max-height:3.2em;overflow:hidden}.ptbl{table-layout:fixed;width:100%}.ptbl td,.ptbl th{overflow-wrap:anywhere;word-break:keep-all;vertical-align:top}.ptbl .sub{max-height:3.2em;overflow:hidden}.evd{border-top:1px solid var(--line);padding:8px 0}.evd summary{cursor:pointer;padding:6px 0}.board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px}.board .bcard{background:var(--ivory-2,var(--card));border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}.board .bcard summary{list-style:none;cursor:pointer}.board .bcard summary::-webkit-details-marker{display:none}.board .bl{margin-top:6px;font-size:12.5px;color:var(--muted);line-height:1.55;overflow-wrap:anywhere;word-break:keep-all}.board .bl ul{margin:0;padding-left:16px}@media (max-width:760px){.board{grid-template-columns:1fr 1fr}}@media (max-width:420px){.board{grid-template-columns:1fr}}.ptbl.ev code{font-size:12px;background:var(--ivory-2);padding:1px 5px;border-radius:6px}.ev-warn td:nth-child(2){color:var(--warn-c);font-weight:800}.ev-hold td:nth-child(2){color:var(--gold-ink);font-weight:700}.ev-ex td:nth-child(2){color:var(--muted)}.ev-ok td:nth-child(2){color:var(--ok-c)}
+/* ═══════════════════════════════════════════════════════════════
+   아이랑 브랜드 디자인 시스템 v2후보 (2026-11-03, 026 프리미엄 통합) — v1 뒤에 붙는다
+   A 기본 디자인: 딥네이비·고급 아이보리·샴페인 골드 포인트·세이지/절제된 코랄 (012 토큰 유지)
+   B 글씨체: Noto Sans KR 유지(지정 서체 없음) — 제목 800·자간 -0.5px / 본문 15px·줄 1.6 / 보조 12.5~13px
+   C 전체 구성: 007 홈5(고요한 검색)+홈3(우리 아이 맞춤), 상세1(사진 히어로·출처·확인일), 준비 중 틀, 저장(즐겨찾기), 마이
+   규칙: 카드 곡률 20 · 버튼 14 · 칩 12 · 터치 44px · 아이콘 선 1.75 단색 · 골드는 '확인됨·저장·강조'에만
+   ═══════════════════════════════════════════════════════════════ */
+:root{--gold-soft:#EFE3C6;--navy-2:#2B3A5C;--fs-h1:26px;--fs-h2:18px;--fs-body:15px;--fs-sub:12.5px;--shadow-lg:0 2px 4px rgba(31,42,68,.05),0 18px 40px -20px rgba(31,42,68,.35)}
+body{font-size:var(--fs-body);line-height:1.6}
+h1{font-size:var(--fs-h1)!important;font-weight:800;letter-spacing:-.5px;line-height:1.25}
+h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:-.3px}
+.sub,.foot,.note,.ad,.d{font-size:var(--fs-sub)}
+.eyebrow{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.4px;color:var(--gold-ink);background:var(--gold-bg);padding:3px 9px;border-radius:8px}
+.card-pad{padding:16px 18px}
+/* 공통 상단 바(v2): 로고·구 이름·다른 구 */
+.topbar-v2{display:flex;align-items:center;gap:10px;margin:2px 0 14px}
+.topbar-v2 .brand{font-size:19px;font-weight:800;letter-spacing:-.4px;white-space:nowrap}
+.topbar-v2 .by{font-size:11px;color:var(--muted)}
+/* 검색 카드(홈5): 크고 조용하게 */
+.search-v2{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border:1px solid var(--line);background:var(--paper);border-radius:var(--r-card);box-shadow:var(--shadow-lg)}
+.search-v2 input{flex:1;min-width:0;border:0;background:transparent;font-size:16px;min-height:48px;outline:none;color:var(--ink)}
+.search-v2 input::placeholder{color:#6B7285}
+.q-chips{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 2px;scrollbar-width:none}
+.q-chips::-webkit-scrollbar{display:none}
+.q-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:var(--r-chip);background:var(--ivory-2);color:var(--navy);border:1px solid transparent;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.q-chip:active{background:var(--navy-soft)}
+/* 섹션 머리 */
+.sec-head{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+.sec-head .more{margin-left:auto;font-size:13px;font-weight:700;color:var(--navy);background:none;border:0;min-height:44px;padding:0 6px;cursor:pointer}
+/* 준비 중 틀 */
+.soon-frame{border:1px dashed var(--gold);background:linear-gradient(180deg,#FFFDF8,var(--paper));border-radius:var(--r-card);padding:22px 20px;text-align:center}
+.soon-frame .ic{margin:0 auto 10px}
+.soon-frame h2{margin:0 0 6px}
+.soon-frame p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+.soon-frame .src{margin-top:12px;font-size:12.5px;color:var(--muted)}
+.soon-frame .actions{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+/* 저장(즐겨찾기) */
+.fav-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;flex:0 0 auto;font:inherit}
+.fav-btn.on{background:var(--gold-bg);border-color:var(--gold-soft);color:var(--gold-ink)}
+.fav-row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.fav-row:last-child{border-bottom:0}
+.fav-row .t{flex:1;min-width:0}
+.fav-row .t b{display:block;font-size:15px}
+.fav-row .t span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 출처·확인일 줄 */
+.src-line{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:10px}
+.src-line .dot{width:8px;height:8px;border-radius:50%;background:var(--sage);margin-top:6px;flex:0 0 auto}
+/* 상세 시트(상세1) */
+.sheet-bg{position:fixed;inset:0;background:rgba(22,32,58,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--paper);border-radius:24px 24px 0 0;padding:14px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:var(--shadow-lg)}
+.sheet .grip{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h2{font-size:20px;margin:4px 0 2px}
+.sheet .kv{display:grid;grid-template-columns:84px 1fr;gap:6px 10px;font-size:14px;margin:12px 0}
+.sheet .kv b{color:var(--muted);font-weight:700}
+.sheet .hours{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sheet .hours div{background:var(--ivory-2);border-radius:10px;padding:8px 6px;text-align:center;font-size:12.5px}
+.sheet .hours div b{display:block;font-size:12px;color:var(--muted)}
+.sheet .hours div.today{background:var(--navy-soft);color:var(--navy)}
+.sheet .acts{display:flex;gap:8px;margin-top:14px}
+.sheet .acts .btn{flex:1;min-height:48px;text-decoration:none;justify-content:center}
+/* 하단 탭 v2 */
+.nav{background:rgba(255,255,255,.96)!important;border:1px solid var(--line)!important;border-radius:24px!important;height:72px!important;box-shadow:var(--shadow-lg)!important;backdrop-filter:blur(12px)}
+.navi{height:70px!important;font-size:11.5px!important;color:var(--muted)!important}
+.navi .ic{width:40px;height:30px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:none}
+.navi.on{color:var(--navy-ink)!important}
+.navi.on .ic{background:var(--navy-soft)!important;box-shadow:none!important;transform:none!important}
+/* 입구·구 카드 */
+.gu-card{border:1px solid var(--line);background:var(--paper);border-radius:var(--r-card);overflow:hidden}
+/* 접근성: 초점 */
+:focus-visible{outline:3px solid rgba(184,146,62,.6);outline-offset:2px}
+/* 관리자 공통(같은 벌) */
+.pnav.on{position:relative}
+.pnav.on::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--gold)}
+.psep{font-size:11px;letter-spacing:.4px;color:#9AA3B8;margin:14px 10px 4px;text-transform:uppercase}
+.ptbl th{font-size:12px;color:var(--muted);font-weight:700}
+.pcard .k{font-size:12.5px;color:var(--muted)}
+@media (max-width:430px){h1{font-size:24px!important}.sheet .hours{grid-template-columns:repeat(4,1fr)}}
+/* 026 관리자 터치 영역 44px·표 링크 */
+.pnav{min-height:44px}.mnav button{min-height:44px}.btn.sm{min-width:44px;min-height:44px}.btn{min-height:44px}
+details.evd>summary{min-height:44px;display:flex;align-items:center;gap:8px}
+a.lnk,.ptbl a{display:inline-flex;align-items:center;min-height:44px}
+.ptbl td.more{min-height:44px}
+textarea{min-height:44px}
+a.lnk{min-width:44px;justify-content:center}.feedrow{min-height:44px}input[type=date],input[type=text],.psearch{min-height:44px}td a,.ptbl a{min-width:44px;justify-content:center}
+.rt,button.rt,.seg button{min-height:44px}td a[target]{min-width:44px;min-height:44px}
+.rt{min-width:44px}
+/* 026 표: 긴 글은 줄바꿈(겹침 방지), 휴대폰은 표를 자연 폭으로 두고 가로 스크롤 */
+.ptbl.ev td,.ptbl.ev th{white-space:normal;overflow-wrap:anywhere;word-break:keep-all;text-align:left;vertical-align:top}
+.m .ptbl.ev{table-layout:auto;min-width:560px}.m .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
@@ -276,6 +365,7 @@ const BI = {
   rocket: '<path d="M14 4c3 0 6 3 6 6l-6 6-4-4z"/><path d="M8 12l-4 1 2-5 3 1M12 16l-1 4 5-2-1-3"/><circle cx="15" cy="9" r="1.25"/>',
   key: '<circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l2 2M19 3l2 2"/>',
   lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7"/>',
   city: '<path d="M3 20V9h6v11M9 20V4h6v16M15 20v-8h6v8"/><path d="M5 12h2M5 15h2M11 8h2M11 11h2M11 14h2M17 15h2"/>',
   alert: '<path d="M12 4 3 19h18z"/><path d="M12 10v4M12 16.5v.5"/>',
   moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
@@ -543,7 +633,7 @@ function viewHome() {
     <p class="legend" style="margin:6px 0 0">막대 위 숫자는 그날 전체 방문 횟수, 아래 숫자는 그날 방문한 사람 수예요.</p></div>
   <h2>도시별</h2>
   <div class="grid cities">${S.map(([c, s]) => { const hl = cityHealth(c); return `<div class="card">
-    <div class="city-head"><span class="dot ${hl === "ok" ? "" : hl}" title="수집 상태"></span><h3>${c.name}</h3><div class="sp"></div><a href="${c.site}" target="_blank" rel="noopener" class="sub">앱 ↗</a></div>
+    <div class="city-head"><span class="dot ${hl === "ok" ? "" : hl}" title="수집 상태"></span><h3>${c.name}</h3><div class="sp"></div><a href="${c.site}" target="_blank" rel="noopener" class="sub" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px">앱 ↗</a></div>
     ${!DATA.city[c.k] ? `<div class="note" style="padding:30px 0;text-align:center">불러오는 중…</div>` : s.err ? `<div class="pill p-bad">${esc(s.err)}</div>` : `
     <div class="mini"><div><span class="k">오늘 사람</span><b>${fmt(s.today)}</b></div><div><span class="k">30분 방문</span><b>${fmt(s.opT)}</b></div><div><span class="k">새로 · 다시</span><b>${fmt(s.newT)}·${fmt(s.retT)}</b></div></div>
     ${bars(s.week)}`}</div>`; }).join("")}</div>
@@ -835,8 +925,11 @@ function pcConn() {
     ${row("Cloudflare (앱 배포)", !RUNS || RUNS.err ? ["y", "확인 중"] : cf ? [cf.ok === "success" ? "g" : "r", (cf.ok === "success" ? "" : "실패 · ") + ago2(cf.at)] : ["y", "기록 없음"])}
     ${row("관제 (10분마다)", kw)}</div>`;
 }
-const PC_NAV = [["dash", ico("chart", 16, "none"), "대시보드"], ["cities", ico("city", 16, "none"), "도시"], ["apps", ico("grid", 16, "none"), "앱 보기"], ["traffic", ico("users", 16, "none"), "방문 통계"], ["data", ico("refresh", 16, "none"), "수집 상태"], ["ads", ico("megaphone", 16, "none"), "광고"],
-  ["sep", "", "운영"], ["newcity", ico("plus", 16, "none"), "새 도시 열기"], ["deploy", ico("rocket", 16, "none"), "배포·수집 기록"], ["settings", ico("key", 16, "none"), "바로가기·관제"]];
+// 026(2026-11-03): 관리자 9구역 — 대시보드 / 구별 운영 현황 / 자료 수집 현황 / 원문 검증·공개 승인 / 공개 보류·제외 / 수집 오류·변경 감지 / 복구·변경 이력 / 권한·보안 / 방문 통계·보고서 (+ 더보기)
+const PC_NAV = [["dash", ico("chart", 16, "none"), "전체 운영 대시보드"], ["cities", ico("city", 16, "none"), "구별 운영 현황"], ["data", ico("refresh", 16, "none"), "공식 자료 수집 현황"], ["verify", ico("check", 16, "none"), "원문 검증·공개 승인"], ["hold", ico("alert", 16, "none"), "공개 보류·제외"],
+  ["ops", ico("rocket", 16, "none"), "수집 오류·변경 감지"], ["history", ico("clock", 16, "none"), "복구·변경 이력"], ["security", ico("lock", 16, "none"), "관리자 권한·보안"], ["traffic", ico("users", 16, "none"), "방문 통계·운영 보고서"],
+  ["sep", "", "더보기"], ["apps", ico("grid", 16, "none"), "앱 보기"], ["ads", ico("megaphone", 16, "none"), "광고"], ["newcity", ico("plus", 16, "none"), "새 도시 열기"], ["deploy", ico("key", 16, "none"), "배포·수집 기록"], ["settings", ico("key", 16, "none"), "바로가기·관제"]];
+const M_SHORT = { "전체 운영 대시보드": "대시보드", "구별 운영 현황": "구별", "공식 자료 수집 현황": "수집", "원문 검증·공개 승인": "검증·승인", "공개 보류·제외": "보류·제외", "수집 오류·변경 감지": "오류·변경", "복구·변경 이력": "이력", "관리자 권한·보안": "보안", "방문 통계·운영 보고서": "통계·보고서", "배포·수집 기록": "기록", "바로가기·관제": "바로가기", "새 도시 열기": "새 도시" };
 function pcList(limit) {   // 휴대폰: 도시 카드 줄 (누르면 앱 보기로)
   const rows = pcRows();
   return rows.slice(0, limit).map(([c, s]) => { const hl = cityHealth(c);
@@ -866,6 +959,113 @@ let GATES = null, gatesLoading = false;
 function loadGates() { if (gatesLoading) return; gatesLoading = true;
   Promise.all(CITIES.map(c => fetch(c.raw + "_status.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(j => [c.k, j])))
     .then(rs => { GATES = Object.fromEntries(rs); if (unlocked) render(); }); }
+// ───── 026 관리자 9구역 패널(실제 운영 데이터만, 가상 숫자 없음) ─────
+let RV = null, rvLoading = false, CHG = null, chgLoading = false, INC = null, incLoading = false, APV = null;
+async function fetchRaw(path) {   // 앱이 읽는 main 먼저, 없으면 저장소 기본 가지(자동 작업이 쌓는 곳)
+  const get = b => fetch(`https://raw.githubusercontent.com/${CITIES_REPO}/${b}/${path}`, { cache: "no-cache" }).then(r => r.ok ? r.json().then(j => [b, j]) : null).catch(() => null);
+  let got = await get("main"); if (got) return got;
+  if (!fetchRaw.def) { fetchRaw.def = await fetch(`https://api.github.com/repos/${CITIES_REPO}`).then(r => r.ok ? r.json() : {}).then(j => j.default_branch || "").catch(() => ""); }
+  if (fetchRaw.def && fetchRaw.def !== "main") got = await get(fetchRaw.def);
+  return got;
+}
+function loadReverify() { if (rvLoading) return; rvLoading = true;
+  Promise.all([...CITIES.map(c => fetchRaw(`review/${c.k}/_reverify.json`).then(g => [c.k, g ? g[1] : null])), fetchRaw("approvals/reverify.json").then(g => g ? g[1] : null)])
+    .then(rs => { APV = rs.pop(); RV = Object.fromEntries(rs); if (unlocked) render(); }); }
+function loadChanges() { if (chgLoading) return; chgLoading = true;
+  Promise.all(CITIES.map(c => fetchRaw(`ops/changes/${c.k}.json`).then(g => [c.k, g ? g[1] : null]))).then(rs => { CHG = Object.fromEntries(rs); if (unlocked) render(); }); }
+function loadIncLog() { if (incLoading) return; incLoading = true; fetchRaw("ops/incidents_log.json").then(g => { INC = g ? g[1] : { items: [] }; if (unlocked) render(); }); }
+const PILL = (t, bg, ink) => `<span class="pill" style="background:${bg};color:${ink};font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;margin-left:8px">${t}</span>`;
+const LIVE = PILL("운영 데이터", "var(--sage-bg)", "var(--sage-ink)"), DEMOP = PILL("가상 시안 · 실제 값 없음", "var(--gold-bg)", "var(--gold-ink)");
+const nameOf = k => (CITIES.find(c => c.k === k) || {}).name || k;
+function verifyPanel() {   // 원문 검증·공개 승인: 재검증 대기(의미 변경) + 원문 미확인 보류 + 승인 절차·기록
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>원문 검증·공개 승인</h3>${DEMOP}</div><p class="sub">실제 화면: review/&lt;구&gt;/_reverify.json 대기 목록 · 원문 미확인 보류 파일 · 승인 기록</p></div>`;
+  if (RV === null) { loadReverify(); loadGates(); return `<div class="pcard note">재검증 대기 목록을 읽는 중…</div>`; }
+  const pend = CITIES.flatMap(c => (((RV[c.k] || {}).pending) || []).map(x => ({ c: c.name, ...x })));
+  const holds = CITIES.flatMap(c => Object.entries((((GATES || {})[c.k] || {}).files) || {}).filter(([, v]) => v.hold).map(([f, v]) => ({ c: c.name, f, ...v })));
+  const fileHold = CITIES.flatMap(c => Object.entries(((RV[c.k] || {}).file_hold) || {}).map(([f, why]) => ({ c: c.name, f, why })));
+  const apv = ((APV || {}).items || []);
+  const rows = pend.map(x => `<tr class="${/비공개/.test(x.status || "") ? "ev-warn" : "ev-hold"}"><td><b>${esc(x.c)}</b><div class="sub"><code>${esc(x.file)}</code></div></td><td>${esc(x.name || x.key)}<div class="sub">${esc(x.kind)} · ${esc((x.fields || []).join(", ") || "—")}</div></td><td class="sub" title="${esc(JSON.stringify(x.before || {}))} → ${esc(JSON.stringify(x.after || {}))}">${esc(short(JSON.stringify(x.before || "—"), 60))}<br>→ ${esc(short(JSON.stringify(x.after || "—"), 60))}</td><td class="sub">${esc(x.first_seen || "")}<br>기한 ${esc(x.due || "—")}</td><td class="sub">${esc(x.status || "")}</td></tr>`).join("");
+  const holdRows = holds.map(x => `<tr class="ev-hold"><td><b>${esc(x.c)}</b></td><td>${esc(x.label)} <span class="sub"><code>${esc(x.f)}</code></span></td><td>${esc(x.official_verify || "미확인")}</td><td class="sub">${esc(x.source_org || "")}</td><td class="sub">${esc(short(x.reason, 100))}</td></tr>`).join("");
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>원문 검증·공개 승인</h3>${LIVE}<span class="sp"></span><span class="sub">자동 수집 성공(auto_check)과 기관 원문 검증(official_verify)은 별개 — 여기는 사람이 확인할 것만</span></div>
+    <div class="board"><div class="bcard"><div class="k">재검증 대기(의미 변경·삭제)</div><div class="v" style="color:${pend.length ? "var(--warn-c)" : "var(--ok-c)"}">${pend.length}</div><div class="bl">병원 진료시간·과목, 혜택 조건 등이 바뀐 기록 — 확인 전 그 칸은 비공개</div></div>
+      <div class="bcard"><div class="k">파일째 보류</div><div class="v" style="color:${fileHold.length ? "var(--warn-c)" : "var(--ok-c)"}">${fileHold.length}</div><div class="bl">${fileHold.map(x => esc(x.c + " " + x.f)).join(", ") || "없음"}</div></div>
+      <div class="bcard"><div class="k">원문 미확인 보류(파일)</div><div class="v" style="color:${holds.length ? "var(--gold-ink)" : "var(--ok-c)"}">${holds.length}</div><div class="bl">표본 대조 뒤 data_rules.json official_verify 갱신</div></div>
+      <div class="bcard"><div class="k">승인 기록</div><div class="v">${apv.length}</div><div class="bl">approvals/reverify.json</div></div></div>
+    <details class="evd" ${pend.length ? "open" : ""}><summary><b>재검증 대기 ${pend.length}</b> <span class="sub">변경 전 → 후 · 감지일 · 기한</span></summary><div class="tbl">${pend.length ? `<table class="ptbl ev"><thead><tr><th>구·파일</th><th>기록</th><th>전 → 후</th><th>감지·기한</th><th>지금 상태</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="sub">대기 없음</p>`}</div></details>
+    <details class="evd" ${holds.length ? "open" : ""}><summary><b>원문 미확인 보류 ${holds.length}</b> <span class="sub">공개 등급이지만 기관 원문 표본 대조가 안 끝난 파일</span></summary><div class="tbl">${holds.length ? `<table class="ptbl ev"><thead><tr><th>구</th><th>자료</th><th>원문 확인</th><th>출처</th><th>사유</th></tr></thead><tbody>${holdRows}</tbody></table>` : `<p class="sub">없음</p>`}</div></details>
+    <details class="evd"><summary><b>승인하는 방법</b></summary><div class="bl" style="line-height:1.7">① 위 항목을 원문(심평원·E-Gen·복지로·나이스)과 대조 → ② <a class="lnk" href="https://github.com/${CITIES_REPO}/blob/${fetchRaw.def || "main"}/approvals/reverify.json" target="_blank" rel="noopener">approvals/reverify.json ↗</a> 의 items 에 <code>{city, file, key, result: "승인"|"기각", approved_at, by, note}</code> 추가 → ③ 다음 수집(매일 05:30 / 병원 월요일)에서 반영되고 '복구·변경 이력'에 결과가 남아요. 파일 단위 공개 전환(급식·특목·날씨)은 <code>tools/data_rules.json</code> 의 official_verify 를 갱신. 이 화면은 읽기 전용이에요(쓰기는 GitHub 계정 권한).</div></details>
+    ${apv.length ? `<details class="evd"><summary><b>승인 기록 ${apv.length}</b></summary><div class="tbl"><table class="ptbl ev"><thead><tr><th>때</th><th>구·파일</th><th>기록</th><th>결과</th><th>누가·메모</th></tr></thead><tbody>${apv.slice().reverse().map(a => `<tr><td class="sub">${esc(a.approved_at || "")}</td><td>${esc(nameOf(a.city))} <span class="sub">${esc(a.file || "")}</span></td><td class="sub">${esc(a.key || "")}</td><td>${esc(a.result || "승인")}</td><td class="sub">${esc(a.by || "")} · ${esc(a.note || "")}</td></tr>`).join("")}</tbody></table></div></details>` : ""}</div>`;
+}
+function holdPanel() {   // 공개 보류·제외 관리: 검문(_status.json)의 보류·제외·실패를 구별로
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>공개 보류·제외</h3>${DEMOP}</div></div>`;
+  if (GATES === null) { loadGates(); return `<div class="pcard note">검문 결과를 읽는 중…</div>`; }
+  const all = CITIES.flatMap(c => Object.entries((((GATES || {})[c.k] || {}).files) || {}).map(([f, v]) => ({ c: c.name, f, ...v })));
+  const hold = all.filter(x => x.hold), ex = all.filter(x => !x.published && !x.hold && !/실패|만료/.test(x.auto_check || "")), fail = all.filter(x => /실패|만료|과다/.test(x.auto_check || "")), pub = all.filter(x => x.published);
+  const byLabel = xs => Object.entries(xs.reduce((m, x) => { (m[x.label || x.f] = m[x.label || x.f] || []).push(x); return m; }, {}));
+  const grp = (title, xs, cls, note) => `<details class="evd" open><summary><b>${title} ${xs.length}</b> <span class="sub">${note}</span></summary><div class="tbl">${xs.length ? `<table class="ptbl ev"><thead><tr><th>자료</th><th>구</th><th>자동 검사</th><th>원문 확인</th><th>사유</th></tr></thead><tbody>${byLabel(xs).map(([l, items]) => `<tr class="${cls}"><td><b>${esc(l)}</b><div class="sub"><code>${esc(items[0].f)}</code></div></td><td class="sub">${items.map(x => esc(x.c)).join(", ")}</td><td class="sub">${esc(items[0].auto_check || "—")}</td><td class="sub">${esc(items[0].official_verify || "—")}</td><td class="sub">${esc(short(items[0].reason, 120))}</td></tr>`).join("")}</tbody></table>` : `<p class="sub">없음</p>`}</div></details>`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>공개 보류·제외 관리</h3>${LIVE}<span class="sp"></span><span class="sub">공개 ${pub.length} · 보류 ${hold.length} · 제외 ${ex.length} · 검사 실패 ${fail.length} (파일 수, 5구 합)</span></div>
+    ${grp("검사 실패·만료·과다 변경", fail, "ev-warn", "직전 공개본 유지 중 — 원인 확인 필요")}${grp("공개 보류(원문 미확인)", hold, "ev-hold", "자동 검사는 통과, 기관 원문 표본 대조 전")}${grp("공개 제외", ex, "ev-ex", "키 미승인·미검증·비공식 — 규칙(tools/data_rules.json)으로 막음")}
+    <p class="sub" style="margin:8px 0 0">정책: 서울·경기는 어떤 단계에서도 공개하지 않음(tools/safety_policy.json). 보류·제외를 바꾸려면 data_rules.json 의 verify_status / official_verify 를 고치고 대표 승인 뒤 반영.</p></div>`;
+}
+function opsDetectPanel() {   // 자동 수집 오류 및 변경 감지
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>수집 오류·변경 감지</h3>${DEMOP}</div></div>`;
+  if (CHG === null) loadChanges(); if (MON === null) loadMonitor();
+  const failed = Array.isArray(RUNS) ? RUNS.filter(r => r.ok === "failure" || r.ok === "timed_out") : [];
+  const inc = (MON && MON.incidents) ? MON.incidents.filter(i => i.state !== "공개 보류") : [];
+  const runsT = failed.length ? `<table class="ptbl ev"><thead><tr><th>작업</th><th>내용</th><th>때</th></tr></thead><tbody>${failed.slice(0, 12).map(r => `<tr class="ev-warn"><td>${esc(RUN_KO[runName(r.name)] || r.name)}</td><td class="sub">${esc(r.title || "")}</td><td class="sub"><a class="lnk" href="${r.url}" target="_blank" rel="noopener">${ago2(r.at)}</a></td></tr>`).join("")}</tbody></table>` : `<p class="sub">${Array.isArray(RUNS) ? "실패한 자동 작업 없음(최근 기록 기준)" : "작업 기록을 읽는 중…"}</p>`;
+  const incT = inc.length ? `<table class="ptbl ev"><thead><tr><th>상태</th><th>내용</th><th>언제부터</th></tr></thead><tbody>${inc.map(i => `<tr class="${i.state === "장애" ? "ev-warn" : "ev-hold"}"><td>${esc(i.state)} <span class="sub">${esc(i.severity)}</span></td><td>${esc(i.title)}<div class="sub">${esc(short(i.detail, 120))}</div></td><td class="sub">${esc(i.since || "")}</td></tr>`).join("")}</tbody></table>` : `<p class="sub">${MON && MON.none ? "감시 미적용(work 승인 전)" : MON ? "감시 집계상 장애·검증 필요 없음" : "감시 집계를 읽는 중…"}</p>`;
+  const chg = CHG ? CITIES.flatMap(c => (((CHG[c.k] || {}).runs) || []).slice(0, 3).map(r => ({ c: c.name, ...r }))) : [];
+  const chgT = CHG === null ? `<p class="sub">변경 기록을 읽는 중…</p>` : chg.length ? `<table class="ptbl ev"><thead><tr><th>확인일</th><th>구·자료</th><th>결과</th><th>추가·단순·의미·삭제</th><th>미해결</th></tr></thead><tbody>${chg.sort((a, b) => (b.checked_at || "").localeCompare(a.checked_at || "")).slice(0, 20).map(r => { const n = r.counts || {}; return `<tr class="${n.held ? "ev-hold" : "ev-ok"}"><td class="sub">${esc(r.checked_at)}</td><td><b>${esc(r.c)}</b> <span class="sub">${esc(r.label || r.file)}</span></td><td>${esc(r.guard)}</td><td class="sub">${n.added || 0} · ${n.simple || 0} · ${n.meaning || 0} · ${n.removed || 0}</td><td style="color:${n.held ? "var(--warn-c)" : "inherit"}">${n.held || 0}</td></tr>`; }).join("")}</tbody></table>` : `<p class="sub">변경 감지 기록 없음(ops/changes/ — 검문 v06 반영 뒤 쌓여요)</p>`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>자동 수집 오류</h3>${LIVE}<span class="sp"></span><span class="sub">GitHub Actions 실패 + 매시간 감시(ops/monitor.json)</span></div><details class="evd" open><summary><b>실패한 자동 작업 ${failed.length}</b></summary><div class="tbl">${runsT}</div></details><details class="evd" open><summary><b>감시 집계 — 장애·검증 필요 ${inc.length}</b></summary><div class="tbl">${incT}</div></details></div>
+    <div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>변경 감지(공식 자료가 바뀐 기록)</h3>${LIVE}<span class="sp"></span><span class="sub">직전 공개본과 기록 단위 비교 · 의미 변경·삭제는 재검증 전 비공개</span></div><div class="tbl">${chgT}</div></div>`;
+}
+function historyPanel() {   // 복구 및 변경 이력
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>복구·변경 이력</h3>${DEMOP}</div></div>`;
+  if (INC === null) loadIncLog(); if (OPS === null) loadOps(); if (CHG === null) loadChanges();
+  const auto = ((INC || {}).items || []), rec = (((OPS || {}).rec || {}).items || []).slice().reverse();
+  const res = CHG ? CITIES.flatMap(c => (((CHG[c.k] || {}).runs) || []).flatMap(r => (r.items || []).filter(i => i.verify_result).map(i => ({ c: c.name, at: r.checked_at, ...i })))) : [];
+  const T = (rows, head) => rows.length ? `<table class="ptbl ev"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>` : `<p class="sub">기록 없음</p>`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>복구·변경 이력</h3>${LIVE}<span class="sp"></span><span class="sub">자동 복구 기록(감시) / 사람이 적은 복구 / 변경 검증 결과</span></div>
+    <details class="evd" open><summary><b>복구 완료(자동 기록) ${auto.length}</b> <span class="sub">직전 집계의 장애·검증 필요가 사라진 시각</span></summary><div class="tbl">${INC === null ? `<p class="sub">읽는 중…</p>` : T(auto.slice(0, 30).map(x => `<tr class="ev-ok"><td class="sub">${esc(x.since || "")} → ${esc(x.resolved_at || "")}</td><td>${esc(x.title || "")}</td><td class="sub">${esc(x.state || "")} · ${esc(x.how || "")}</td></tr>`), ["기간", "내용", "구분"])}</div></details>
+    <details class="evd" open><summary><b>복구 완료(사람 기록) ${rec.length}</b></summary><div class="tbl">${T(rec.map(x => `<tr class="ev-ok"><td class="sub">${esc(x.at)}</td><td>${esc(x.what)}</td><td class="sub">${esc(x.action)}</td><td class="sub">${esc(x.by || "")} · ${esc(x.evidence || "")}</td></tr>`), ["때", "오류", "조치", "누가·근거"])}</div></details>
+    <details class="evd" open><summary><b>변경 검증 결과 ${res.length}</b> <span class="sub">승인 반영·기각·원복·복귀·보류 만료·삭제 확정</span></summary><div class="tbl">${CHG === null ? `<p class="sub">읽는 중…</p>` : T(res.sort((a, b) => (b.at || "").localeCompare(a.at || "")).slice(0, 40).map(i => `<tr class="${/기각|만료/.test(i.verify_result) ? "ev-hold" : "ev-ok"}"><td class="sub">${esc(i.at || "")}</td><td><b>${esc(i.c)}</b> <span class="sub">${esc(i.file || "")}</span></td><td>${esc(i.name || i.key || "")} <span class="sub">${esc((i.fields || []).join(", "))}</span></td><td>${esc(i.verify_result)}</td><td class="sub">${esc(i.approved_by || "")} ${esc(i.approved_at || "")}</td></tr>`), ["확인일", "구·자료", "기록", "결과", "승인"])}</div></details></div>`;
+}
+function securityPanel() {   // 관리자 권한·보안 — 이 화면이 실제로 하는 것만
+  const hasVault = !!ls.get(VAULT), sess = !!SESS && unlocked;
+  const row = (k, v, ok) => `<tr class="${ok === true ? "ev-ok" : ok === false ? "ev-warn" : ""}"><td><b>${k}</b></td><td>${v}</td></tr>`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>관리자 권한·보안</h3>${LIVE}<span class="sp"></span><span class="sub">이 관리자 페이지는 읽기 전용 — 자료·설정 변경은 GitHub 계정 권한으로만</span></div>
+    <div class="tbl"><table class="ptbl ev"><tbody>
+      ${row("관리자 등록", hasVault ? "이 기기에 등록됨 (GoatCounter 키를 비밀번호로 잠근 금고)" : "등록 안 됨", hasVault)}
+      ${row("지금 세션", sess ? "열림 · 10분 안 쓰면 자동 잠금" : "잠김", sess)}
+      ${row("비밀번호 규칙", "숫자 6자리 이상 또는 아무 글자 8자 이상 · 5번 틀리면 30초 대기", true)}
+      ${row("키 보관 방식", "PBKDF2(SHA-256) → AES-GCM 으로 암호화해 이 브라우저 안(localStorage)에만 보관 · 서버 없음 · 화면을 떠나면 메모리 키 삭제", true)}
+      ${row("할 수 있는 것", "방문 통계 읽기 · 검문·감시·변경 결과 읽기 · 앱 미리보기", true)}
+      ${row("할 수 없는 것(의도)", "자료 공개·승인·설정 변경 — GitHub(leejunsik22-gif) 계정으로만 · 새 도시 공개는 publish-city '승인' 입력", true)}
+      ${row("페이지 보호 헤더", "noindex · no-referrer · frame-ancestors 제한 (admin/_headers)", true)}
+      ${row("검토 필요", "frame-ancestors 에 songgollab.co.kr(이전 친구 도메인)이 남아 있음 — 대표 승인 뒤 제거 권장", false)}
+    </tbody></table></div>
+    <div class="row2" style="margin-top:12px"><button class="btn soft" onclick="lock()">지금 잠그기</button><button class="btn soft" onclick="if(confirm('이 기기의 관리자 키를 지우고 다시 등록할까요?'))forget()">키 지우고 다시 등록(비밀번호 변경)</button><a class="btn soft" href="https://github.com/settings/security" target="_blank" rel="noopener">GitHub 2단계 인증 확인 ↗</a></div>
+    <p class="sub" style="margin:10px 0 0">접속 기록·권한 등급은 서버가 없어 제공하지 않아요(실제 없는 기능은 표시하지 않음).</p></div>`;
+}
+function reportPanel() {   // 운영 보고서(주간 요약) — 실제 값만, 없으면 '—'
+  if (DEMO) return `<div class="pcard" style="margin-bottom:14px;border:1px dashed var(--line)"><div class="hd"><h3>운영 보고서</h3>${DEMOP}</div></div>`;
+  if (RV === null) loadReverify(); if (MON === null) loadMonitor(); if (GATES === null) loadGates();
+  const S0 = DATA ? CITIES.map(c => [c, cityStats(c)]) : null, S = S0 && S0.some(([, s]) => !s.err) ? S0.filter(([, s]) => !s.err) : null;   // 통계를 하나도 못 읽으면 '—'
+  const w7 = S ? S.reduce((a, [, s]) => a + (s.w7 || 0), 0) : null, today = S ? S.reduce((a, [, s]) => a + (s.today || 0), 0) : null;
+  const weekAgo = Date.now() - 7 * 864e5, runs7 = Array.isArray(RUNS) ? RUNS.filter(r => Date.parse(r.at) > weekAgo) : null;
+  const ok7 = runs7 ? runs7.filter(r => r.ok === "success").length : null, bad7 = runs7 ? runs7.filter(r => r.ok === "failure").length : null;
+  const files = GATES ? CITIES.flatMap(c => Object.values((((GATES || {})[c.k] || {}).files) || {})) : null;
+  const pub = files ? files.filter(f => f.published).length : null, hold = files ? files.filter(f => f.hold).length : null, fail = files ? files.filter(f => /실패|만료|과다/.test(f.auto_check || "")).length : null;
+  const pend = RV ? CITIES.reduce((a, c) => a + ((((RV[c.k] || {}).pending) || []).length), 0) : null;
+  const m = MON && !MON.none ? MON.summary : null;
+  const v = x => x == null ? "—" : fmt(x);
+  const d = new Date(), ymd = d.toISOString().slice(0, 10);
+  const text = `[아이랑 대전 운영 보고 ${ymd}]\n방문: 오늘 ${v(today)}명 · 7일 ${v(w7)}명 (GoatCounter)\n자동 작업(7일): 성공 ${v(ok7)} · 실패 ${v(bad7)} (GitHub Actions)\n검문: 공개 ${v(pub)} · 보류 ${v(hold)} · 검사 실패 ${v(fail)} (파일, 5구 합)\n재검증 대기: ${v(pend)}건\n감시: 장애 ${m ? m["장애"] : "—"} · 검증 필요 ${m ? m["검증 필요"] : "—"} · 공개 보류 ${m ? m["공개 보류"] : "—"} · 복구 7일 ${m ? m["복구 완료(7일)"] : "—"}${MON && MON.none ? " (감시 미적용)" : ""}\n`;
+  return `<div class="pcard" style="margin-bottom:14px"><div class="hd"><h3>운영 보고서(주간 요약)</h3>${LIVE}<span class="sp"></span><span class="sub">실제 값만 · 못 읽은 것은 '—'</span></div>
+    <div class="board"><div class="bcard"><div class="k">방문 7일</div><div class="v">${v(w7)}</div><div class="bl">오늘 ${v(today)}명</div></div><div class="bcard"><div class="k">자동 작업 7일</div><div class="v" style="color:${bad7 ? "var(--warn-c)" : "var(--ok-c)"}">${v(ok7)}<small style="font-size:13px;color:var(--muted)"> 성공</small></div><div class="bl">실패 ${v(bad7)}</div></div><div class="bcard"><div class="k">검문(파일)</div><div class="v">${v(pub)}<small style="font-size:13px;color:var(--muted)"> 공개</small></div><div class="bl">보류 ${v(hold)} · 실패 ${v(fail)}</div></div><div class="bcard"><div class="k">재검증 대기</div><div class="v" style="color:${pend ? "var(--warn-c)" : "var(--ok-c)"}">${v(pend)}</div><div class="bl">${m ? `장애 ${m["장애"]} · 검증 필요 ${m["검증 필요"]}` : "감시 —"}</div></div></div>
+    <textarea readonly style="width:100%;min-height:150px;margin-top:10px;font:13px/1.6 ui-monospace,monospace;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--ivory-2);color:var(--ink)">${esc(text)}</textarea>
+    <div class="row2" style="margin-top:8px"><button class="btn soft" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.closest('.pcard').querySelector('textarea').value).then(()=>alert('복사했어요'))">보고 문장 복사</button></div></div>`;
+}
 // ───── 상태판(2026-11-03 저녁, 024): airang-cities ops/monitor.json(매시간 감시) — 현재 장애 / 복구 완료 / 검증 필요 / 공개 보류를 한 칸씩 ─────
 let MON = null, monLoading = false, monBranch = "";
 function loadMonitor() { if (monLoading) return; monLoading = true;
@@ -1036,7 +1236,7 @@ function renderPC() {
         <div class="pcard"><div class="hd"><h3>최근 수집·배포</h3><span class="sp"></span><a class="lnk" onclick="pcGo('deploy')">모두 ›</a></div>${Array.isArray(RUNS) ? RUNS.slice(0, 7).map(runRow).join("") : `<span class="sub">${RUNS && RUNS.err ? "GitHub 기록을 못 읽었어요" : "불러오는 중…"}</span>`}</div></div>${M ? `<div class="mconn">${pcConn()}</div>` : ""}`;
   } else if (pcTab === "cities") body = M ? `<input class="psearch m" placeholder="🔍 도시 이름으로 찾기" value="${esc(pcQ)}" oninput="pcQ=this.value.trim();document.getElementById('mlist').innerHTML=pcList(99)"><div class="pcard"><div class="hd">${pcSeg()}<span class="sp"></span>${pcSortChips()}</div><div id="mlist">${pcList(99)}</div></div>` : `<div class="pmid"><div class="pcard"><div class="hd"><h3>도시 ${CITIES.length}곳</h3>${pcSeg()}<span class="sp"></span><span class="sub">제목(오늘·7일·광고)을 누르면 정렬</span></div><table class="ptbl" id="pctable">${pcTable(99)}</table></div>${pcPhone(620)}</div>`;
   else if (pcTab === "apps") body = M ? mApps() : viewOne();
-  else if (pcTab === "traffic") body = viewTraffic() + `<h2>도시별 7일</h2>` + viewHome().split("<h2>도시별</h2>")[1];
+  else if (pcTab === "traffic") body = reportPanel() + viewTraffic() + `<h2>도시별 7일</h2>` + viewHome().split("<h2>도시별</h2>")[1];
   else if (pcTab === "data") body = M ? mData() : viewData();
   else if (pcTab === "ads") body = viewAds();
   else if (pcTab === "deploy") body = (M ? `<div class="mconn">${pcConn()}</div>` : "") + `<div class="pcard">${Array.isArray(RUNS) ? RUNS.slice(0, 40).map(r => runRow(r).replace("</em>", `</em><small>${esc(r.repo)} · ${esc((r.title || "").slice(0, 40))}</small>`)).join("") : "불러오는 중…"}</div>
@@ -1048,11 +1248,16 @@ function renderPC() {
     <li><b>그림</b> (나중에 해도 돼요): GPT에 한 장씩 <b>1200×500</b> — 동화풍 3D, 엄마·아이 뒷모습, 글자 없이</li>
     <li>미리보기를 보고 <b>"올려"</b> 하면 앱·입구·관리자·관제에 한꺼번에 들어가요.</li></ol>
     <div class="row2"><a class="btn soft" href="https://github.com/leejunsik22-gif/airang-cities/actions/workflows/newcity.yml" target="_blank" rel="noopener">첫 수집 기록 ↗</a><a class="btn soft" href="https://github.com/leejunsik22-gif/airang-cities/blob/main/app/cities.json" target="_blank" rel="noopener">도시 설정 파일 ↗</a></div>
-    <h3 style="margin-top:18px">남은 곳</h3><p class="sub">서울·경기: 모두 열었어요<br>인천: 서해·검단·영종·제물포 (2026-07 새로 생긴 구)</p></div>`;
+    <h3 style="margin-top:18px">지금 상태</h3><p class="sub">운영: 대전 5개 구 · 후보(비공개 설정만): 대구·부산·제주·충북·인천·광주·울산·세종 — 공개는 대표 계정의 publish-city '승인' 입력 뒤에만<br><b>서울·경기는 아이랑 대상이 아니에요</b>(tools/safety_policy.json — 검문이 공개를 거부)</p></div>`;
   else if (pcTab === "settings") body = viewLinks();
+  else if (pcTab === "verify") body = verifyPanel();
+  else if (pcTab === "hold") body = holdPanel();
+  else if (pcTab === "ops") body = opsDetectPanel();
+  else if (pcTab === "history") body = historyPanel();
+  else if (pcTab === "security") body = securityPanel();
   $app.className = "pcwrap" + (M ? " m" : "");
   if (M) {
-    const mnav = PC_NAV.filter(x => x[0] !== "sep").map(([k, ic, l]) => `<button class="${pcTab === k ? "on" : ""}" onclick="pcGo('${k}')">${ic} ${l.replace("배포·수집 기록", "기록").replace("바로가기·관제", "바로가기").replace("새 도시 열기", "새 도시")}${k === "data" && bad ? ` <b class="nb">${bad}</b>` : ""}</button>`).join("");
+    const mnav = PC_NAV.filter(x => x[0] !== "sep").map(([k, ic, l]) => `<button class="${pcTab === k ? "on" : ""}" onclick="pcGo('${k}')">${ic} ${M_SHORT[l] || l}${k === "data" && bad ? ` <b class="nb">${bad}</b>` : ""}</button>`).join("");
     $app.innerHTML = `<div class="mtop"><div class="logo">아</div><div style="flex:1;min-width:0"><b>아이랑 관리자</b><div class="sub">${when} 기준${busy ? ` · 불러오는 중 ${prog}/${CITIES.length}` : ""}</div></div>
       <button class="btn soft sm" onclick="refreshAll()" ${busy ? "disabled" : ""}>↻</button><button class="btn soft sm" onclick="lock()">잠금</button></div>
       <nav class="mnav">${mnav}</nav>${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}${DEMO ? `<div class="demo">시안 화면이에요. 숫자는 예시예요.</div>` : ""}
