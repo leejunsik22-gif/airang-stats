@@ -17,7 +17,7 @@ jobs:
       NEW: airang-daejeon-all
     steps:
       - uses: actions/checkout@v4
-        with: { repository: leejunsik22-gif/airang-cities, sparse-checkout: app }
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, sparse-checkout: app }
       - run: |
           set -u
           API=https://api.cloudflare.com/client/v4
