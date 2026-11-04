@@ -12,6 +12,8 @@ permissions:
   actions: read
 jobs:
   deploy:
+    # 2026-11-05 v03(배포 가지 고정): 이 워크플로 자체도 airang-stats 의 main 에서 실행될 때만 배포한다(다른 가지에서 수동 실행해도 배포 안 됨)
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -20,6 +22,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4      # 앱 원본 1벌 (airang-cities/app) → 도시 7곳으로 만들어 올림
         with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src-cities, sparse-checkout: "app\ndata" }   # 2026-11-04: 앱 원본은 운영 가지 main 고정(기본 가지 daejeon-setup 아님 — 앱이 읽는 data도 main)   # data: 검색용 페이지 만들 때 씀
+      - name: 배포 원본 확인 (앱 원본 = airang-cities 의 승인된 운영 가지 main 그 자체인지 — 기본 가지·후보 가지는 거부)
+        run: |
+          cd src-cities
+          want=$(git ls-remote https://github.com/leejunsik22-gif/airang-cities.git refs/heads/main | cut -f1); have=$(git rev-parse HEAD)
+          [ -n "$want" ] && [ "$want" = "$have" ] || { echo "::error::앱 원본이 airang-cities main 이 아닙니다 (checkout=$have, main=$want) — 배포 중단"; exit 1; }
+          [ -z "${AIRANG_INCLUDE_CANDIDATES:-}" ] || { echo "::error::후보 도시 포함 빌드 변수가 켜져 있음 — 운영 배포 금지"; exit 1; }
+          mkdir -p ../deployed; echo "앱 원본 확인: airang-cities main $have"; echo "$have" > ../deployed/source_main_sha.txt.new
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: |
@@ -27,6 +36,16 @@ jobs:
           mkdir -p deployed data
           # 도시 앱 전부를 사이트 하나(airang-daejeon-all)에 올림 — 주소(호스트)를 보고 도시 폴더를 보여 줌 (allsite/worker.js)
           python3 src-cities/app/build.py --out all >/dev/null
+          # 빌드 결과 = 운영 도시(cities.json) + 입구 만인지 확인 (후보 도시 폴더가 섞이면 배포 중단)
+          python3 - <<'PY'
+          import json, os, sys
+          want = sorted(list(json.load(open("src-cities/app/cities.json", encoding="utf-8"))["cities"]) + ["entry"])
+          have = sorted(d for d in os.listdir("all") if os.path.isdir(os.path.join("all", d)) and not d.startswith("_"))
+          extra = [d for d in have if d not in want and d not in ("guide",)]
+          if extra or any(w not in have for w in want): print("::error::빌드 폴더가 운영 도시와 다름 — 있어야 할 것 %s / 실제 %s" % (want, have)); sys.exit(1)
+          print("빌드 폴더 확인:", have)
+          PY
+          mv deployed/source_main_sha.txt.new deployed/source_main_sha.txt 2>/dev/null || true
           python3 src-cities/app/seo.py --out all --data src-cities/data   # 검색용 페이지 (<도시>/guide/…, sitemap.xml, robots.txt)
           python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js
           { sha=$(cd all && find . -type f | sort | xargs sha256sum | sha256sum | cut -c1-16)

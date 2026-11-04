@@ -6,7 +6,9 @@ on:
 permissions:
   contents: read
 jobs:
+  # 2026-11-05: 시험용이지만 운영 사이트(airang-daejeon-all)에 올리므로 main 에서만, 앱 원본도 main 고정
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -14,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
-        with: { repository: leejunsik22-gif/airang-cities, path: src-cities, sparse-checkout: app }
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src-cities, sparse-checkout: app }
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - name: 만들기
