@@ -61,7 +61,7 @@ const daily = (h, day) => ((h.stats || []).find(s => s.day === day) || {}).daily
 
 async function adNames() {
   try { const r = await fetch(ADS_URL, { headers: { "User-Agent": UA } }); if (r.ok) return Object.fromEntries(((await r.json()).ads || []).map(a => [a.id, a.name])); } catch (e) {}
-  return { lagrills: "라그릴스 셀프바베큐" };
+  return {};   // 2026-11-05: 광고주 이름표 제거(대표 지시)
 }
 
 async function build(env) {

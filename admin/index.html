@@ -438,7 +438,7 @@ const hrsOf = (c, f, h) => (WEEKLY[f] || []).includes(c.k) ? 24 * 8 : h;
 const ADS_URL = "https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/ads/ads.json";
 const ADS_EDIT = "https://github.com/leejunsik22-gif/airang-cities/edit/main/ads/ads.json";
 // ads.json 을 아직 못 읽을 때 쓰는 기본값 (지금 앱에 들어 있는 광고)
-const ADS_FALLBACK = { ads: [{ id: "lagrills", name: "라그릴스 셀프바베큐", where: "용인 처인구 포곡읍", line: "아이랑 가기 좋은 가족 바베큐", cities: ["all"], start: "2026-10-01", end: "", status: "on", contact: "010-3768-2246" }] };
+const ADS_FALLBACK = { ads: [] };   // 2026-11-05 대표 지시: 광고 예시(라그릴스) 제거 — 광고는 광고 자료 파일에서만
 const AD_KIND = { book: "네이버 예약", tel: "전화", info: "가게 정보", map: "길찾기", site: "홈페이지", stay: "펜션 예약" };
 const EV_NAME = { "행사-시청": "행사 원문 (시청)", "행사-도서관": "행사 원문 (도서관)" };
 const KEY = "airang.admin.key", PIN = "airang.admin.pin", CACHE = "airang.admin.cache";
@@ -620,7 +620,7 @@ function render() {
   if (!DATA) { const c = ls.get(CACHE); if (c) { try { DATA = JSON.parse(c); } catch (e) {} } if (DATA && !busy && !snapTried && CITIES.some(x => (DATA.city[x.k] || {}).err)) setTimeout(loadSnap, 30); if (!DATA && !busy && !snapTried) { loadSnap().then(() => { if (!DATA && !busy) loadAll(); }); } else if (!DATA && !busy) { loadAll(); } else if (DATA && !busy && Date.now() - DATA.at > 20 * 60e3 && !snapTried) setTimeout(() => loadSnap().then(() => { if (DATA && Date.now() - DATA.at > 40 * 60e3 && !busy) loadAll(); }), 50); }
   pcWas = isPC(); return renderPC();   // PC·휴대폰 같은 화면 구성 (휴대폰은 위쪽 버튼·한 줄 배치)
   $app.className = "wrap"; pcWas = false;
-  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">라그릴스 · 대전 ${CITIES.length}개 구 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
+  const head = `<header><div class="logo">아</div><div><h1>아이랑 관리자</h1><div class="sub">대전 ${CITIES.length}개 구 ${DATA ? "· " + new Date(DATA.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + " 기준" : ""}</div></div><div class="sp"></div>
     <button class="btn" onclick="loadAll()" ${busy ? "disabled" : ""}>${busy ? "불러오는 중 " + prog + "/" + CITIES.length : "↻ 새로고침"}</button>
     <button class="btn soft" onclick="lock()">잠그기</button></header>
     ${busy ? `<div class="progress"><i style="width:${Math.round(prog / CITIES.length * 100)}%"></i></div>` : ""}
@@ -1290,7 +1290,7 @@ function renderPC() {
     return;
   }
   $app.className = "pcwrap";
-  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 라그릴스</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${aband()}${top}${body}</main></div>`;
+  $app.innerHTML = `<div class="pc"><aside class="pside"><div class="pbrand"><div class="logo">아</div><div><b>아이랑 관리자</b><small>PC · 운영 관리</small></div></div>${nav}${pcConn()}</aside><main class="pmain">${aband()}${top}${body}</main></div>`;
 }
 function pcSeg() { return `<div class="seg">${[["all", "전체 " + CITIES.length], ...SIDO_LIST.map(x => [x, x + " " + CITIES.filter(c => sidoOf(c) === x).length])].map(([k, l]) => `<button class="${pcSido === k ? "on" : ""}" onclick="pcSet('sido','${k}')">${l}</button>`).join("")}</div>`; }
 let pcWas = null;
