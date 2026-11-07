@@ -1344,7 +1344,7 @@ if (DEMO) {
     DATA.city[c.k] = { err: "", refs: [["(직접 방문 · 앱)", b * 5], ["teamblind.com", Math.round(b * 2.1)], ["m.search.naver.com", Math.round(b * .8)], ["kakao", Math.round(b * .5)], ["google.com", Math.round(b * .3)]],
       hits: [{ path: "방문-하루", event: true, count: 0, stats: ser(i => v[i]) }, { path: "방문-새로", event: true, stats: ser(i => n[i]) }, { path: "방문-다시", event: true, stats: ser(i => v[i] - n[i]) },
         { path: "방문-열기-1", event: true, stats: ser(i => v[i]) }, { path: "방문-열기-2", event: true, stats: ser(i => Math.round(v[i] * .5)) }, { path: "방문-열기-3", event: true, stats: ser(i => Math.round(v[i] * .2)) },
-        { path: "광고-lagrills-info", event: true, count: Math.round(b * .9) }, { path: "광고-lagrills-book", event: true, count: Math.round(b * .25) }, { path: "광고-lagrills-tel", event: true, count: Math.round(b * .1) }, { path: "광고-lagrills-map", event: true, count: Math.round(b * .15) },
+        { path: "광고-sample-info", event: true, count: Math.round(b * .9) }, { path: "광고-sample-book", event: true, count: Math.round(b * .25) }, { path: "광고-sample-tel", event: true, count: Math.round(b * .1) }, { path: "광고-sample-map", event: true, count: Math.round(b * .15) },
         { path: "/ad", event: false, count: Math.round(b * 1.6) }, { path: "급식-보기", event: true, count: b * 3 }, { path: "학원-비교", event: true, count: b * 2 }, { path: "행사-도서관", event: true, count: b }, { path: "날씨-보기", event: true, count: Math.round(b * 1.5) }] };
     const now = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace("T", " ");
     const ago = h => new Date(Date.now() + 9 * 3600e3 - h * 3600e3).toISOString().slice(0, 16).replace("T", " ");
