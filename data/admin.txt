@@ -1,4 +1,4 @@
 ✨ Uploading _headers
 🌎 Deploying...
-✨ Deployment complete! Take a peek over at https://1e000cde.airang-daejeon-admin.pages.dev
+✨ Deployment complete! Take a peek over at https://719774ea.airang-daejeon-admin.pages.dev
 pages.dev: 200 <title>아이랑 관리자
