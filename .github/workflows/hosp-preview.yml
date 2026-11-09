@@ -89,7 +89,7 @@ jobs:
             const ok = (n, c, v) => { console.log((c ? "통과" : "실패") + " | " + n + (v !== undefined ? " (" + v + ")" : "")); if (!c) bad++; };
             const br = await chromium.launch();
             for (const [g, want] of [["yuseong", 18], ["djdonggu", 3]]) {
-              const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true });   // 검사 도구가 화면 상태를 읽을 수 있게(사이트 자체 설정은 그대로) const p = await ctx.newPage();
+              const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
               const ext = []; p.on("request", (r) => { if (/raw\.githubusercontent|goatcounter|gc\.zgo/.test(r.url())) ext.push(r.url()); });
               await p.goto(B + "/" + g + "/"); await p.waitForLoadState("networkidle");
               const chip = p.locator(".q-chips .q-chip").first(); ok(g + " 홈 첫 칸 '동네 소아과'", (await chip.innerText()).includes("동네 소아과"));
