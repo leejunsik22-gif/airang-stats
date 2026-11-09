@@ -1,6 +1,6 @@
 🌎 Deploying...
-✨ Deployment complete! Take a peek over at https://e4b3973a.airang-daejeon-all.pages.dev
-앱 6곳 한 번에 올림
+✨ Deployment complete! Take a peek over at https://34a14ebc.airang-daejeon-all.pages.dev
+앱 8곳 한 번에 올림
 임시 도메인 — 주소 연결 건너뜀: djdonggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djjunggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djseogu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
