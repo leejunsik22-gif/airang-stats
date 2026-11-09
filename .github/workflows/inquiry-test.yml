@@ -1,0 +1,98 @@
+name: inquiry-test (문의하기 A안 — 시험 주소 전용, 운영과 분리)
+# 2026-11-09 대표 승인: D1 시험 환경 연결까지만. 운영 사이트(airang-daejeon-all)는 건드리지 않는다.
+# 시험 주소: https://airang-inquiry-test.pages.dev  (별도 Pages 프로젝트 + D1 airang-inquiry-test)
+# 관리자 확인: Cloudflare Access 설정 전이므로, 이 실행 안에서만 쓰는 1회용 열쇠로 같은 방식(RS256)의 증표를 만들어 검사한다(개인 열쇠는 저장하지 않음 → 실행 뒤엔 아무도 관리자 증표를 만들 수 없음).
+on:
+  push:
+    branches: [inquiry-test]
+    paths: [".github/workflows/inquiry-test.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-env:
+    if: github.ref == 'refs/heads/inquiry-test'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
+      PROJ: airang-inquiry-test
+      DBNAME: airang-inquiry-test
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: leejunsik22-gif/airang-cities, ref: inquiry-a, path: src }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: 시험 가지 확인 (운영 main 아님)
+        run: cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = "inquiry-a"
+      - name: D1 시험 저장소 (없으면 만들기)
+        run: |
+          npm i -g wrangler@3 >/dev/null 2>&1
+          id=$(wrangler d1 list --json 2>/tmp/e | jq -r --arg n "$DBNAME" '.[] | select(.name==$n) | .uuid' || true)
+          if [ -z "$id" ]; then wrangler d1 create "$DBNAME" > /tmp/c 2>&1 || { cat /tmp/c /tmp/e; echo "::error::D1 만들기 실패(토큰 권한 확인 필요)"; exit 1; }
+            id=$(wrangler d1 list --json | jq -r --arg n "$DBNAME" '.[] | select(.name==$n) | .uuid'); echo "D1 새로 만듦"; else echo "D1 이미 있음"; fi
+          echo "D1_ID=$id" >> $GITHUB_ENV; echo "D1: $DBNAME ($id)"
+      - name: 1회용 관리자 시험 열쇠 + 화면 빌드 + 설정
+        run: |
+          mkdir -p w && cd w
+          node -e '
+            const c=require("crypto");const {publicKey,privateKey}=c.generateKeyPairSync("rsa",{modulusLength:2048});
+            const jwk={...publicKey.export({format:"jwk"}),kid:"ci1",alg:"RS256",use:"sig"};
+            require("fs").writeFileSync("/tmp/priv.pem",privateKey.export({type:"pkcs8",format:"pem"}));
+            require("fs").writeFileSync("/tmp/jwks.json",JSON.stringify({keys:[jwk]}));'
+          python3 ../src/app/build.py --out site --city entry >/dev/null
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > site/_headers
+          printf '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>아이랑 문의 시험</title><p>시험 주소입니다. <a href="/inquiry/">문의하기</a> · <a href="/entry/">입구</a></p>\n' > site/index.html
+          cp -r ../src/functions ./functions
+          SALT=$(openssl rand -hex 16)
+          cat > wrangler.toml <<TOML
+          name = "$PROJ"
+          pages_build_output_dir = "site"
+          compatibility_date = "2024-09-23"
+          [[d1_databases]]
+          binding = "INQ_DB"
+          database_name = "$DBNAME"
+          database_id = "$D1_ID"
+          [vars]
+          HASH_SALT = "$SALT"
+          ACCESS_TEAM_DOMAIN = "https://ci-only.invalid"
+          ACCESS_AUD = "ci-only-aud"
+          ADMIN_EMAILS = "ci-admin@ci-only.invalid"
+          ACCESS_JWKS_TEST = '$(cat /tmp/jwks.json)'
+          TOML
+          sed -i 's/^          //' wrangler.toml; grep -v JWKS wrangler.toml
+      - name: 시험 주소에 올리기 (별도 프로젝트)
+        run: |
+          cd w
+          wrangler pages project create "$PROJ" --production-branch main >/dev/null 2>&1 || true
+          wrangler pages deploy --project-name "$PROJ" --branch main --commit-dirty=true 2>&1 | tail -4
+      - name: 실제 시험 주소에서 이어서 확인 (접수 → 번호 → 접수함 → 상태 변경, 관리자 차단)
+        run: |
+          B=https://$PROJ.pages.dev; sleep 20
+          tok() { node -e '
+            const c=require("crypto"),f=require("fs");const b=x=>Buffer.from(x).toString("base64url");
+            const [aud,email,exp]=process.argv.slice(1);const now=Math.floor(Date.now()/1e3);
+            const h=b(JSON.stringify({alg:"RS256",kid:"ci1",typ:"JWT"})),p=b(JSON.stringify({aud:[aud],email,iss:"https://ci-only.invalid",iat:now,exp:now+ +exp}));
+            const s=c.sign("sha256",Buffer.from(h+"."+p),f.readFileSync("/tmp/priv.pem")).toString("base64url");console.log(h+"."+p+"."+s)' "$@"; }
+          T=$(tok ci-only-aud ci-admin@ci-only.invalid 600)
+          ok=0; bad=0; chk() { if [ "$2" = "$3" ]; then echo "통과 | $1 ($2)"; ok=$((ok+1)); else echo "실패 | $1 (기대 $3, 실제 $2)"; bad=$((bad+1)); fi; }
+          code() { curl -s -o /tmp/o -w "%{http_code}" "$@"; }
+          chk "문의 화면 열림" "$(code $B/inquiry/)" 200
+          chk "입구 '문의하기' 버튼" "$(curl -s $B/entry/ | grep -c 'id="btn-contact"')" 1
+          r=$(curl -s -X POST $B/api/inquiry -H "origin: $B" -H "content-type: application/json" -d '{"kind":"fix","body":"[가상] 시험 주소 확인 — 자동 점검","gu":"유성","screen":"학원 상세"}'); echo "접수 응답: $r"
+          N=$(echo "$r" | jq -r '.ticket'); chk "접수 번호 받음" "$( [ "$N" -gt 0 ] 2>/dev/null && echo yes)" yes
+          chk "로그인 없이 접수함 자료 차단" "$(code $B/api/inquiry/admin)" 401
+          chk "위조 증표 차단" "$(code $B/api/inquiry/admin -H 'cf-access-jwt-assertion: a.b.c')" 401
+          chk "다른 메일 증표 차단" "$(code $B/api/inquiry/admin -H "cf-access-jwt-assertion: $(tok ci-only-aud someone@ci-only.invalid 600)")" 403
+          chk "만료 증표 차단" "$(code $B/api/inquiry/admin -H "cf-access-jwt-assertion: $(tok ci-only-aud ci-admin@ci-only.invalid -60)")" 401
+          A=(-H "cf-access-jwt-assertion: $T")
+          chk "접수함에서 같은 번호 보임(새 문의)" "$(curl -s "${A[@]}" "$B/api/inquiry/admin?state=%EC%83%88%20%EB%AC%B8%EC%9D%98" | jq -r --argjson n "$N" '.items[]|select(.id==$n)|.state')" "새 문의"
+          for s in "처리 중" "완료"; do
+            chk "상태 → $s 저장" "$(code -X POST $B/api/inquiry/admin "${A[@]}" -H "origin: $B" -H 'content-type: application/json' -d "{\"action\":\"state\",\"id\":$N,\"state\":\"$s\"}")" 200
+            chk "상태 → $s 확인" "$(curl -s "${A[@]}" "$B/api/inquiry/admin" | jq -r --argjson n "$N" '.items[]|select(.id==$n)|.state')" "$s"
+          done
+          chk "다른 사이트에서 상태 변경 차단" "$(code -X POST $B/api/inquiry/admin "${A[@]}" -H 'origin: https://evil.example' -H 'content-type: application/json' -d "{\"action\":\"delete\",\"id\":$N}")" 403
+          chk "시험 문의 지우기" "$(code -X POST $B/api/inquiry/admin "${A[@]}" -H "origin: $B" -H 'content-type: application/json' -d "{\"action\":\"delete\",\"id\":$N}")" 200
+          chk "지운 번호 다시 지우기 → 없음" "$(code -X POST $B/api/inquiry/admin "${A[@]}" -H "origin: $B" -H 'content-type: application/json' -d "{\"action\":\"delete\",\"id\":$N}")" 404
+          rm -f /tmp/priv.pem
+          echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
