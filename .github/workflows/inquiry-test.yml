@@ -74,4 +74,6 @@ jobs:
           chk "위조 로그인 쿠키 차단" "$(code $B/api/inquiry/admin -H "cookie: airang_admin=9999999999999.$(printf '0%.0s' {1..64})")" "401|503"
           chk "다른 사이트에서 로그인 시도 차단" "$(code -X POST $B/api/inquiry/login -H 'origin: https://evil.example' -H 'content-type: application/json' -d '{"password":"x"}')" "403|503"
           chk "로그인 없이 상태 변경 차단" "$(code -X POST $B/api/inquiry/admin -H "origin: $B" -H 'content-type: application/json' -d '{"action":"delete","id":1}')" "401|503"
+          # 자동 점검이 넣은 [가상] 문의는 끝나면 스스로 지움(대표 접수함을 어지럽히지 않게 — 11/9 대표 확인 중 요청)
+          cd w && n=$(wrangler d1 execute "$DBNAME" --remote --json --command "DELETE FROM inquiries WHERE body LIKE '[가상] 시험 주소 자동 점검%'" 2>/dev/null | jq -r '.[0].meta.changes // "?"'); echo "자동 점검 문의 정리: $n건 지움"
           echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
