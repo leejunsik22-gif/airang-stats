@@ -1,0 +1,79 @@
+name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분리)
+# 2026-11-10 대표 승인: 임시 시험 주소 생성. 대조 통과 의원만(도안누리소아청소년과의원 제외), 병원·약국·응급실 탭 제외.
+# 시험 주소: https://airang-hosp-preview.pages.dev  (별도 Pages 프로젝트. 운영 airang-daejeon-all 은 건드리지 않음)
+# 확인이 끝나면 action=down 으로 이 프로젝트를 지운다(대표 지시).
+on:
+  push:
+    branches: [hosp-preview]
+    paths: [".github/workflows/hosp-preview.yml", "hosp-preview.action"]
+permissions:
+  contents: read
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/hosp-preview'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
+      PROJ: airang-hosp-preview
+      GUS: "djdonggu djjunggu djseogu yuseong daedeok"
+    steps:
+      - uses: actions/checkout@v4
+      - name: 할 일 (up=올리기 / down=내리기)
+        run: a=$(tr -d ' \n' < hosp-preview.action); echo "ACTION=$a" >> $GITHUB_ENV; echo "할 일: $a"; test "$a" = up -o "$a" = down
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm i -g wrangler@3 >/dev/null 2>&1
+      - name: 내리기 (시험 주소 삭제)
+        if: env.ACTION == 'down'
+        run: |
+          wrangler pages project delete "$PROJ" --yes 2>&1 | tail -3 || true
+          sleep 15; c=$(curl -s -o /dev/null -w "%{http_code}" https://$PROJ.pages.dev/yuseong/); echo "삭제 뒤 주소 응답: $c"
+          wrangler pages project list 2>/dev/null | grep -c "$PROJ" | { read n; echo "남은 프로젝트 수: $n"; test "$n" = 0; }
+      - uses: actions/checkout@v4
+        if: env.ACTION == 'up'
+        with: { repository: leejunsik22-gif/airang-cities, ref: hosp-preview, path: src }
+      - uses: actions/checkout@v4
+        if: env.ACTION == 'up'
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: live, sparse-checkout: data }
+      - name: 화면 빌드 (시험 가지) + 시험 자료 넣기
+        if: env.ACTION == 'up'
+        run: |
+          cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = hosp-preview && cd ..
+          args="--city entry"; for g in $GUS; do args="$args --city $g"; done
+          python3 src/app/build.py --out site $args >/dev/null
+          rm -rf site/inquiry   # 문의하기는 이 시험 범위 밖
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > site/_headers
+          for g in $GUS; do
+            mkdir -p site/$g/data && cp live/data/$g/* site/$g/data/
+            cp src/preview/$g/hospitals.json site/$g/data/hospitals.json
+            jq '.files["hospitals.json"].published = true | .files["hospitals.json"].reason = "시험 주소 전용(운영 공개 아님)"' live/data/$g/_status.json > site/$g/data/_status.json
+            f=site/$g/index.html
+            sed -i "s#\"https://raw.githubusercontent.com/\" + REPO + \"/main/data/$g/\"#\"./data/\"#" $f
+            sed -i 's#<script data-goatcounter=[^>]*></script>##' $f   # 시험 방문은 통계에 안 셈
+            sed -i 's#<body\([^>]*\)>#<body\1><div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#B42318;color:#fff;font:700 12px/1.6 sans-serif;text-align:center;padding:2px 6px;pointer-events:none">시험 주소 · 운영 아님 · 확인 뒤 삭제</div>#' $f
+            grep -q '"./data/"' $f || { echo "::error::$g 자료 주소 바꾸기 실패"; exit 1; }
+          done
+      - name: 시험 주소에 올리기 (별도 프로젝트)
+        if: env.ACTION == 'up'
+        run: |
+          wrangler pages project create "$PROJ" --production-branch main >/dev/null 2>&1 || true
+          wrangler pages deploy site --project-name "$PROJ" --branch main --commit-dirty=true 2>&1 | tail -3
+      - name: 실제 시험 주소에서 확인
+        if: env.ACTION == 'up'
+        run: |
+          B=https://$PROJ.pages.dev; sleep 20; ok=0; bad=0
+          chk() { if [ "$2" = "$3" ]; then echo "통과 | $1 ($2)"; ok=$((ok+1)); else echo "실패 | $1 (기대 $3, 실제 $2)"; bad=$((bad+1)); fi; }
+          chk "입구 열림" "$(curl -s -o /dev/null -w '%{http_code}' $B/entry/)" 200
+          for g in $GUS; do
+            chk "$g 화면 열림" "$(curl -s -o /dev/null -w '%{http_code}' $B/$g/)" 200
+            curl -s $B/$g/data/hospitals.json -o h.json
+            chk "$g 병원·약국·응급실 비어 있음" "$(jq '[.hospitals,.pharm,.er]|map(length)|add' h.json)" 0
+            chk "$g 대조 통과 의원만" "$(jq '[.clinics[]|select(.cx!=1)]|length' h.json)" 0
+            chk "$g 도안누리 없음" "$(jq '[.clinics[]|select(.id=="A1600074")]|length' h.json)" 0
+            echo "     $g 의원 $(jq '.clinics|length' h.json) · 동네 소아과 $(jq '[.clinics[]|select(.p=="소아청소년과")]|length' h.json)"
+            chk "$g 병원 공개 표시(시험용)" "$(curl -s $B/$g/data/_status.json | jq '.files["hospitals.json"].published')" true
+            chk "$g 혜택은 계속 보류" "$(curl -s $B/$g/data/_status.json | jq '.files["benefits.json"].published')" false
+            chk "$g 통계 스크립트 없음" "$(curl -s $B/$g/ | grep -c goatcounter.com/count || true)" 0
+          done
+          echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
