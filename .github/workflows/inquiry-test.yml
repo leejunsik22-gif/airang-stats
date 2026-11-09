@@ -68,7 +68,7 @@ jobs:
           chk "접수함 화면 틀 열림(자료 없음)" "$(code -L $B/inquiry/admin/)" 200
           r=$(curl -s -X POST $B/api/inquiry -H "origin: $B" -H "content-type: application/json" -d '{"kind":"use","body":"[가상] 시험 주소 자동 점검 — 대표 확인 뒤 지워도 됨"}'); echo "접수 응답: $r"
           chk "문의 접수 번호 받음" "$(echo "$r" | jq -r '.ok')" true
-          pw=$(curl -s $B/api/inquiry/admin -o /dev/null -w "%{http_code}"); echo "관리자 상태: $pw (503=비밀번호 미등록, 401=등록됨·로그인 필요)"
+          pw=$(curl -s $B/api/inquiry/admin -o /tmp/a -w "%{http_code}"); echo "관리자 상태: $pw $(cat /tmp/a)"
           chk "로그인 없이 접수함 자료 차단" "$pw" "401|503"
           chk "틀린 비밀번호 거절" "$(code -X POST $B/api/inquiry/login -H "origin: $B" -H 'content-type: application/json' -d '{"password":"wrong-password-ci"}')" "401|503"
           chk "위조 로그인 쿠키 차단" "$(code $B/api/inquiry/admin -H "cookie: airang_admin=9999999999999.$(printf '0%.0s' {1..64})")" "401|503"
