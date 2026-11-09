@@ -52,7 +52,7 @@ jobs:
             f=site/$g/index.html
             sed -i "s#\"https://raw.githubusercontent.com/\" + REPO + \"/main/data/$g/\"#\"./data/\"#" $f
             sed -i 's#<script data-goatcounter=[^>]*></script>##' $f   # 시험 방문은 통계에 안 셈
-            sed -i 's#<body\([^>]*\)>#<body\1><div style="position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#B42318;color:#fff;font:700 12px/1.6 sans-serif;text-align:center;padding:2px 6px;pointer-events:none">시험 주소 · 운영 아님 · 확인 뒤 삭제</div>#' $f
+            sed -i 's@<body\([^>]*\)>@<body\1><div role="note" style="background:#B42318;color:#fff;font:700 12px/1.6 sans-serif;text-align:center;padding:3px 6px">시험 주소 · 운영 아님 · 확인 뒤 삭제</div>@' $f
             grep -q '"./data/"' $f || { echo "::error::$g 자료 주소 바꾸기 실패"; exit 1; }
           done
       - name: 시험 주소에 올리기 (별도 프로젝트)
