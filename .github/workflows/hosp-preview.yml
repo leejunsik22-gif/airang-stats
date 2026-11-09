@@ -20,7 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 할 일 (up=올리기 / down=내리기)
-        run: a=$(tr -d ' \n' < hosp-preview.action); echo "ACTION=$a" >> $GITHUB_ENV; echo "할 일: $a"; test "$a" = up -o "$a" = down
+        run: |
+          a=$(tr -d ' \n' < hosp-preview.action); echo "ACTION=$a" >> $GITHUB_ENV; echo "할 일 = $a"; test "$a" = up -o "$a" = down
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: npm i -g wrangler@3 >/dev/null 2>&1
