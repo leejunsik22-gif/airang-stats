@@ -3,10 +3,21 @@
 //   airang.daejeon.example.invalid/…  →  /entry/…
 // 모르는 주소(시험용 airang-daejeon-all.pages.dev 등)는 경로 그대로: /yongin/ 처럼 폴더로 들어가 확인.
 const HOSTS = /*HOSTS*/{};
+// 2026-11-09 문의하기 운영 공개(대표 승인): 접수·접수함·로그인 처리. 원본 = airang-cities/functions (make_all.py 가 이 폴더 안으로 복사)
+import * as inqSubmit from "./functions/api/inquiry/index.js";
+import * as inqAdmin from "./functions/api/inquiry/admin.js";
+import * as inqLogin from "./functions/api/inquiry/login.js";
+const API = { "/api/inquiry": inqSubmit, "/api/inquiry/admin": inqAdmin, "/api/inquiry/login": inqLogin };
 
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
+    const api = API[url.pathname.replace(/\/+$/, "")];
+    if (api) {   // 문의 처리(저장소 INQ_DB). 없는 방식은 405
+      const fn = api["onRequest" + req.method[0] + req.method.slice(1).toLowerCase()];
+      return fn ? fn({ request: req, env, params: {} }) : new Response("Method Not Allowed", { status: 405, headers: { allow: "GET, POST, DELETE" } });
+    }
+    if (url.pathname === "/inquiry" || url.pathname.startsWith("/inquiry/")) return env.ASSETS.fetch(req);   // 문의 화면은 어느 주소에서든 같은 곳
     const key = HOSTS[url.hostname];
     if (!key) {
       // 아직 안 연 도시 주소(…daejeon.example.invalid)로 들어오면 입구로 보냄

@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4      # 앱 원본 1벌 (airang-cities/app) → 도시 7곳으로 만들어 올림
-        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src-cities, sparse-checkout: "app\ndata" }   # 2026-11-04: 앱 원본은 운영 가지 main 고정(기본 가지 daejeon-setup 아님 — 앱이 읽는 data도 main)   # data: 검색용 페이지 만들 때 씀
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src-cities, sparse-checkout: "app\ndata\nfunctions" }   # 2026-11-04: 앱 원본은 운영 가지 main 고정(기본 가지 daejeon-setup 아님 — 앱이 읽는 data도 main)   # data: 검색용 페이지 만들 때 씀
       - name: 배포 원본 확인 (앱 원본 = airang-cities 의 승인된 운영 가지 main 그 자체인지 — 기본 가지·후보 가지는 거부)
         run: |
           cd src-cities
@@ -41,13 +41,29 @@ jobs:
           import json, os, sys
           want = sorted(list(json.load(open("src-cities/app/cities.json", encoding="utf-8"))["cities"]) + ["entry"])
           have = sorted(d for d in os.listdir("all") if os.path.isdir(os.path.join("all", d)) and not d.startswith("_"))
-          extra = [d for d in have if d not in want and d not in ("guide",)]
+          extra = [d for d in have if d not in want and d not in ("guide", "inquiry")]   # inquiry: 문의 화면(2026-11-09 대표 승인)
           if extra or any(w not in have for w in want): print("::error::빌드 폴더가 운영 도시와 다름 — 있어야 할 것 %s / 실제 %s" % (want, have)); sys.exit(1)
           print("빌드 폴더 확인:", have)
           PY
           mv deployed/source_main_sha.txt.new deployed/source_main_sha.txt 2>/dev/null || true
           python3 src-cities/app/seo.py --out all --data src-cities/data   # 검색용 페이지 (<도시>/guide/…, sitemap.xml, robots.txt)
-          python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js
+          python3 allsite/make_all.py all src-cities/app/cities.json allsite/worker.js src-cities/functions
+          # 2026-11-09 문의하기 운영 공개(대표 승인): 운영 전용 저장소 D1 airang-inquiry(시험용 airang-inquiry-test 와 분리) 연결
+          #  - 운영 사이트에 화면에서 넣은 일반 변수가 있으면 wrangler.toml 이 덮어 지우므로 배포 중단(비밀 Secret 은 영향 없음)
+          #  - 호환 날짜·옵션은 지금 운영 값을 그대로 씀
+          P=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/airang-daejeon-all
+          cfg=$(curl -s "$P" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+          [ "$(echo "$cfg" | jq -r '.success')" = "true" ] || { echo "::error::운영 사이트 설정을 읽지 못함 — 배포 중단"; exit 1; }
+          plain=$(echo "$cfg" | jq -r '[(.result.deployment_configs.production.env_vars // {}) | to_entries[] | select(.value.type != "secret_text") | .key | select(. != "HASH_SALT")] | join(",")')
+          [ -z "$plain" ] || { echo "::error::운영 사이트 일반 변수($plain)가 있어 덮어쓰면 사라짐 — 배포 중단"; exit 1; }
+          cdate=$(echo "$cfg" | jq -r '.result.deployment_configs.production.compatibility_date // empty'); [ -n "$cdate" ] || cdate=2024-09-23
+          flags=$(echo "$cfg" | jq -c '.result.deployment_configs.production.compatibility_flags // []')
+          echo "운영 호환 날짜 $cdate 옵션 $flags"
+          did=$(wrangler d1 list --json | jq -r '.[] | select(.name=="airang-inquiry") | .uuid')
+          [ -n "$did" ] || { wrangler d1 create airang-inquiry >/dev/null; did=$(wrangler d1 list --json | jq -r '.[] | select(.name=="airang-inquiry") | .uuid'); echo "운영 문의 저장소 새로 만듦"; }
+          [ -n "$did" ] || { echo "::error::운영 문의 저장소(D1) 확인 실패 — 배포 중단"; exit 1; }
+          printf 'name = "airang-daejeon-all"\npages_build_output_dir = "all"\ncompatibility_date = "%s"\ncompatibility_flags = %s\n[[d1_databases]]\nbinding = "INQ_DB"\ndatabase_name = "airang-inquiry"\ndatabase_id = "%s"\n[vars]\nHASH_SALT = "%s"\n' "$cdate" "$flags" "$did" "$(openssl rand -hex 16)" > wrangler.toml
+          grep -v HASH_SALT wrangler.toml
           { sha=$(cd all && find . -type f | sort | xargs sha256sum | sha256sum | cut -c1-16)
             if [ "$(cat deployed/all 2>/dev/null)" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "yes" ]; then echo "앱 그대로 (올리지 않음)"
             elif { wrangler pages project create airang-daejeon-all --production-branch main >/dev/null 2>&1 || true; } && wrangler pages deploy all --project-name airang-daejeon-all --branch main --commit-dirty=true > /tmp/d.log 2>&1; then tail -2 /tmp/d.log; echo "$sha" > deployed/all; echo "앱 $(ls -d all/*/ | wc -l)곳 한 번에 올림"

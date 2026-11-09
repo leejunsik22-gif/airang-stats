@@ -1,8 +1,9 @@
 """도시별 앱 폴더(build.py 결과)를 사이트 하나로 묶는다: <out>/<도시>/… + _worker.js + 404.html
-  python3 make_all.py <build.py 결과 폴더> <cities.json> <worker.js>
+  python3 make_all.py <build.py 결과 폴더> <cities.json> <worker.js> <airang-cities/functions>
+2026-11-09: _worker.js 를 폴더(_worker.js/index.js)로 만들고 문의 처리 코드(functions)를 그 안에 복사 — 폴더 안 파일은 화면 파일로 공개되지 않음
 """
-import json, os, sys
-out, cfg, wjs = sys.argv[1:4]
+import json, os, shutil, sys
+out, cfg, wjs, fdir = sys.argv[1:5]
 c = json.load(open(cfg, encoding="utf-8"))
 hosts = {v["domain"]: k for k, v in c["cities"].items()}
 hosts[c["entry"]["domain"]] = "entry"
@@ -17,5 +18,9 @@ for k in hosts.values():   # 도시마다 404 (없는 파일에 첫 화면 대�
 open(os.path.join(out, "404.html"), "w", encoding="utf-8").write(nf)   # 맨 위 404: 없으면 Pages가 모든 길을 첫 화면으로 돌림
 src = open(wjs, encoding="utf-8").read()
 assert "/*HOSTS*/{}" in src
-open(os.path.join(out, "_worker.js"), "w", encoding="utf-8").write(src.replace("/*HOSTS*/{}", json.dumps(hosts, ensure_ascii=False)))
+wd = os.path.join(out, "_worker.js")
+if os.path.isfile(wd): os.remove(wd)
+shutil.rmtree(wd, ignore_errors=True); os.makedirs(wd)
+open(os.path.join(wd, "index.js"), "w", encoding="utf-8").write(src.replace("/*HOSTS*/{}", json.dumps(hosts, ensure_ascii=False)))
+shutil.copytree(fdir, os.path.join(wd, "functions"), ignore=shutil.ignore_patterns("package.json"))
 print(f"묶음: 주소 {len(hosts)}개 →", out)

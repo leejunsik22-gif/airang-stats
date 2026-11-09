@@ -1,0 +1,35 @@
+name: inquiry-live-check (운영 문의하기 확인 — 읽기·시험 접수만, 배포 없음)
+# 2026-11-09 문의하기 운영 공개 뒤 확인: 일반 문의는 로그인 없이 접수, 접수함·문의 자료·상태 변경은 인증 없이 안 열림.
+# 시험 접수 1건은 끝나면 운영 저장소에서 지움. 비밀번호는 모르므로 로그인 성공은 대표 직접 확인.
+on: { workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: |
+          B=https://airang-daejeon-all.pages.dev
+          ok=0; bad=0; chk() { if echo "$2" | grep -qxE "$3"; then echo "통과 | $1 ($2)"; ok=$((ok+1)); else echo "실패 | $1 (기대 $3, 실제 $2)"; bad=$((bad+1)); fi; }
+          code() { curl -s -o /tmp/o -w "%{http_code}" "$@"; }
+          chk "입구 화면" "$(code -L $B/entry/)" 200
+          chk "유성 화면" "$(code -L $B/yuseong/)" 200
+          chk "입구 '문의하기' 버튼" "$(curl -sL $B/entry/ | grep -c 'id="btn-contact"')" 1
+          chk "문의 화면(로그인 없이)" "$(code -L $B/inquiry/)" 200
+          chk "처리 코드 파일이 화면으로 안 보임" "$(code $B/_worker.js/functions/_shared/inquiry.js)" "404|403|405"
+          r=$(curl -s -X POST $B/api/inquiry -H "origin: $B" -H "content-type: application/json" -d '{"kind":"use","body":"[가상] 운영 자동 점검 — 곧 자동 삭제"}'); echo "접수 응답: $r"
+          chk "일반 문의 접수(로그인 없이)" "$(echo "$r" | jq -r '.ok')" true
+          st=$(curl -s $B/api/inquiry/admin -o /tmp/a -w "%{http_code}"); echo "관리자 상태: $st $(cat /tmp/a)"
+          chk "로그인 없이 문의 자료 차단" "$st" "401|503"
+          chk "틀린 비밀번호 거절" "$(code -X POST $B/api/inquiry/login -H "origin: $B" -H 'content-type: application/json' -d '{"password":"wrong-password-ci"}')" "401|503"
+          chk "위조 로그인 쿠키 차단" "$(code $B/api/inquiry/admin -H "cookie: airang_admin=9999999999999.$(printf '0%.0s' {1..64})")" "401|503"
+          chk "다른 사이트에서 로그인 차단" "$(code -X POST $B/api/inquiry/login -H 'origin: https://evil.example' -H 'content-type: application/json' -d '{"password":"x"}')" "403|503"
+          chk "로그인 없이 상태 변경·삭제 차단" "$(code -X POST $B/api/inquiry/admin -H "origin: $B" -H 'content-type: application/json' -d '{"action":"delete","id":1}')" "401|503"
+          npm i -g wrangler@3 >/dev/null 2>&1
+          n=$(wrangler d1 execute airang-inquiry --remote --json --command "DELETE FROM inquiries WHERE body LIKE '[가상] 운영 자동 점검%'" 2>/dev/null | jq -r '.[0].meta.changes // "?"'); echo "자동 점검 문의 정리: $n건 지움"
+          echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
