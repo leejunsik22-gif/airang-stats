@@ -1,0 +1,24 @@
+name: promo-linkcheck (홍보 원고 연결 주소 확인 — 읽기만)
+on:
+  push:
+    branches: [promo-linkcheck]
+    paths: [".github/workflows/promo-linkcheck.yml"]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 주소 열림·구 이름·학원 자료 확인
+        run: |
+          B=https://airang-daejeon-all.pages.dev; bad=0
+          for u in entry djdonggu djjunggu djseogu yuseong daedeok; do
+            c=$(curl -sL -o /tmp/p -w '%{http_code}' $B/$u/); t=$(grep -o '<title>[^<]*' /tmp/p | head -1 | sed 's/<title>//')
+            echo "$u | $c | $t"; [ "$c" = 200 ] || bad=$((bad+1))
+          done
+          for g in djdonggu djjunggu djseogu yuseong daedeok; do
+            n=$(curl -s https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/$g/academies.json | jq '[.academies[]|select(.n|test("영어"))]|length')
+            pub=$(curl -s https://raw.githubusercontent.com/leejunsik22-gif/airang-cities/main/data/$g/_status.json | jq '.files["academies.json"]|[.published,.official_verify]|join("/")')
+            echo "$g | 이름에 '영어' 들어간 학원·교습소 $n곳 | 공개/검수 $pub"
+          done
+          exit $bad
