@@ -78,3 +78,47 @@ jobs:
             chk "$g 통계 스크립트 없음" "$(curl -s $B/$g/ | grep -c goatcounter.com/count || true)" 0
           done
           echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
+      - name: 실제 시험 주소를 휴대폰 크기 브라우저로 열어 확인 (홈 → 동네 소아과 → 상세 → 전화·길찾기)
+        if: env.ACTION == 'up'
+        run: |
+          mkdir pw && cd pw && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > c.js <<'JS'
+          const { chromium, devices } = require("playwright");
+          (async () => {
+            const B = "https://" + process.env.PROJ + ".pages.dev"; let bad = 0;
+            const ok = (n, c, v) => { console.log((c ? "통과" : "실패") + " | " + n + (v !== undefined ? " (" + v + ")" : "")); if (!c) bad++; };
+            const br = await chromium.launch();
+            for (const [g, want] of [["yuseong", 18], ["djdonggu", 3]]) {
+              const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block" }); const p = await ctx.newPage();
+              const ext = []; p.on("request", (r) => { if (/raw\.githubusercontent|goatcounter|gc\.zgo/.test(r.url())) ext.push(r.url()); });
+              await p.goto(B + "/" + g + "/"); await p.waitForLoadState("networkidle");
+              const chip = p.locator(".q-chips .q-chip").first(); ok(g + " 홈 첫 칸 '동네 소아과'", (await chip.innerText()).includes("동네 소아과"));
+              ok(g + " 홈에 '약국' 바로가기 없음", (await p.locator(".q-chips .q-chip", { hasText: "약국" }).count()) === 0);
+              await chip.click(); await p.waitForFunction(() => typeof HOSP !== "undefined" && HOSP && HOSP.clinics.length > 0, null, { timeout: 15000 }); await p.waitForTimeout(500);
+              const v = await p.locator("#view").innerText();
+              ok(g + " 목록 '" + want + "곳'", v.includes(want + "곳"), (v.match(/\d+곳/) || [""])[0]);
+              ok(g + " 병원·약국·응급실 탭 없음 + 안내", v.includes("병원·약국·응급실 정보는 공식 자료를 확인한 뒤 열어요"));
+              for (const t of ["지금 문 연", "밤에 여는", "야간", "진료 예정"]) ok(g + " '" + t + "' 표시 없음", !v.includes(t));
+              ok(g + " 도안누리 없음", !v.includes("도안누리소아청소년과"));
+              const kids = await p.evaluate(() => HOSP.clinics.map((x, i) => ({ i, n: x.n, t: x.t, a: x.a, p: x.p })).filter((x) => x.p === "소아청소년과"));
+              let telOk = 0, mapOk = 0;
+              for (const k of kids) {
+                await p.evaluate((i) => hsDetail("clinics", i), k.i);
+                const sh = p.locator("#sheet"); await sh.waitFor();
+                const tel = await sh.locator(".acts a[href^='tel:']").getAttribute("href");
+                const map = decodeURIComponent(await sh.locator(".acts a", { hasText: "길찾기" }).getAttribute("href"));
+                if (tel === "tel:" + k.t.replace(/[^\d-]/g, "")) telOk++; else console.log("   전화 다름: " + k.n + " " + tel + " / " + k.t);
+                if (map === "https://map.naver.com/p/search/" + k.n + " " + (k.a || "").split(" ").slice(0, 2).join(" ")) mapOk++; else console.log("   지도 다름: " + k.n + " " + map);
+                if (k === kids[0]) { ok(g + " 상세 '방문 전에 전화로 확인' 화면 안", await sh.getByText("방문 전에 전화로 확인").isVisible()); ok(g + " 상세 전화 버튼 화면 안", await sh.locator(".acts a[href^='tel:']").isVisible()); console.log("   예: " + k.n + " → " + tel + " · " + map); }
+                await p.keyboard.press("Escape");
+              }
+              ok(g + " 소아과 전화 버튼 번호 = 자료 번호", telOk === kids.length, telOk + "/" + kids.length);
+              ok(g + " 소아과 길찾기 = 이름+주소 지도 검색", mapOk === kids.length, mapOk + "/" + kids.length);
+              ok(g + " 운영 자료·통계로 요청 안 나감", ext.length === 0, ext.length);
+              await ctx.close();
+            }
+            await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
+          })();
+          JS
+          sed -i 's/^          //' c.js; node c.js
+
