@@ -3,7 +3,7 @@ name: android-pilot (안드로이드 가상기기 시범 — 082, 운영 무관)
 on:
   push:
     branches: [android-pilot]
-    paths: [".github/workflows/android-pilot.yml", "tools/android_pilot.js"]
+    paths: [".github/workflows/android-pilot.yml", "tools/android_pilot.js", "tools/android_diag.js"]
 permissions:
   contents: write
 jobs:
@@ -30,7 +30,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: |
             adb shell pm list packages | grep -i chrome || true
-            node tools/android_pilot.js
+            node tools/android_diag.js
       - name: 결과 저장(이 가지에만)
         if: always()
         run: |
