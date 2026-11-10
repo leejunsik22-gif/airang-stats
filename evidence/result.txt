@@ -1,4 +1,16 @@
 통과 | 크롬 설치됨
 통과 | 안드로이드 버전 (14)
 통과 | 가상기기 연결 (sdk_gphone64_x86_64)
-오류: browserContext.newPage: Assertion error
+통과 | 크롬 실행 (1번에 성공)
+통과 | [글자 1.0배] 전체 보기 버튼 (‘영어’ 학원·교습소 전체 보기 (223곳) ›)
+통과 | [글자 1.0배] 버튼 잘림 없음·폭 안·44px↑ ({"h":44,"r":394,"vw":412,"cut":false,"dpr":2.625,"fs":"14px"})
+통과 | 터치 → 학원 메뉴 (acas)
+통과 | 학원 메뉴 223곳
+통과 | 검색어 '영어' 전달
+통과 | 목록 스크롤 (0→2502.47607421875)
+통과 | 검색어 바꾸기(수학)
+통과 | 뒤로 가기 → 검색 결과
+오류: page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://airang-hosp-preview.pages.dev/yuseong/#find/%EC%98%81%EC%96%B4", waiting until "load"
+
