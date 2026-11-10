@@ -1,0 +1,6 @@
+가상기기: sdk_gphone64_x86_64 / 안드로이드 14 / 크롬 versionName=113.0.5672.136
+병원 | 홈 첫 칸: 동네 소아과
+병원 | 목록 18곳 표시: false
+병원 | 상세 권오균소아과의원: 전화 tel:042-826-1799 (자료 042-826-1799) 일치 true · 길찾기 https://map.naver.com/p/search/권오균소아과의원 반석로 28 · '방문 전에 전화로 확인' true
+스크롤 시도 1 | 시작 0 → 쓸기마다 0 → 0 → 0 → 0
+오류: locator.click: Timeout 30000ms exceeded.
