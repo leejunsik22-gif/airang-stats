@@ -2,6 +2,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-10 대표 승인: 임시 시험 주소 생성. 대조 통과 의원만(도안누리소아청소년과의원 제외), 병원·약국·응급실 탭 제외.
 # 시험 주소: https://airang-hosp-preview.pages.dev  (별도 Pages 프로젝트. 운영 airang-daejeon-all 은 건드리지 않음)
 # 확인이 끝나면 action=down 으로 이 프로젝트를 지운다(대표 지시).
+# 2026-11-10 079 대표 A안 승인: 같은 시험 주소에 076 '학원 전체 보기'(airang-cities hosp-preview 044d516) 함께 넣어 갤럭시 통합 검수.
 on:
   push:
     branches: [hosp-preview]
@@ -117,6 +118,16 @@ jobs:
               ok(g + " 운영 자료·통계로 요청 안 나감", ext.length === 0, ext.length);
               await ctx.close();
             }
+            // 079: 학원 전체 보기 — 홈 검색 버튼 숫자 = 학원 메뉴 숫자, 뒤로 가기
+            { const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/#find/" + encodeURIComponent("영어")); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const btn = p.locator("#view button", { hasText: "학원·교습소 전체 보기" }); const bt = (await btn.count()) ? await btn.innerText() : "";
+              const n = (bt.match(/\(([\d,]+)곳\)/) || [])[1]; ok("학원 전체 보기 버튼 표시", !!n, bt);
+              const home10 = await p.locator("#view a[href^='#aca/']").count(); ok("홈 검색 학원 10곳", home10 === 10, home10);
+              if (n) { await btn.click(); await p.waitForTimeout(800); const v = await p.locator("#view").innerText();
+                ok("학원 메뉴 같은 숫자", v.includes(n + "곳"), n); ok("학원 메뉴 검색어 '영어'", (await p.locator("#acaq").inputValue()) === "영어");
+                await p.goBack(); await p.waitForTimeout(600); ok("뒤로 가기 → 검색 결과", /#find\//.test(p.url())); }
+              await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
