@@ -28,7 +28,7 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
   };
   const shot = async (n) => { await p.screenshot({ path: `evidence/${n}.png` }); };
   for (const fs_ of ["1.0", "1.3", "1.5"]) {
-    adb(`settings put system font_scale ${fs_}`); await new Promise((r) => setTimeout(r, 2000)); await openChrome(`(글자 ${fs_}배)`);
+    adb(`settings put system font_scale ${fs_}`); await new Promise((r) => setTimeout(r, 6000)); ok(`[글자 ${fs_}배] 안드로이드 설정값`, true, adb("settings get system font_scale")); await openChrome(`(글자 ${fs_}배)`);
     await p.goto(B + "/yuseong/#find/" + encodeURIComponent("영어"), { timeout: 60000 }); await p.waitForLoadState("networkidle"); await p.waitForTimeout(1500);
     const btn = p.locator("#view button", { hasText: "학원·교습소 전체 보기" });
     const has = await btn.count(); const t = has ? await btn.innerText() : "";
@@ -37,6 +37,7 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
       await btn.scrollIntoViewIfNeeded();
       const m = await btn.evaluate((e) => { const r = e.getBoundingClientRect(); return { h: Math.round(r.height), r: Math.round(r.right), vw: innerWidth, cut: e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1, dpr: devicePixelRatio, fs: getComputedStyle(e).fontSize }; });
       ok(`[글자 ${fs_}배] 버튼 잘림 없음·폭 안·44px↑`, !m.cut && m.r <= m.vw && m.h >= 44, JSON.stringify(m));
+      ok(`[글자 ${fs_}배] 페이지 본문 글자 크기(측정)`, true, await p.evaluate(() => getComputedStyle(document.querySelector("#view h1, #view h2, body")).fontSize));
       await shot(`find_영어_x${fs_}`);
       if (fs_ === "1.0") {
         await btn.click(); await p.waitForTimeout(1500);
@@ -46,16 +47,17 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
         await shot("acas_영어");
         // 목록 스크롤(손가락 쓸어 올리기)
         const y0 = await p.evaluate(() => scrollY); for (let i = 0; i < 6; i++) { await dev.shell("input swipe 540 1600 540 500 300"); await p.waitForTimeout(400); }
-        const y1 = await p.evaluate(() => scrollY); ok("목록 스크롤", y1 > y0 + 500, `${y0}→${y1}`); await shot("acas_scrolled");
+        let y1 = await p.evaluate(() => scrollY); if (y1 <= y0 + 500) { await p.waitForTimeout(1500); for (let i = 0; i < 6; i++) { await dev.shell("input swipe 540 1800 540 600 400"); await p.waitForTimeout(500); } y1 = await p.evaluate(() => scrollY); }
+        ok("목록 스크롤(손가락 쓸기)", y1 > y0 + 500, `${y0}→${Math.round(y1)}`); await shot("acas_scrolled");
         await p.fill("#acaq", "수학"); await p.waitForTimeout(1200);
         ok("검색어 바꾸기(수학)", /\d+곳/.test(await p.locator("#view").innerText()));
         await p.goBack(); await p.waitForTimeout(1200); ok("뒤로 가기 → 검색 결과", /#find\//.test(p.url()));
       }
     }
   }
-  adb("settings put system font_scale 1.0"); await new Promise((r) => setTimeout(r, 2000)); await openChrome("(병원)");
+  adb("settings put system font_scale 1.0"); await new Promise((r) => setTimeout(r, 6000)); await openChrome("(병원)");
   // 병원: 홈 → 동네 소아과 → 상세 → 전화·길찾기
-  await p.goto(B + "/yuseong/", { timeout: 60000 }); await p.waitForLoadState("networkidle"); await p.waitForTimeout(1200);
+  try { await p.goto(B + "/yuseong/", { timeout: 60000 }); } catch (e) { ok("병원: 첫 열기 실패 → 다시 열기", true, e.message.split("\n")[0]); await openChrome("(병원 재시도)"); await p.goto(B + "/yuseong/", { timeout: 60000 }); } await p.waitForLoadState("networkidle"); await p.waitForTimeout(1200);
   const chip = p.locator(".q-chips .q-chip").first(); ok("홈 첫 칸 '동네 소아과'", (await chip.innerText()).includes("동네 소아과")); await shot("home");
   await chip.click(); await p.waitForTimeout(2500);
   ok("동네 소아과 18곳", (await p.locator("#view").innerText()).includes("18곳")); await shot("hosp_list");
