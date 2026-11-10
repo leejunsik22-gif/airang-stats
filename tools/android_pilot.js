@@ -27,7 +27,7 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
       ok(`[글자 ${fs_}배] 버튼 잘림 없음·폭 안·44px↑`, !m.cut && m.r <= m.vw && m.h >= 44, JSON.stringify(m));
       await shot(`find_영어_x${fs_}`);
       if (fs_ === "1.0") {
-        await btn.tap(); await p.waitForTimeout(1500);
+        await btn.click(); await p.waitForTimeout(1500);
         ok("터치 → 학원 메뉴", /#acas$/.test(p.url()), p.url().split("#")[1]);
         ok("학원 메뉴 223곳", (await p.locator("#view").innerText()).includes("223곳"));
         ok("검색어 '영어' 전달", (await p.locator("#acaq").inputValue()) === "영어");
@@ -45,10 +45,10 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
   // 병원: 홈 → 동네 소아과 → 상세 → 전화·길찾기
   await p.goto(B + "/yuseong/", { timeout: 60000 }); await p.waitForLoadState("networkidle"); await p.waitForTimeout(1200);
   const chip = p.locator(".q-chips .q-chip").first(); ok("홈 첫 칸 '동네 소아과'", (await chip.innerText()).includes("동네 소아과")); await shot("home");
-  await chip.tap(); await p.waitForTimeout(2500);
+  await chip.click(); await p.waitForTimeout(2500);
   ok("동네 소아과 18곳", (await p.locator("#view").innerText()).includes("18곳")); await shot("hosp_list");
   const first = p.locator("#view .lift, #view button.school").filter({ hasText: "소아" }).first();
-  if (await first.count()) { await first.tap(); await p.waitForTimeout(1200); }
+  if (await first.count()) { await first.click(); await p.waitForTimeout(1200); }
   const sheet = p.locator("#sheet");
   if (await sheet.count()) {
     const tel = await sheet.locator(".acts a[href^='tel:']").first().getAttribute("href").catch(() => null);
