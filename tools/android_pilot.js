@@ -12,20 +12,23 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
   ok("안드로이드 버전", true, adb("getprop ro.build.version.release"));
   const [dev] = await _android.devices(); ok("가상기기 연결", !!dev, dev && dev.model());
   await dev.shell("am force-stop com.android.chrome");
-  let ctx, p, why = "";
-  for (let i = 1; i <= 3 && !p; i++) {   // 가상기기 크롬 연결이 가끔 첫 탭을 못 여는 문제 → 다시 시도(최대 3번)
-    try {
-      await dev.shell("am force-stop com.android.chrome"); await new Promise((r) => setTimeout(r, 2000));
-      ctx = await dev.launchBrowser({ args: ["--disable-fre", "--no-first-run", "--no-default-browser-check"] });
-      await new Promise((r) => setTimeout(r, 3000));
-      p = ctx.pages()[0] || await ctx.newPage();
-    } catch (e) { why += `#${i} ${e.message.split("\n")[0]} `; try { await ctx.close(); } catch (_) {} ctx = p = undefined; }
-  }
-  ok("크롬 실행", !!p, why || "1번에 성공");
-  if (!p) throw new Error("크롬 탭을 열지 못함: " + why);
+  let ctx, p;
+  const openChrome = async (tag) => {   // 글자 크기 설정을 바꾸면 크롬이 닫히므로 매번 다시 연다(첫 탭 문제는 최대 3번 다시 시도)
+    try { if (ctx) await ctx.close(); } catch (_) {} ctx = p = undefined; let why = "";
+    for (let i = 1; i <= 3 && !p; i++) {
+      try {
+        await dev.shell("am force-stop com.android.chrome"); await new Promise((r) => setTimeout(r, 2000));
+        ctx = await dev.launchBrowser({ args: ["--disable-fre", "--no-first-run", "--no-default-browser-check"] });
+        await new Promise((r) => setTimeout(r, 3000));
+        p = ctx.pages()[0] || await ctx.newPage();
+      } catch (e) { why += `#${i} ${e.message.split("\n")[0]} `; try { await ctx.close(); } catch (_) {} ctx = p = undefined; }
+    }
+    ok(`크롬 실행 ${tag}`, !!p, why || "1번에 성공");
+    if (!p) throw new Error("크롬 탭을 열지 못함: " + why);
+  };
   const shot = async (n) => { await p.screenshot({ path: `evidence/${n}.png` }); };
   for (const fs_ of ["1.0", "1.3", "1.5"]) {
-    adb(`settings put system font_scale ${fs_}`); await p.waitForTimeout(1500);
+    adb(`settings put system font_scale ${fs_}`); await new Promise((r) => setTimeout(r, 2000)); await openChrome(`(글자 ${fs_}배)`);
     await p.goto(B + "/yuseong/#find/" + encodeURIComponent("영어"), { timeout: 60000 }); await p.waitForLoadState("networkidle"); await p.waitForTimeout(1500);
     const btn = p.locator("#view button", { hasText: "학원·교습소 전체 보기" });
     const has = await btn.count(); const t = has ? await btn.innerText() : "";
@@ -50,7 +53,7 @@ const adb = (c) => execSync("adb shell " + c).toString().trim();
       }
     }
   }
-  adb("settings put system font_scale 1.0");
+  adb("settings put system font_scale 1.0"); await new Promise((r) => setTimeout(r, 2000)); await openChrome("(병원)");
   // 병원: 홈 → 동네 소아과 → 상세 → 전화·길찾기
   await p.goto(B + "/yuseong/", { timeout: 60000 }); await p.waitForLoadState("networkidle"); await p.waitForTimeout(1200);
   const chip = p.locator(".q-chips .q-chip").first(); ok("홈 첫 칸 '동네 소아과'", (await chip.innerText()).includes("동네 소아과")); await shot("home");
