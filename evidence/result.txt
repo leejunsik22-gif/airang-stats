@@ -1,0 +1,7 @@
+통과 | 크롬 설치됨
+통과 | 안드로이드 버전 (14)
+통과 | 가상기기 연결 (sdk_gphone64_x86_64)
+통과 | 크롬 실행 (ok)
+통과 | [글자 1.0배] 전체 보기 버튼 (‘영어’ 학원·교습소 전체 보기 (223곳) ›)
+통과 | [글자 1.0배] 버튼 잘림 없음·폭 안·44px↑ ({"h":44,"r":394,"vw":412,"cut":false,"dpr":2.625,"fs":"14px"})
+오류: locator.tap: The page does not support tap. Use hasTouch context option to enable touch support.
