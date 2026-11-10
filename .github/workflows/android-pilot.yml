@@ -1,0 +1,39 @@
+name: android-pilot (안드로이드 가상기기 시범 — 082, 운영 무관)
+# 무료 표준 러너 + 안드로이드 에뮬레이터 + 가상기기 안의 크롬으로 시험 주소를 연다. 결과·캡처는 이 가지 evidence/에만 저장.
+on:
+  push:
+    branches: [android-pilot]
+    paths: [".github/workflows/android-pilot.yml", "tools/android_pilot.js"]
+permissions:
+  contents: write
+jobs:
+  emu:
+    if: github.ref == 'refs/heads/android-pilot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: 가상화(KVM) 켜기
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm; ls -l /dev/kvm
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm i playwright@1.48.2 >/dev/null 2>&1 && echo ok
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: |
+            adb shell pm list packages | grep -i chrome || true
+            node tools/android_pilot.js
+      - name: 결과 저장(이 가지에만)
+        if: always()
+        run: |
+          [ -d evidence ] || exit 0
+          git config user.name "airang-bot"; git config user.email "actions@users.noreply.github.com"
+          git add evidence && git commit -m "안드로이드 가상기기 시범 결과·캡처" && git pull --rebase -q && git push -q || true
