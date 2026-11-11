@@ -1,6 +1,4 @@
-🌎 Deploying...
-✨ Deployment complete! Take a peek over at https://fa00bcd5.airang-daejeon-all.pages.dev
-앱 8곳 한 번에 올림
+앱 그대로 (올리지 않음)
 임시 도메인 — 주소 연결 건너뜀: djdonggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djjunggu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
 임시 도메인 — 주소 연결 건너뜀: djseogu.daejeon.example.invalid (도메인 확정 후 cities.json 교체)
