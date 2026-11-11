@@ -1,0 +1,24 @@
+name: prod-check-111 (학원 전체 보기 운영 반영 사후 확인 — 읽기만)
+on:
+  push:
+    branches: [prod-check-111]
+    paths: [".github/workflows/prod-check-111.yml", "tools/prod_check_aca.js"]
+permissions:
+  contents: write
+jobs:
+  check:
+    if: github.ref == 'refs/heads/prod-check-111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1 && echo ok
+      - run: node tools/prod_check_aca.js
+      - name: 결과 저장(이 가지에만)
+        if: always()
+        run: |
+          [ -d evidence ] || exit 0
+          git config user.name "airang-bot"; git config user.email "actions@users.noreply.github.com"
+          git add evidence && git commit -m "운영 사후 확인 결과·캡처(111)" && git push -q || true
