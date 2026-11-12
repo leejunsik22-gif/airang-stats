@@ -97,13 +97,16 @@ jobs:
               await ctx.close();
             }
             // 118: 크롬 '텍스트 크기 조절'(화면 확대) 150~300% — 아래 메뉴 5칸 모두 보임, 가로 밀림 없음
-            for (const z of [1.5, 2, 2.5, 3]) {
-              const ctx = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p = await ctx.newPage();
-              await p.goto(B + "/yuseong/#find/" + encodeURIComponent("수학")); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+            // 118 v03: 홈·학원·병원·마이 화면도 — 화면 폭이 확대 비율대로 유지(내용 때문에 화면이 넓어지지 않음)
+            for (const z of [1.5, 2, 2.5, 3]) for (const scr of ["", "#find/" + encodeURIComponent("수학"), "#acas", "#hosp", "#my"]) {
+              const W = Math.round(412 / z);
+              const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/" + scr); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
               const r = await p.evaluate(() => { const nav = document.querySelector("nav.nav"), nr = nav.getBoundingClientRect();
-                const vis = [...nav.querySelectorAll(".navi")].filter((b) => { const q = b.getBoundingClientRect(); return q.left >= nr.left - 1 && q.right <= nr.right + 1 && q.width > 20; }).length;
-                return { vis, h: document.documentElement.scrollWidth > innerWidth + 2 }; });
-              ok("확대 " + z * 100 + "% 아래 메뉴 5칸 보임", r.vis === 5, r.vis); ok("확대 " + z * 100 + "% 가로 밀림 없음", !r.h);
+                const vis = [...nav.querySelectorAll(".navi")].filter((b) => { const q = b.getBoundingClientRect(); return q.left >= nr.left - 1 && q.right <= innerWidth + 1 && q.width > 20; }).length;
+                return { vis, iw: innerWidth, sw: document.documentElement.scrollWidth }; });
+              const nm = "확대 " + z * 100 + "% " + (scr ? decodeURIComponent(scr) : "홈");
+              ok(nm + " 아래 메뉴 5칸 보임", r.vis === 5, r.vis); ok(nm + " 화면 폭 유지·가로 밀림 없음", Math.abs(r.iw - W) <= 1 && r.sw <= r.iw + 2, W + "/" + r.iw + "/" + r.sw);
               await ctx.close();
             }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
