@@ -1,0 +1,70 @@
+name: prod-check-118 (117·118 운영 반영 뒤 운영 주소 확인 — 읽기만)
+on:
+  push:
+    branches: [prod-check-118]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      PROJ: airang-daejeon-all
+      GUS: "djdonggu djjunggu djseogu yuseong daedeok"
+    steps:
+      - name: 운영 주소에서 확인 (주소·안내 페이지)
+        run: |
+          B=https://airang-daejeon-all.pages.dev; ok=0; bad=0
+          chk() { if [ "$2" = "$3" ]; then echo "통과 | $1 ($2)"; ok=$((ok+1)); else echo "실패 | $1 (기대 $3, 실제 $2)"; bad=$((bad+1)); fi; }
+          chk "F2 기본 주소 → 입구로 넘김(302)" "$(curl -s -o /dev/null -w '%{http_code}' $B/)" 302
+          chk "F2 넘기는 곳 = /entry/" "$(curl -s -o /dev/null -w '%{redirect_url}' $B/ | sed 's#^https://[^/]*##')" /entry/
+          chk "F2 기본 주소에 개발용 목록 없음" "$(curl -sL $B/ | grep -c '아이랑 (시험)' || true)" 0
+          chk "입구 열림" "$(curl -s -o /dev/null -w '%{http_code}' $B/entry/)" 200
+          for g in $GUS; do
+            chk "$g 화면 열림" "$(curl -s -o /dev/null -w '%{http_code}' $B/$g/)" 200
+            curl -s $B/$g/guide/ -o gi.html
+            chk "$g F1 안내 페이지 열림" "$(curl -s -o /dev/null -w '%{http_code}' $B/$g/guide/)" 200
+            chk "$g F1 안내 페이지 '0곳·0개' 없음" "$(grep -oE '>0(곳|개)<' gi.html | wc -l)" 0
+            chk "$g F1 안내 페이지 '소아과' 없음" "$(grep -c '소아과' gi.html || true)" 0
+            chk "$g F1 없는 소아과 페이지로 링크 없음" "$(curl -s $B/$g/guide/school-start.html | grep -c 'pediatrics.html' || true)" 0
+                      done
+          echo "합계: 통과 $ok / 실패 $bad"; [ $bad -eq 0 ]
+      - name: 운영 주소를 휴대폰 크기 브라우저로 열어 확인 (F3 + 학원 검색)
+        run: |
+          mkdir pw && cd pw && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > c.js <<'JS'
+          const { chromium, devices } = require("playwright");
+          (async () => {
+            const B = "https://airang-daejeon-all.pages.dev"; let bad = 0;
+            const ok = (n, c, v) => { console.log((c ? "통과" : "실패") + " | " + n + (v !== undefined ? " (" + v + ")" : "")); if (!c) bad++; };
+            const br = await chromium.launch();
+            for (const g of process.env.GUS.split(" ")) {
+              const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block" }); const p = await ctx.newPage();
+              const errs = []; p.on("pageerror", (e) => errs.push(String(e)));
+              await p.goto(B + "/" + g + "/?nocount=1"); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const hero = await p.locator("#view p").filter({ hasText: "믿을 수 있는 정보" }).first().innerText().catch(() => "");
+              ok(g + " F3 소개 문구에 병원·혜택 없음", hero.length > 0 && !/병원|혜택/.test(hero), hero);
+              const ph = await p.locator("input[name=q]").getAttribute("placeholder"); ok(g + " F3 검색 안내", ph === "학원, 학교 이름", ph);
+              const chips = await p.locator(".q-chips .q-chip").allInnerTexts(); ok(g + " F3 바로가기 칩", chips.join("/") === "우리 동네 학원/학교 일정", chips.join("/"));
+              await p.fill("input[name=q]", "영어"); await p.press("input[name=q]", "Enter"); await p.waitForTimeout(1500);
+              const bt = await p.locator("#view button", { hasText: "학원·교습소 전체 보기" }).innerText().catch(() => "");
+              ok(g + " 영어 검색 → 전체 보기 버튼", /\(\d[\d,]*곳\)/.test(bt), bt);
+              ok(g + " 스크립트 오류 없음", errs.length === 0, errs.join(" | ").slice(0, 200));
+              await ctx.close();
+            }
+            // 118: 크롬 '텍스트 크기 조절'(화면 확대) 150~300% — 아래 메뉴 5칸 모두 보임, 가로 밀림 없음
+            // 118 v03: 홈·학원·병원·마이 화면도 — 화면 폭이 확대 비율대로 유지(내용 때문에 화면이 넓어지지 않음)
+            for (const z of [1.5, 2, 2.5, 3]) for (const scr of ["", "#find/" + encodeURIComponent("수학"), "#acas", "#hosp", "#my"]) {
+              const W = Math.round(412 / z);
+              const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/?nocount=1" + scr); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const r = await p.evaluate(() => { const nav = document.querySelector("nav.nav"), nr = nav.getBoundingClientRect();
+                const vis = [...nav.querySelectorAll(".navi")].filter((b) => { const q = b.getBoundingClientRect(); return q.left >= nr.left - 1 && q.right <= innerWidth + 1 && q.width > 20; }).length;
+                return { vis, iw: innerWidth, sw: document.documentElement.scrollWidth }; });
+              const nm = "확대 " + z * 100 + "% " + (scr ? decodeURIComponent(scr) : "홈");
+              ok(nm + " 아래 메뉴 5칸 보임", r.vis === 5, r.vis); ok(nm + " 화면 폭 유지·가로 밀림 없음", Math.abs(r.iw - W) <= 1 && r.sw <= r.iw + 2, W + "/" + r.iw + "/" + r.sw);
+              await ctx.close();
+            }
+            await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
+          })();
+          JS
+          sed -i 's/^          //' c.js; PROJ=$PROJ GUS="$GUS" node c.js
