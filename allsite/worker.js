@@ -22,7 +22,8 @@ export default {
     if (!key) {
       // 아직 안 연 도시 주소(…daejeon.example.invalid)로 들어오면 입구로 보냄
       if (url.hostname.endsWith(".daejeon.example.invalid")) return Response.redirect("/entry/", 302);   // (자체 도메인은 아직 없음 — pages.dev 는 경로 방식으로 처리)
-      if (url.pathname === "/") return new Response(LIST, { headers: { "content-type": "text/html; charset=utf-8" } });
+      if (url.pathname === "/") return Response.redirect(new URL("/entry/", url).toString(), 302);   // 117(2026-11-12): 기본 주소는 개발용 목록 대신 입구로 (목록은 /_list/ 에서만)
+      if (url.pathname === "/_list/") return new Response(LIST, { headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex" } });
       return env.ASSETS.fetch(req);
     }
     const inner = new URL(url);
