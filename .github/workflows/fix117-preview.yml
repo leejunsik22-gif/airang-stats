@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: 할 일 (up=올리기 / down=내리기)
         run: |
-          a=$(tr -d ' \n' < fix117-preview.action); echo "ACTION=$a" >> $GITHUB_ENV; echo "할 일 = $a"; test "$a" = up -o "$a" = down
+          a=$(head -1 fix117-preview.action | tr -d " \n"); echo "ACTION=$a" >> $GITHUB_ENV; echo "할 일 = $a"; test "$a" = up -o "$a" = down
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: npm i -g wrangler@3 >/dev/null 2>&1
@@ -94,6 +94,16 @@ jobs:
               const bt = await p.locator("#view button", { hasText: "학원·교습소 전체 보기" }).innerText().catch(() => "");
               ok(g + " 영어 검색 → 전체 보기 버튼", /\(\d[\d,]*곳\)/.test(bt), bt);
               ok(g + " 스크립트 오류 없음", errs.length === 0, errs.join(" | ").slice(0, 200));
+              await ctx.close();
+            }
+            // 118: 크롬 '텍스트 크기 조절'(화면 확대) 150~300% — 아래 메뉴 5칸 모두 보임, 가로 밀림 없음
+            for (const z of [1.5, 2, 2.5, 3]) {
+              const ctx = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/#find/" + encodeURIComponent("수학")); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const r = await p.evaluate(() => { const nav = document.querySelector("nav.nav"), nr = nav.getBoundingClientRect();
+                const vis = [...nav.querySelectorAll(".navi")].filter((b) => { const q = b.getBoundingClientRect(); return q.left >= nr.left - 1 && q.right <= nr.right + 1 && q.width > 20; }).length;
+                return { vis, h: document.documentElement.scrollWidth > innerWidth + 2 }; });
+              ok("확대 " + z * 100 + "% 아래 메뉴 5칸 보임", r.vis === 5, r.vis); ok("확대 " + z * 100 + "% 가로 밀림 없음", !r.h);
               await ctx.close();
             }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
