@@ -3,6 +3,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 시험 주소: https://airang-hosp-preview.pages.dev  (별도 Pages 프로젝트. 운영 airang-daejeon-all 은 건드리지 않음)
 # 확인이 끝나면 action=down 으로 이 프로젝트를 지운다(대표 지시).
 # 2026-11-10 079 대표 A안 승인: 같은 시험 주소에 076 '학원 전체 보기'(airang-cities hosp-preview 044d516) 함께 넣어 갤럭시 통합 검수.
+# 2026-11-13 127 대표 결정(가안): 개인 메일 → 문의하기 수정본도 같은 시험 주소에(fix-ime-hosp에 fix-contact 합침).
 # 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-hosp(=fix-ime-preview + hosp-preview 병원 작업) 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
@@ -46,7 +47,7 @@ jobs:
           cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = fix-ime-hosp && cd ..
           args="--city entry"; for g in $GUS; do args="$args --city $g"; done
           python3 src/app/build.py --out site $args >/dev/null
-          rm -rf site/inquiry   # 문의하기는 이 시험 범위 밖
+          rm -rf site/inquiry/admin   # 2026-11-13 127: 문의하기 화면(정적)만 두고 관리자 화면은 뺌. 시험 주소에는 접수 기능(functions)이 없어 보내기는 실패함 = 운영 접수함과 섞이지 않음
           printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > site/_headers
           for g in $GUS; do
             mkdir -p site/$g/data && cp live/data/$g/* site/$g/data/
@@ -150,6 +151,14 @@ jobs:
               await p.goto(B + "/yuseong/#acas"); await p.waitForTimeout(1200);
               const b3 = await p.evaluate(() => { const c = document.querySelector(".aca-sum"); if (!c) return null; const v = [...c.querySelectorAll("div")].find(d => /원$/.test(d.innerText) && !d.children.length); const lh = parseFloat(getComputedStyle(v).fontSize) * 1.6; return v.getBoundingClientRect().height <= lh; }); ok("② 수강료 중간값 한 줄", b3 === true, b3);
               const sw = await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2); ok("② 가로 넘침 없음", sw);
+              await ctx.close(); }
+            // 127: 개인 메일 주소 화면 노출 정리 → 문의하기
+            { const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
+              for (const r of ["", "#my", "#about", "#news", "#hosp"]) { await p.goto(B + "/yuseong/" + r); await p.waitForTimeout(1200); ok("127 " + (r || "홈") + " 개인 메일 주소 없음", !/leejunsik22@gmail/.test(await p.content())); }
+              await p.goto(B + "/yuseong/#my"); await p.waitForTimeout(1000);
+              const href = await p.locator("a", { hasText: "문의하기" }).first().getAttribute("href"); ok("127 마이 → 문의하기 링크", /inquiry\/\?kind=use/.test(href || ""), href);
+              await p.goto(new URL(href, B + "/yuseong/").href); await p.waitForTimeout(1000); ok("127 문의하기 화면 열림·이용 문의 선택", await p.locator("input[value=use]").isChecked());
+              await p.goto(B + "/entry/"); await p.waitForTimeout(800); ok("127 입구 개인 메일 주소 없음", !/leejunsik22@gmail/.test(await p.content()));
               await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
