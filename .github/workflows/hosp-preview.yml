@@ -3,7 +3,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 시험 주소: https://airang-hosp-preview.pages.dev  (별도 Pages 프로젝트. 운영 airang-daejeon-all 은 건드리지 않음)
 # 확인이 끝나면 action=down 으로 이 프로젝트를 지운다(대표 지시).
 # 2026-11-10 079 대표 A안 승인: 같은 시험 주소에 076 '학원 전체 보기'(airang-cities hosp-preview 044d516) 함께 넣어 갤럭시 통합 검수.
-# 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-preview 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
+# 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-hosp(=fix-ime-preview + hosp-preview 병원 작업) 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
   push:
@@ -36,14 +36,14 @@ jobs:
           wrangler pages project list 2>/dev/null | grep -c "$PROJ" | { read n; echo "남은 프로젝트 수: $n"; test "$n" = 0; }
       - uses: actions/checkout@v4
         if: env.ACTION == 'up'
-        with: { repository: leejunsik22-gif/airang-cities, ref: fix-ime-preview, path: src }
+        with: { repository: leejunsik22-gif/airang-cities, ref: fix-ime-hosp, path: src }
       - uses: actions/checkout@v4
         if: env.ACTION == 'up'
         with: { repository: leejunsik22-gif/airang-cities, ref: main, path: live, sparse-checkout: data }
       - name: 화면 빌드 (시험 가지) + 시험 자료 넣기
         if: env.ACTION == 'up'
         run: |
-          cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = fix-ime-preview && cd ..
+          cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = fix-ime-hosp && cd ..
           args="--city entry"; for g in $GUS; do args="$args --city $g"; done
           python3 src/app/build.py --out site $args >/dev/null
           rm -rf site/inquiry   # 문의하기는 이 시험 범위 밖
