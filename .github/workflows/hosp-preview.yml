@@ -3,6 +3,8 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 시험 주소: https://airang-hosp-preview.pages.dev  (별도 Pages 프로젝트. 운영 airang-daejeon-all 은 건드리지 않음)
 # 확인이 끝나면 action=down 으로 이 프로젝트를 지운다(대표 지시).
 # 2026-11-10 079 대표 A안 승인: 같은 시험 주소에 076 '학원 전체 보기'(airang-cities hosp-preview 044d516) 함께 넣어 갤럭시 통합 검수.
+# 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-preview 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
+#   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
   push:
     branches: [hosp-preview]
@@ -34,14 +36,14 @@ jobs:
           wrangler pages project list 2>/dev/null | grep -c "$PROJ" | { read n; echo "남은 프로젝트 수: $n"; test "$n" = 0; }
       - uses: actions/checkout@v4
         if: env.ACTION == 'up'
-        with: { repository: leejunsik22-gif/airang-cities, ref: hosp-preview, path: src }
+        with: { repository: leejunsik22-gif/airang-cities, ref: fix-ime-preview, path: src }
       - uses: actions/checkout@v4
         if: env.ACTION == 'up'
         with: { repository: leejunsik22-gif/airang-cities, ref: main, path: live, sparse-checkout: data }
       - name: 화면 빌드 (시험 가지) + 시험 자료 넣기
         if: env.ACTION == 'up'
         run: |
-          cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = hosp-preview && cd ..
+          cd src && git log --oneline -1 && test "$(git rev-parse --abbrev-ref HEAD)" = fix-ime-preview && cd ..
           args="--city entry"; for g in $GUS; do args="$args --city $g"; done
           python3 src/app/build.py --out site $args >/dev/null
           rm -rf site/inquiry   # 문의하기는 이 시험 범위 밖
@@ -127,6 +129,27 @@ jobs:
               if (n) { await btn.click(); await p.waitForTimeout(800); const v = await p.locator("#view").innerText();
                 ok("학원 메뉴 같은 숫자", v.includes(n + "곳"), n); ok("학원 메뉴 검색어 '영어'", (await p.locator("#acaq").inputValue()) === "영어");
                 await p.goBack(); await p.waitForTimeout(600); ok("뒤로 가기 → 검색 결과", /#find\//.test(p.url())); }
+              await ctx.close(); }
+            // 124: ① 검색칸 한글 조합(가상 IME) — 병원·학교·학원(느리게)
+            { const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage(); const cdp = await ctx.newCDPSession(p);
+              const P = { "권": ["ㄱ", "구", "궈", "권"], "오": ["ㅇ", "오"], "균": ["ㄱ", "규", "균"], "수": ["ㅅ", "수"], "학": ["ㅎ", "하", "학"] };
+              const typ = async (sel, w) => { await p.click(sel); for (const ch of w) { for (const x of (P[ch] || [ch])) { await cdp.send("Input.imeSetComposition", { text: x, selectionStart: x.length, selectionEnd: x.length }); await p.waitForTimeout(450); } await cdp.send("Input.insertText", { text: ch }); await p.waitForTimeout(450); } await p.waitForTimeout(800); };
+              await p.goto(B + "/yuseong/#hosp"); await p.waitForFunction(() => typeof HOSP !== "undefined" && HOSP && HOSP.clinics.length > 0, null, { timeout: 15000 }); await p.waitForTimeout(500);
+              await typ("#hq", "권오균"); ok("① 병원 검색칸 '권오균' 그대로", (await p.inputValue("#hq")) === "권오균", await p.inputValue("#hq"));
+              ok("① 병원 검색 결과 1곳(입력 중 결과만 바뀜)", /(^|\D)1곳/.test(await p.locator("#view").innerText()));
+              await p.goto(B + "/yuseong/#schools"); await p.waitForTimeout(1200); await typ("#q", "학"); ok("① 학교 검색칸 '학' 그대로", (await p.inputValue("#q")) === "학", await p.inputValue("#q"));
+              await p.goto(B + "/yuseong/#acas"); await p.waitForTimeout(1200); await typ("#acaq", "수학"); ok("① 학원 검색칸(느리게) '수학' 그대로", (await p.inputValue("#acaq")) === "수학", await p.inputValue("#acaq"));
+              await ctx.close(); }
+            // 124: ② 글자 최대(300%) 보기 3건
+            { const z = 3, W = Math.round(412 / z); const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/"); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const b1 = await p.evaluate(() => { const b = document.querySelector("button.banner3"); if (!b) return null; const R = b.getBoundingClientRect(), t = [...b.querySelectorAll(".bt b,.bt span")].map(e => e.getBoundingClientRect()), G = b.querySelector(".img-tag").getBoundingClientRect(); const ov = (a, c) => !(a.right <= c.left || c.right <= a.left || a.bottom <= c.top || c.bottom <= a.top); return { cut: t.some(r => r.bottom > R.bottom + 1), over: t.some(r => ov(r, G)) }; });
+              ok("② 행사 띠 글자 잘림 없음·AI 표시 안 겹침", !b1 || (!b1.cut && !b1.over), JSON.stringify(b1));
+              await p.goto(B + "/yuseong/#find/" + encodeURIComponent("영어")); await p.waitForTimeout(1200);
+              const b2 = await p.evaluate(() => { const d = document.querySelector("a.find-row div div"); return d ? d.scrollWidth <= d.clientWidth + 1 : null; }); ok("② 검색 결과 이름 잘림 없음", b2 === true, b2);
+              await p.goto(B + "/yuseong/#acas"); await p.waitForTimeout(1200);
+              const b3 = await p.evaluate(() => { const c = document.querySelector(".aca-sum"); if (!c) return null; const v = [...c.querySelectorAll("div")].find(d => /원$/.test(d.innerText) && !d.children.length); const lh = parseFloat(getComputedStyle(v).fontSize) * 1.6; return v.getBoundingClientRect().height <= lh; }); ok("② 수강료 중간값 한 줄", b3 === true, b3);
+              const sw = await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2); ok("② 가로 넘침 없음", sw);
               await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
