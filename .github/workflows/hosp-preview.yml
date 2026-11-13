@@ -5,6 +5,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-10 079 대표 A안 승인: 같은 시험 주소에 076 '학원 전체 보기'(airang-cities hosp-preview 044d516) 함께 넣어 갤럭시 통합 검수.
 # 2026-11-13 127 대표 결정(가안): 개인 메일 → 문의하기 수정본도 같은 시험 주소에(fix-ime-hosp에 fix-contact 합침).
 # 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-hosp(=fix-ime-preview + hosp-preview 병원 작업) 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
+# 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
   push:
@@ -159,6 +160,13 @@ jobs:
               const href = await p.locator("a", { hasText: "문의하기" }).first().getAttribute("href"); ok("127 마이 → 문의하기 링크", /inquiry\/\?kind=use/.test(href || ""), href);
               await p.goto(new URL(href, B + "/yuseong/").href); await p.waitForTimeout(1000); ok("127 문의하기 화면 열림·이용 문의 선택", await p.locator("input[value=use]").isChecked());
               await p.goto(B + "/entry/"); await p.waitForTimeout(800); ok("127 입구 개인 메일 주소 없음", !/leejunsik22@gmail/.test(await p.content()));
+              await ctx.close(); }
+            // 129: 글자 최대 홈 검색칸 + 학원·유치원 화면 하단 메뉴 불
+            { const z = 1.8, W = Math.round(412 / z); const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/"); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const s = await p.evaluate(() => { const f = document.querySelector(".search-v2"); const i = f.querySelector("input"), b = f.querySelector(".bi"); return { fw: Math.round(f.getBoundingClientRect().width), iw: Math.round(i.getBoundingClientRect().width), icon: b ? getComputedStyle(b).display : "none" }; });
+              ok("129 글자 최대 홈 검색칸 입력 폭 ≥ 칸의 60%", s.iw >= s.fw * 0.6, JSON.stringify(s));
+              for (const r of ["acas", "kinders"]) { await p.goto(B + "/yuseong/#" + r); await p.waitForTimeout(1000); const on = await p.evaluate(() => [...document.querySelectorAll(".navi.on")].map(b => b.dataset.tab).join()); ok("129 " + r + " 하단 메뉴 '홈'에 불", on === "home", on); }
               await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
