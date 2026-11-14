@@ -6,6 +6,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 127 대표 결정(가안): 개인 메일 → 문의하기 수정본도 같은 시험 주소에(fix-ime-hosp에 fix-contact 합침).
 # 2026-11-13 대표 승인(124): 같은 시험 주소의 화면을 airang-cities fix-ime-hosp(=fix-ime-preview + hosp-preview 병원 작업) 로 바꿈 = 운영 main(117·118 반영본) + ①검색칸 한글 입력 수정 + ②글자 최대 보기 3건 + 병원 시험 자료(그대로).
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
+# 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
   push:
@@ -166,6 +167,12 @@ jobs:
               await p.goto(B + "/yuseong/"); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
               const s = await p.evaluate(() => { const f = document.querySelector(".search-v2"); const i = f.querySelector("input"), b = f.querySelector(".bi"); return { fw: Math.round(f.getBoundingClientRect().width), iw: Math.round(i.getBoundingClientRect().width), icon: b ? getComputedStyle(b).display : "none" }; });
               ok("129 글자 최대 홈 검색칸 입력 폭 ≥ 칸의 60%", s.iw >= s.fw * 0.6, JSON.stringify(s));
+              await ctx.close(); }
+            // 129 v02: 갤럭시 실제 글자 최대(약 300%) — 검색칸 입력 한 줄 + 찾기 버튼 아래 줄
+            { const z = 3, W = Math.round(412 / z); const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
+              await p.goto(B + "/yuseong/"); await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
+              const s3 = await p.evaluate(() => { const f = document.querySelector(".search-v2"), i = f.querySelector("input"), b = f.querySelector(".btn"); const R = f.getBoundingClientRect(), I = i.getBoundingClientRect(), Bt = b.getBoundingClientRect(); return { fw: Math.round(R.width), iw: Math.round(I.width), below: Bt.top >= I.bottom - 1, inside: Bt.right <= R.right + 1 && Bt.bottom <= R.bottom + 1 }; });
+              ok("129 v02 글자 300% 검색 입력 폭 ≥ 칸의 80% · 찾기 버튼 아래 줄 · 칸 안", s3.iw >= s3.fw * 0.8 && s3.below && s3.inside, JSON.stringify(s3));
               for (const r of ["acas", "kinders"]) { await p.goto(B + "/yuseong/#" + r); await p.waitForTimeout(1000); const on = await p.evaluate(() => [...document.querySelectorAll(".navi.on")].map(b => b.dataset.tab).join()); ok("129 " + r + " 하단 메뉴 '홈'에 불", on === "home", on); }
               await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
