@@ -1,4 +1,4 @@
-# airang-stats — 클로드 작업 규칙 (131B v01, 2026-11-14)
+# airang-stats — 클로드 작업 규칙 (131B v02, 2026-11-14)
 
 아이랑 대전의 **배포·관리자·운영 확인** 저장소. 앱 원본은 airang-cities 에 있다(규칙: airang-cities/CLAUDE.md).
 작업 시작 전 프로젝트 문서 **「현재 상태판」 최신 판(131A…)**을 먼저 읽는다.
@@ -8,6 +8,8 @@
 |---|---|---|
 | `cf-apps.yml` | airang-cities **main** 을 그대로 빌드해 운영(airang-daejeon-all) 배포. 6시간마다 + 수동 | main 이 아닌 원본은 스스로 거부. **수동 실행 = 운영 배포 → 대표 "승인" 뒤에만** |
 | `admin.yml` 등 | 관리자 화면(airang-daejeon-admin) 배포 | 관리자 변경도 운영 변경 |
+| `cf-all.yml` | 이름은 "(시험)"이지만 **운영 사이트(airang-daejeon-all)에 올림** | 운영 배포 → 승인 필요. 지금은 cf-apps 를 씀, 실행하지 않는다 |
+| `cf-move.yml` | 도시 주소·DNS 를 옮김 | 운영 주소 변경 → 승인 필요, 실행하지 않는다 |
 | `hosp-preview.yml` (hosp-preview 가지) | 시험 주소 airang-hosp-preview 빌드 + 자동 확인. 원본 = airang-cities `fix-ime-hosp` | 시험용. 작업마다 확인 항목을 덧붙이고 이전 항목은 지우지 않는다 |
 | `inquiry-live-check.yml` | 운영 문의 접수 1건 넣고 확인 뒤 삭제 | 운영 D1 을 건드리므로 필요할 때만 |
 | `prod-check-<번호>` 가지 | 운영 반영 직후 운영 주소 확인(?nocount=1, 통계 차단) | 확인만, 변경 없음 |
