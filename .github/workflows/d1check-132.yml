@@ -1,0 +1,28 @@
+# 2026-11-15 132: 시험 주소와 운영 D1 분리 확인 — 읽기 전용(조회·GET만). 배포·설정 변경·문의 접수 없음.
+name: d1check-132 (읽기 전용)
+on:
+  push:
+    branches: [d1check-132]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ec2068662f417d156ec0ebeda41a396e
+    steps:
+      - name: 두 사이트 설정의 D1 연결 비교 (ID 는 앞 8자리만 표시)
+        run: |
+          A=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects
+          mask(){ sed -E 's/([0-9a-f]{8})[0-9a-f-]{20,}/\1…/g'; }
+          for p in airang-hosp-preview airang-daejeon-all; do
+            c=$(curl -s "$A/$p" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+            echo "== $p 조회 성공: $(echo "$c" | jq -r .success)"
+            echo "$c" | jq -c '{prod_d1: (.result.deployment_configs.production.d1_databases // {}), preview_d1: (.result.deployment_configs.preview.d1_databases // {}), latest_functions: (.result.latest_deployment.uses_functions // null)}' | mask
+          done
+          D=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database
+          echo "== D1 목록(이름·ID 앞 8자리)"; curl -s "$D" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq -r '.result[] | "\(.name)  \(.uuid[0:8])…"'
+      - name: 실제 주소 GET 확인 (로그인·접수 안 함)
+        run: |
+          for u in https://airang-hosp-preview.pages.dev/api/inquiry/admin https://airang-hosp-preview.pages.dev/api/inquiry https://airang-daejeon-all.pages.dev/api/inquiry/admin; do
+            code=$(curl -s -o /tmp/b -w "%{http_code} %{content_type}" "$u"); echo "$u → $code | $(head -c 90 /tmp/b | tr '\n' ' ')"
+          done
