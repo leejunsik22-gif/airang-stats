@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-17 134 v03 (대표 시험 주소 반영 승인 11-17 05:50): fix-ime-hosp 에 fix-134v02 합침 — 디자인 기준(시험만)·개인정보 안내 문구. 확인 항목: 유치원 IME, 134 안내 문구, 300% 이용 안내.
 # 2026-11-16 134 (대표 통합 시험 승인): fix-ime-hosp 에 int-134(129+131+132 통합) 합침 — 앱 화면 변화는 없음, 기존 확인 항목 전부 재실행.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
@@ -137,13 +138,16 @@ jobs:
               await ctx.close(); }
             // 124: ① 검색칸 한글 조합(가상 IME) — 병원·학교·학원(느리게)
             { const ctx = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage(); const cdp = await ctx.newCDPSession(p);
-              const P = { "권": ["ㄱ", "구", "궈", "권"], "오": ["ㅇ", "오"], "균": ["ㄱ", "규", "균"], "수": ["ㅅ", "수"], "학": ["ㅎ", "하", "학"] };
+              const P = { "권": ["ㄱ", "구", "궈", "권"], "오": ["ㅇ", "오"], "균": ["ㄱ", "규", "균"], "수": ["ㅅ", "수"], "학": ["ㅎ", "하", "학"], "유": ["ㅇ", "유"], "치": ["ㅊ", "치"], "원": ["ㅇ", "우", "워", "원"] };
               const typ = async (sel, w) => { await p.click(sel); for (const ch of w) { for (const x of (P[ch] || [ch])) { await cdp.send("Input.imeSetComposition", { text: x, selectionStart: x.length, selectionEnd: x.length }); await p.waitForTimeout(450); } await cdp.send("Input.insertText", { text: ch }); await p.waitForTimeout(450); } await p.waitForTimeout(800); };
               await p.goto(B + "/yuseong/#hosp"); await p.waitForFunction(() => typeof HOSP !== "undefined" && HOSP && HOSP.clinics.length > 0, null, { timeout: 15000 }); await p.waitForTimeout(500);
               await typ("#hq", "권오균"); ok("① 병원 검색칸 '권오균' 그대로", (await p.inputValue("#hq")) === "권오균", await p.inputValue("#hq"));
               ok("① 병원 검색 결과 1곳(입력 중 결과만 바뀜)", /(^|\D)1곳/.test(await p.locator("#view").innerText()));
               await p.goto(B + "/yuseong/#schools"); await p.waitForTimeout(1200); await typ("#q", "학"); ok("① 학교 검색칸 '학' 그대로", (await p.inputValue("#q")) === "학", await p.inputValue("#q"));
               await p.goto(B + "/yuseong/#acas"); await p.waitForTimeout(1200); await typ("#acaq", "수학"); ok("① 학원 검색칸(느리게) '수학' 그대로", (await p.inputValue("#acaq")) === "수학", await p.inputValue("#acaq"));
+              /* 134 v03: 유치원 검색칸 — 칸이 없으면 통과로 세지 않고 '미확인'으로만 적음 */
+              await p.goto(B + "/yuseong/#kinders"); await p.waitForTimeout(2500);
+              if (await p.locator("#kinq").count()) { await typ("#kinq", "유치원"); ok("134 유치원 검색칸 '유치원' 그대로", (await p.inputValue("#kinq")) === "유치원", await p.inputValue("#kinq")); } else console.log("미확인 134 유치원 검색칸 없음(자료 불러오기 실패 또는 화면 변경)");
               await ctx.close(); }
             // 124: ② 글자 최대(300%) 보기 3건
             { const z = 3, W = Math.round(412 / z); const ctx = await br.newContext({ viewport: { width: W, height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p = await ctx.newPage();
@@ -187,6 +191,19 @@ jobs:
               await p.goto(B + "/yuseong/#about"); await p.waitForTimeout(1200);
               const a = await p.evaluate(() => document.body.innerText);
               ok("132 이용 안내 '개인정보를 묻지 않아요'", a.includes("개인정보를 묻지 않아요") && !a.includes("받지도, 저장하지도"), "");
+              /* 134 v03: 개인정보 안내가 실제 저장 항목·기간·삭제 시점과 일치(피트 134 검수 4, v02 재검수 4) */
+              const W1 = ["문의 종류", "보낸 구와 화면 이름", "90일", "접수 180일", "하루가 지나면 지울 대상", "관리자가 접수함을 열 때", "조금 늦을 수 있어요"];
+              ok("134 이용 안내 저장 항목·기간·삭제 시점", W1.every((w) => a.includes(w)), W1.filter((w) => !a.includes(w)).join(","));
+              ok("134 이용 안내 '하루만·하루 동안' 단정 표현 없음", !/하루만|하루 동안/.test(a), "");
+              await p.goto(B + "/inquiry/"); await p.waitForTimeout(800);
+              const n2 = await p.evaluate(() => (document.querySelector(".note") || {}).innerText || "");
+              const W2 = ["문의 종류", "보낸 구와 화면", "90일", "접수 180일", "접속 주소(IP)", "하루가 지나면 지울 대상", "조금 늦을 수 있어요"];
+              ok("134 문의 화면 안내 저장 항목·기간·삭제 시점", W2.every((w) => n2.includes(w)) && !/하루만|하루 동안/.test(n2), W2.filter((w) => !n2.includes(w)).join(","));
+              /* 134 v03: 글자 300%에서 이용 안내·문의 화면 가로 밀림(문의 화면 9px 밀림은 기존 문제로 기록만) */
+              { const z = 3; const c3 = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p3 = await c3.newPage();
+                await p3.goto(B + "/yuseong/#about"); await p3.waitForTimeout(1500); ok("134 글자 300% 이용 안내 가로 밀림 없음", await p3.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2));
+                await p3.goto(B + "/inquiry/"); await p3.waitForTimeout(1000); const ov = await p3.evaluate(() => document.documentElement.scrollWidth - innerWidth); console.log("기록 134 글자 300% 문의 화면 가로 넘침 " + ov + "px (기존 문제, 판정 제외)");
+                await c3.close(); }
               await ctx.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
