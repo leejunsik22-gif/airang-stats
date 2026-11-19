@@ -57,8 +57,9 @@ jobs:
       - name: 실제 서버에서 경계 사례 보내 보기
         run: |
           B=https://$PROJ.pages.dev; sleep 25
-          node - "$B" src/tests/cases/inquiry_boundary_144.json <<'JS'
-          const [B, file] = process.argv.slice(2); const c = JSON.parse(require("fs").readFileSync(file, "utf8"));
+          node --input-type=module - "$B" src/tests/cases/inquiry_boundary_144.json <<'JS'
+          import fs from "fs";
+          const [B, file] = process.argv.slice(2); const c = JSON.parse(fs.readFileSync(file, "utf8"));
           const strip = (b) => b.replace(/ \([^)]*\)$/, "");
           const post = async (kind, body) => { const r = await fetch(B + "/api/inquiry", { method: "POST", headers: { origin: B, "content-type": "application/json" }, body: JSON.stringify({ kind, body: "[가상] 144 " + body }) }); let j = {}; try { j = await r.json(); } catch (e) {} return { s: r.status, msg: j.msg || "" }; };
           let ok = 0, bad = 0, s200 = 0, s429 = 0;
