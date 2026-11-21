@@ -44,7 +44,7 @@ jobs:
         run: |
           cd src
           set +e; npm run qa -- --reporter=list > ../qa.log 2>&1; rc=$?; set -e
-          echo "== 결과 요약 (${{ matrix.target }})"; tail -8 ../qa.log | grep -E "passed|failed|skipped|flaky" || true
+          echo "== 기록 끝 40줄"; tail -40 ../qa.log; echo "== 결과 요약 (${{ matrix.target }})"; tail -8 ../qa.log | grep -E "passed|failed|skipped|flaky" || true
           echo "== 실패 목록"; grep -E "^\s+✘" ../qa.log || echo "(없음)"
           echo "== 문의 차단 규칙 시험만"; grep -E "143 서버|144 규칙|141|142" ../qa.log | grep -E "✓|✘" | sed 's/^ *//' | head -20
           exit $rc
