@@ -1,0 +1,50 @@
+name: qa-rerun-145 (운영 반영 후보 fix-145 독립 재실행 — 시험만, 배포·쓰기 없음)
+# 2026-11-21 145 (피트 145 검수: "독립 재실행 미완료" → 클로드 작업 공간이 아닌 깨끗한 GitHub 컴퓨터에서 처음부터 다시 실행)
+#  - 원본: airang-cities 커밋 72b5f47f4a8bf93ed42b1ca1017b854ff81ad538 고정 (가지 이름이 아니라 커밋 번호로 받음 → 나중에 바뀌어도 같은 코드)
+#  - A: 후보 그대로 / B: 그 시점 운영 main 과 임시로 합친 결과 (push 안 함)
+#  - 비밀값 사용 0, 배포 0, 저장소 쓰기 0 (permissions: contents: read)
+on:
+  push:
+    branches: [qa-rerun-145]
+    paths: [".github/workflows/qa-rerun-145.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rerun:
+    if: github.ref == 'refs/heads/qa-rerun-145'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [A_후보그대로, B_운영main과합친결과]
+    env:
+      SHA: 72b5f47f4a8bf93ed42b1ca1017b854ff81ad538
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src, fetch-depth: 0 }
+      - name: 원본 고정·확인
+        run: |
+          cd src && git fetch -q origin "$SHA" && git checkout -q --detach "$SHA"
+          test "$(git rev-parse HEAD)" = "$SHA" && echo "받은 커밋: $(git log --oneline -1)"
+          if [ "${{ matrix.target }}" = "B_운영main과합친결과" ]; then
+            M=$(git rev-parse --short origin/main); echo "운영 main: $M"
+            git -c user.name=ci -c user.email=ci@local merge --no-ff --no-edit -q origin/main || { echo "::error::병합 충돌"; git diff --name-only --diff-filter=U; exit 1; }
+            echo "병합 충돌 0 · 병합 뒤 data 변경(운영 대비): $(git diff --name-only origin/main HEAD -- data | wc -l)개 파일"
+            echo "배포 폴더 변경(운영 대비):"; git diff --numstat origin/main HEAD -- app functions
+          fi
+          echo "디자인 기준 파일 SHA-256: $(sha256sum tools/qa/design_baseline.json | cut -c1-16)"
+          echo "서버 규칙 파일 SHA-256: $(sha256sum functions/_shared/inquiry.js | cut -c1-16)"
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: 시험 도구 새로 설치 (npm ci · Chromium)
+        run: cd src && npm ci && npx playwright install --with-deps chromium >/dev/null && npx playwright --version
+      - name: 전체 시험 (npm run qa)
+        run: |
+          cd src
+          set +e; npm run qa -- --reporter=list > ../qa.log 2>&1; rc=$?; set -e
+          echo "== 결과 요약 (${{ matrix.target }})"; tail -8 ../qa.log | grep -E "passed|failed|skipped|flaky" || true
+          echo "== 실패 목록"; grep -E "^\s+✘" ../qa.log || echo "(없음)"
+          echo "== 문의 차단 규칙 시험만"; grep -E "143 서버|144 규칙|141|142" ../qa.log | grep -E "✓|✘" | sed 's/^ *//' | head -20
+          exit $rc
