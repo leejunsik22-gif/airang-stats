@@ -37,7 +37,7 @@ jobs:
           echo "디자인 기준 파일 SHA-256: $(sha256sum tools/qa/design_baseline.json | cut -c1-16)"
           echo "서버 규칙 파일 SHA-256: $(sha256sum functions/_shared/inquiry.js | cut -c1-16)"
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
+        with: { node-version: "22" }
       - name: 시험 도구 새로 설치 (npm ci · Chromium)
         run: cd src && npm ci && npx playwright install --with-deps chromium >/dev/null && npx playwright --version
       - name: 전체 시험 (npm run qa)
