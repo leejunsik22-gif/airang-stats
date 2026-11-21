@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
 # 2026-11-19 143 (피트 143 지시 4번, CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 fix-142 합침 — 학원 상세 큰 글자 머리줄·AI 표시 겹침. 문의 서버 규칙은 시험 주소에서 동작 안 함(화면만).
 # 2026-11-17 134 v03 (대표 시험 주소 반영 승인 11-17 05:50): fix-ime-hosp 에 fix-134v02 합침 — 디자인 기준(시험만)·개인정보 안내 문구. 확인 항목: 유치원 IME, 134 안내 문구, 300% 이용 안내.
 # 2026-11-16 134 (대표 통합 시험 승인): fix-ime-hosp 에 int-134(129+131+132 통합) 합침 — 앱 화면 변화는 없음, 기존 확인 항목 전부 재실행.
@@ -212,6 +213,16 @@ jobs:
                 const m = await p4.evaluate(() => { const h = document.querySelector("#view h1"); if (!h) return null; const H = h.getBoundingClientRect(); const ov = (a, b) => a && b && !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top); const tags = [...document.querySelectorAll(".img-tag")].filter(t => t.offsetParent !== null).map(t => t.getBoundingClientRect()); return { hw: Math.round(H.width), vw: innerWidth, head: !!document.querySelector(".aca-head"), sx: document.documentElement.scrollWidth - innerWidth, tagHit: tags.some(t => ov(t, H)) }; });
                 ok("142 글자 " + Math.round(z * 100) + "% 학원 " + id + " 이름 폭 ≥ 화면 60%·가로 밀림 없음·AI 표시 안 겹침", !!m && m.head && m.hw >= m.vw * 0.6 && m.sx <= 2 && !m.tagHit, JSON.stringify(m)); }
               await c4.close(); }
+            // 150-148: 문의 화면 글자 300·350·400% — 가로 밀림·잘림 없음
+            for (const z of [3, 3.5, 4]) { const c5 = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p5 = await c5.newPage();
+              await p5.goto(B + "/inquiry/"); await p5.waitForTimeout(1200);
+              const m5 = await p5.evaluate(() => { const vw = document.documentElement.clientWidth; const cut = [...document.querySelectorAll("label,button,a,textarea,h1,p,small,b,legend,.hint,.note,.warn")].filter(e => e.offsetParent !== null && e.getBoundingClientRect().width > 0 && e.getBoundingClientRect().right > vw + 1).length; return { sx: document.documentElement.scrollWidth - vw, cut }; });
+              ok("148 문의 화면 글자 " + Math.round(z * 100) + "% 가로 밀림·잘림 없음", m5.sx <= 1 && m5.cut === 0, JSON.stringify(m5)); await c5.close(); }
+            // 150-137: 학원 전화 — 걸리지 않을 번호(JK영어학원 042-823-133)는 전화 칸 숨김
+            { const c6 = await br.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, serviceWorkers: "block" }); const p6 = await c6.newPage();
+              await p6.goto(B + "/yuseong/#aca/3000012366"); await p6.waitForTimeout(2000);
+              const t6 = await p6.evaluate(() => { const v = document.querySelector("#view"); return { tel: [...v.querySelectorAll("a[href^='tel:']")].map(a => a.getAttribute("href")), txt: v.innerText.includes("042-823-133") }; });
+              ok("137 JK영어학원 잘못된 번호 숨김", t6.tel.length === 0 && !t6.txt, JSON.stringify(t6)); await c6.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
