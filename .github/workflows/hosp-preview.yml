@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-22 159: fix-159(마이 메뉴 칸 큰 글자) 합침 ef1ed3a. 메뉴 칸 400% 확인 추가.
 # 2026-11-22 157: fix-157(링크 미리보기 그림 1650861 + 마이 관심 지역 큰 글자 92f176b) 합침.
 # 2026-11-22 155: fix-155(효숲 로고·아이콘·효숲 이야기) 합침. 로고 색 확인 추가. 155 보완(이용 안내 주석 노출 고침) 반영 f488b82. 보완2(아이콘 새싹 잎) 1384126. 보완3(manifest 아이콘 번호) e4709c4.
 # 2026-11-22 153: fix-153(입구 큰 글자·공개 범위 문구) 합침. 입구 170~400% 확인 추가.
@@ -260,6 +261,10 @@ jobs:
               await p11.goto(B + "/yuseong/#my"); await p11.waitForTimeout(1500);
               const m11 = await p11.evaluate(() => { const row = [...document.querySelectorAll("#view .row")].find((r) => r.innerText.includes("관심 지역")); if (!row) return null; const b = row.querySelector("button"); return { overflow: b.scrollHeight - b.clientHeight }; });
               ok("157 마이 관심 지역 버튼 글자 400% 넘침 없음", !!m11 && m11.overflow <= 2, JSON.stringify(m11)); await c11.close(); }
+            { const z = 4; const c12 = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p12 = await c12.newPage();
+              await p12.goto(B + "/yuseong/#my"); await p12.waitForTimeout(1500);
+              const bad12 = await p12.evaluate(() => [...document.querySelectorAll("#view .mtile")].filter((t) => t.offsetParent).flatMap((t) => { const T = t.getBoundingClientRect(); return [...t.querySelectorAll(".bi, b")].filter((e) => { const r = e.getBoundingClientRect(); return r.left < T.left - 1 || r.right > T.right + 1; }).map(() => t.innerText.trim().slice(0, 10)); }));
+              ok("159 마이 메뉴 칸 글자 400% 아이콘·글자 칸 안", bad12.length === 0, bad12.join(",")); await c12.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
