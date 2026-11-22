@@ -8,7 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
-# 2026-11-22 155: fix-155(효숲 로고·아이콘·효숲 이야기) 합침. 로고 색 확인 추가.
+# 2026-11-22 155: fix-155(효숲 로고·아이콘·효숲 이야기) 합침. 로고 색 확인 추가. 155 보완(이용 안내 주석 노출 고침) 반영 f488b82.
 # 2026-11-22 153: fix-153(입구 큰 글자·공개 범위 문구) 합침. 입구 170~400% 확인 추가.
 # 2026-11-22 152: fix-152(새 이름 효숲, 대표 확정 11-22) 합침. 5개 구·입구·문의 화면 이름 확인 추가.
 # 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
@@ -248,7 +248,7 @@ jobs:
               for (const src of ["assets/brand/logo-symbol.png", "icon-192.png", "../entry/img/logo-symbol.png", "../entry/img/tile-yuseong.png"]) {
                 const c = await p9.evaluate(async (src) => { const im = new Image(); im.src = src; await im.decode(); const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const x = cv.getContext("2d"); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, cv.width, cv.height).data; let g = 0, o = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 128) continue; if (d[i + 1] > d[i] + 15 && d[i + 1] > d[i + 2]) g++; if (d[i] > 200 && d[i + 1] > 100 && d[i + 1] < 190 && d[i + 2] < 90) o++; } return { g, o }; }, src);
                 if (c.g < 200 || c.o >= 20) bad9.push(src + JSON.stringify(c)); }
-              await p9.goto(B + "/yuseong/#about"); await p9.waitForTimeout(1500); if (!(await p9.evaluate(() => document.querySelector("#view").innerText.includes("효숲 이야기")))) bad9.push("about");
+              await p9.goto(B + "/yuseong/#about"); await p9.waitForTimeout(1500); { const at = await p9.evaluate(() => document.querySelector("#view").innerText); if (!at.includes("효숲 이야기") || /\/\*|155:/.test(at)) bad9.push("about"); }
               ok("155 효숲 로고·아이콘 초록 나무 + 효숲 이야기", bad9.length === 0, bad9.join(",")); await c9.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
