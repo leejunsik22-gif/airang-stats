@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-22 152: fix-152(새 이름 효숲, 대표 확정 11-22) 합침. 5개 구·입구·문의 화면 이름 확인 추가.
 # 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
 # 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
 # 2026-11-19 143 (피트 143 지시 4번, CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 fix-142 합침 — 학원 상세 큰 글자 머리줄·AI 표시 겹침. 문의 서버 규칙은 시험 주소에서 동작 안 함(화면만).
@@ -226,6 +227,14 @@ jobs:
               await p6.goto(B + "/yuseong/#aca/3000012366"); await p6.waitForTimeout(2000);
               const t6 = await p6.evaluate(() => { const v = document.querySelector("#view"); return { tel: [...v.querySelectorAll("a[href^='tel:']")].map(a => a.getAttribute("href")), txt: v.innerText.includes("042-823-133") }; });
               ok("137 JK영어학원 잘못된 번호 숨김", t6.tel.length === 0 && !t6.txt, JSON.stringify(t6)); await c6.close(); }
+            // 152: 새 이름 효숲 — 5개 구 제목·머리글, 입구, 문의 화면에 '아이랑' 없음(업데이트 소식 기록 줄 제외)
+            { const c7 = await br.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, serviceWorkers: "block" }); const p7 = await c7.newPage(); const bad7 = [];
+              for (const g of ["djdonggu", "djjunggu", "djseogu", "yuseong", "daedeok"]) { await p7.goto(B + "/" + g + "/"); await p7.waitForTimeout(1500);
+                const t7 = await p7.evaluate(() => ({ title: document.title, brand: (document.querySelector(".brand-round") || {}).innerText || "", body: document.body.innerText.split("\n").filter(l => !/아이랑 대전이 (준비 중이에요|'효숲'으로 이름을 바꿨어요)/.test(l)).join("\n") }));
+                if (!t7.title.startsWith("효숲 ") || !t7.brand.includes("효숲") || t7.body.includes("아이랑")) bad7.push(g + ":" + t7.title); }
+              await p7.goto(B + "/entry/"); await p7.waitForTimeout(1200); const e7 = await p7.evaluate(() => ({ title: document.title, has: document.body.innerText.includes("아이랑") })); if (e7.title !== "효숲 대전" || e7.has) bad7.push("entry:" + e7.title);
+              await p7.goto(B + "/inquiry/"); await p7.waitForTimeout(800); const q7 = await p7.evaluate(() => ({ title: document.title, has: document.body.innerText.includes("아이랑") })); if (!q7.title.includes("효숲") || q7.has) bad7.push("inquiry:" + q7.title);
+              ok("152 새 이름 효숲 — 5개 구·입구·문의 화면에 옛 이름 없음", bad7.length === 0, bad7.join(",")); await c7.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
