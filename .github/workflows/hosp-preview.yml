@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
 # 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
 # 2026-11-19 143 (피트 143 지시 4번, CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 fix-142 합침 — 학원 상세 큰 글자 머리줄·AI 표시 겹침. 문의 서버 규칙은 시험 주소에서 동작 안 함(화면만).
 # 2026-11-17 134 v03 (대표 시험 주소 반영 승인 11-17 05:50): fix-ime-hosp 에 fix-134v02 합침 — 디자인 기준(시험만)·개인정보 안내 문구. 확인 항목: 유치원 IME, 134 안내 문구, 300% 이용 안내.
@@ -194,13 +195,15 @@ jobs:
               const a = await p.evaluate(() => document.body.innerText);
               ok("132 이용 안내 '개인정보를 묻지 않아요'", a.includes("개인정보를 묻지 않아요") && !a.includes("받지도, 저장하지도"), "");
               /* 134 v03: 개인정보 안내가 실제 저장 항목·기간·삭제 시점과 일치(피트 134 검수 4, v02 재검수 4) */
-              const W1 = ["문의 종류", "보낸 구와 화면 이름", "90일", "접수 180일", "하루가 지나면 지울 대상", "관리자가 접수함을 열 때", "조금 늦을 수 있어요"];
+              const W1 = ["문의 종류", "보낸 구와 화면 이름", "처리 여부와 상관없이 접수 180일", "하루가 지나면 지울 대상", "관리자가 접수함을 열 때", "조금 늦을 수 있어요"];
               ok("134 이용 안내 저장 항목·기간·삭제 시점", W1.every((w) => a.includes(w)), W1.filter((w) => !a.includes(w)).join(","));
+              ok("151 이용 안내 옛 '90일' 문구 없음", !a.includes("90일"));
               ok("134 이용 안내 '하루만·하루 동안' 단정 표현 없음", !/하루만|하루 동안/.test(a), "");
               await p.goto(B + "/inquiry/"); await p.waitForTimeout(800);
               const n2 = await p.evaluate(() => (document.querySelector(".note") || {}).innerText || "");
-              const W2 = ["문의 종류", "보낸 구와 화면", "90일", "접수 180일", "접속 주소(IP)", "하루가 지나면 지울 대상", "조금 늦을 수 있어요"];
+              const W2 = ["문의 종류", "보낸 구와 화면", "처리 여부와 상관없이 접수 180일", "접속 주소(IP)", "하루가 지나면 지울 대상", "조금 늦을 수 있어요"];
               ok("134 문의 화면 안내 저장 항목·기간·삭제 시점", W2.every((w) => n2.includes(w)) && !/하루만|하루 동안/.test(n2), W2.filter((w) => !n2.includes(w)).join(","));
+              ok("151 문의 화면 옛 '90일' 문구 없음", !n2.includes("90일"));
               /* 134 v03: 글자 300%에서 이용 안내·문의 화면 가로 밀림(문의 화면 9px 밀림은 기존 문제로 기록만) */
               { const z = 3; const c3 = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block", bypassCSP: true }); const p3 = await c3.newPage();
                 await p3.goto(B + "/yuseong/#about"); await p3.waitForTimeout(1500); ok("134 글자 300% 이용 안내 가로 밀림 없음", await p3.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2));
