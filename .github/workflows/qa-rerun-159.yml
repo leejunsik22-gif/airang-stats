@@ -1,18 +1,18 @@
-name: qa-rerun-145 (운영 반영 후보 fix-145 독립 재실행 — 시험만, 배포·쓰기 없음)
-# 2026-11-21 145 (피트 145 검수: "독립 재실행 미완료" → 클로드 작업 공간이 아닌 깨끗한 GitHub 컴퓨터에서 처음부터 다시 실행)
-#  - 원본: airang-cities 커밋 72b5f47f4a8bf93ed42b1ca1017b854ff81ad538 고정 (가지 이름이 아니라 커밋 번호로 받음 → 나중에 바뀌어도 같은 코드)
+name: qa-rerun-159 (운영 반영 후보 fix-159 독립 재실행 — 시험만, 배포·쓰기 없음)
+# 2026-11-22 159 (피트 fix-159 검수 ⑤: 278/0/226 실제 실행 로그·건너뜀 사유 제출) — 145 판을 그대로 복사, 커밋 번호와 건너뜀 목록 출력만 바꿈
+#  - 원본: airang-cities 커밋 7420f32a441022762e98e504ed1d717bc2b7d8a9 고정 (가지 이름이 아니라 커밋 번호로 받음 → 나중에 바뀌어도 같은 코드)
 #  - A: 후보 그대로 / B: 그 시점 운영 main 과 임시로 합친 결과 (push 안 함)
 #  - 비밀값 사용 0, 배포 0, 저장소 쓰기 0 (permissions: contents: read)
 on:
   push:
-    branches: [qa-rerun-145]
-    paths: [".github/workflows/qa-rerun-145.yml"]
+    branches: [qa-rerun-159]
+    paths: [".github/workflows/qa-rerun-159.yml"]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   rerun:
-    if: github.ref == 'refs/heads/qa-rerun-145'
+    if: github.ref == 'refs/heads/qa-rerun-159'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -20,7 +20,7 @@ jobs:
       matrix:
         target: [A_후보그대로, B_운영main과합친결과]
     env:
-      SHA: 72b5f47f4a8bf93ed42b1ca1017b854ff81ad538
+      SHA: 7420f32a441022762e98e504ed1d717bc2b7d8a9
     steps:
       - uses: actions/checkout@v4
         with: { repository: leejunsik22-gif/airang-cities, ref: main, path: src, fetch-depth: 0 }
@@ -46,5 +46,6 @@ jobs:
           set +e; npm run qa -- --reporter=list > ../qa.log 2>&1; rc=$?; set -e
           echo "== 기록 끝 40줄"; tail -40 ../qa.log; echo "== 결과 요약 (${{ matrix.target }})"; tail -8 ../qa.log | grep -E "passed|failed|skipped|flaky" || true
           echo "== 실패 목록"; grep -E "^\s+✘" ../qa.log || echo "(없음)"
+          echo "== 건너뜀 목록(파일·폭별 개수)"; grep -E "^\s+-" ../qa.log | sed -E "s/^ *- *[0-9]+ *//" | sed -E "s/\[(폰[0-9]+)\] › tests\/e2e\/([^:]+):.*/\2 \1/" | sort | uniq -c | sort -rn | head -60
           echo "== 문의 차단 규칙 시험만"; grep -E "143 서버|144 규칙|141|142" ../qa.log | grep -E "✓|✘" | sed 's/^ *//' | head -20
           exit $rc
