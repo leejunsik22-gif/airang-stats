@@ -8,6 +8,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-13 대표 승인(129, 시험 주소만): fix-ime-hosp에 fix-129 합침 = 글자 최대일 때 홈 검색칸 넓힘 + 학원·유치원 화면 하단 '홈'에 불.
 # 2026-11-14 129 v02: 대표 갤럭시 실기기(글자 최대)에서 검색칸이 '소··'만 보여 → 폭 200 이하에선 입력 한 줄 + 찾기 버튼 아래 줄.
 # 2026-11-15 132 (대표 '진행'): fix-132 합침 = 문의하기 이메일 칸 제거·개인정보 안내 문구. 시험 주소는 문의 보내기 기능 없음 → 화면만 확인.
+# 2026-11-22 153: fix-153(입구 큰 글자·공개 범위 문구) 합침. 입구 170~400% 확인 추가.
 # 2026-11-22 152: fix-152(새 이름 효숲, 대표 확정 11-22) 합침. 5개 구·입구·문의 화면 이름 확인 추가.
 # 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
 # 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
@@ -235,6 +236,11 @@ jobs:
               await p7.goto(B + "/entry/"); await p7.waitForTimeout(1200); const e7 = await p7.evaluate(() => ({ title: document.title, has: document.body.innerText.includes("아이랑") })); if (e7.title !== "효숲 대전" || e7.has) bad7.push("entry:" + e7.title);
               await p7.goto(B + "/inquiry/"); await p7.waitForTimeout(800); const q7 = await p7.evaluate(() => ({ title: document.title, has: document.body.innerText.includes("아이랑") })); if (!q7.title.includes("효숲") || q7.has) bad7.push("inquiry:" + q7.title);
               ok("152 새 이름 효숲 — 5개 구·입구·문의 화면에 옛 이름 없음", bad7.length === 0, bad7.join(",")); await c7.close(); }
+            // 153: 입구 화면 글자 170·200·300·400% — 가로 밀림 없음
+            for (const z of [1.7, 2, 3, 4]) { const c8 = await br.newContext({ viewport: { width: Math.round(412 / z), height: Math.round(915 / z) }, deviceScaleFactor: 2.625 * z, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p8 = await c8.newPage();
+              await p8.goto(B + "/entry/"); await p8.waitForTimeout(1500);
+              const m8 = await p8.evaluate(() => ({ sx: document.documentElement.scrollWidth - document.documentElement.clientWidth, hb: /병원|혜택/.test((document.querySelector(".fam") || {}).innerText || "") }));
+              ok("153 입구 글자 " + Math.round(z * 100) + "% 가로 밀림 없음·소개에 병원·혜택 없음", m8.sx <= 1 && !m8.hb, JSON.stringify(m8)); await c8.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
