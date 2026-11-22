@@ -14,6 +14,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-22 153: fix-153(입구 큰 글자·공개 범위 문구) 합침. 입구 170~400% 확인 추가.
 # 2026-11-22 152: fix-152(새 이름 효숲, 대표 확정 11-22) 합침. 5개 구·입구·문의 화면 이름 확인 추가.
 # 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
+# 2026-11-22 164 (피트 작업지시서 v01, 2구역 시험판): fix-ime-hosp 에 fix-164 합침 — 검색 대표 주소 hyoforest.com·입구 링크 글자·다른 지역 상대 주소. 확인 항목 164 2개 추가.
 # 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
 # 2026-11-19 143 (피트 143 지시 4번, CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 fix-142 합침 — 학원 상세 큰 글자 머리줄·AI 표시 겹침. 문의 서버 규칙은 시험 주소에서 동작 안 함(화면만).
 # 2026-11-17 134 v03 (대표 시험 주소 반영 승인 11-17 05:50): fix-ime-hosp 에 fix-134v02 합침 — 디자인 기준(시험만)·개인정보 안내 문구. 확인 항목: 유치원 IME, 134 안내 문구, 300% 이용 안내.
@@ -265,6 +266,13 @@ jobs:
               await p12.goto(B + "/yuseong/#my"); await p12.waitForTimeout(1500);
               const bad12 = await p12.evaluate(() => [...document.querySelectorAll("#view .mtile")].filter((t) => t.offsetParent).flatMap((t) => { const T = t.getBoundingClientRect(); return [...t.querySelectorAll(".bi, b")].filter((e) => { const r = e.getBoundingClientRect(); return r.left < T.left - 1 || r.right > T.right + 1; }).map(() => t.innerText.trim().slice(0, 10)); }));
               ok("159 마이 메뉴 칸 글자 400% 아이콘·글자 칸 안", bad12.length === 0, bad12.join(",")); await c12.close(); }
+            { const c13 = await br.newContext({ viewport: { width: 412, height: 915 }, serviceWorkers: "block" }); const p13 = await c13.newPage();
+              await p13.goto(B + "/entry/"); await p13.waitForTimeout(1000);
+              const g13 = await p13.evaluate(() => [...document.querySelectorAll(".guides a")].map((a) => ({ t: a.innerText.trim(), h: a.getAttribute("href") })));
+              ok("164 입구 동네 정보 링크 hyoforest.com·'학원·학교 일정'(유치원·소아과 없음)", g13.length === 5 && g13.every((l) => /^https:\/\/hyoforest\.com\/[a-z]+\/guide\/$/.test(l.h) && l.t.includes("학원·학교 일정") && !/유치원|소아과/.test(l.t)), JSON.stringify(g13));
+              await p13.goto(B + "/yuseong/#my"); await p13.waitForTimeout(1500);
+              const o13 = await p13.evaluate(() => [...document.querySelectorAll(".oc-list a")].map((a) => [a.getAttribute("href"), new URL(a.href).origin === location.origin]));
+              ok("164 다른 지역 링크 = 같은 주소 안(상대 주소)", o13.length === 4 && o13.every(([h, same]) => /^\/[a-z]+\/$/.test(h) && same), JSON.stringify(o13)); await c13.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
