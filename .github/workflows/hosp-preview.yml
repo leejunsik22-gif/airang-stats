@@ -14,6 +14,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-22 153: fix-153(입구 큰 글자·공개 범위 문구) 합침. 입구 170~400% 확인 추가.
 # 2026-11-22 152: fix-152(새 이름 효숲, 대표 확정 11-22) 합침. 5개 구·입구·문의 화면 이름 확인 추가.
 # 2026-11-22 151: fix-151(문의 보관 — 처리 여부와 상관없이 접수 180일) 합침. 안내 문구 확인을 새 문구로 바꾸고 옛 '90일' 없음 확인 추가.
+# 2026-11-23 161 (대표 결정 ②): fix-ime-hosp 에 fix-161 합침 — 글자 최대 버튼 높이 자동. 확인 항목 161 1개 추가.
 # 2026-11-22 164 (피트 작업지시서 v01, 2구역 시험판): fix-ime-hosp 에 fix-164 합침 — 검색 대표 주소 hyoforest.com·입구 링크 글자·다른 지역 상대 주소. 확인 항목 164 2개 추가.
 # 2026-11-21 150 (CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 운영 main(145 반영본)·fix-150(148 문의하기 큰 글자·137 학원 전화번호·140 관리자 문구) 합침. 문의 서버 기능은 시험 주소에 없음(화면만).
 # 2026-11-19 143 (피트 143 지시 4번, CLAUDE.md §2-3 시험 주소 단계): fix-ime-hosp 에 fix-142 합침 — 학원 상세 큰 글자 머리줄·AI 표시 겹침. 문의 서버 규칙은 시험 주소에서 동작 안 함(화면만).
@@ -273,6 +274,10 @@ jobs:
               await p13.goto(B + "/yuseong/#my"); await p13.waitForTimeout(1500);
               const o13 = await p13.evaluate(() => [...document.querySelectorAll(".oc-list a")].map((a) => [a.getAttribute("href"), new URL(a.href).origin === location.origin]));
               ok("164 다른 지역 링크 = 같은 주소 안(상대 주소)", o13.length === 4 && o13.every(([h, same]) => /^\/[a-z]+\/$/.test(h) && same), JSON.stringify(o13)); await c13.close(); }
+            { const c14 = await br.newContext({ viewport: { width: 103, height: 229 }, deviceScaleFactor: 10.5, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p14 = await c14.newPage();
+              await p14.goto(B + "/yuseong/#my"); await p14.waitForTimeout(2000);
+              const b14 = await p14.evaluate(() => [...document.querySelectorAll("#view .btn")].filter((b) => b.offsetParent && b.innerText.trim()).filter((b) => b.scrollHeight - b.clientHeight > 2).map((b) => b.innerText.trim().slice(0, 12)));
+              ok("161 글자 400% 마이 버튼 글자가 버튼 안('앱처럼 쓰기' 포함)", b14.length === 0, JSON.stringify(b14)); await c14.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
