@@ -21,6 +21,7 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-17 134 v03 (대표 시험 주소 반영 승인 11-17 05:50): fix-ime-hosp 에 fix-134v02 합침 — 디자인 기준(시험만)·개인정보 안내 문구. 확인 항목: 유치원 IME, 134 안내 문구, 300% 이용 안내.
 # 2026-11-16 134 (대표 통합 시험 승인): fix-ime-hosp 에 int-134(129+131+132 통합) 합침 — 앱 화면 변화는 없음, 기존 확인 항목 전부 재실행.
 # 2026-11-27 181·182 (대표 승인 21:11 — 4항 알레르기 확인 카드 가안 시험판·5항 피트 보완 시험판): fix-ime-hosp 53eb8cb 에 fix-182(=fix-181 7539bf7 + 182 b74c0b5) 합침 → 84e4700. 확인 항목 181·182 9개 추가(가상 아이 자료만). 1차 실행 46000119700: 132 옛 제목 확인·자동 권유 창 가림 → 시험 쪽 2곳 고침(앱 변경 없음). 2차 46000784300: 마이 글자 400% 가로 45px 넘침(181 지우기 버튼) 발견 → fix-181 691c005 고침, fix-182 6b8dfc7, fix-ime-hosp 31314fd 로 3차.
+# 2026-11-28 184 (대표 결정 00:14 4항 처리방침 초안 준비): fix-ime-hosp 31314fd + fix-184 e4ebd2b → b3851c1. 확인 항목 2개 추가.
 #   181·182 되돌리기: airang-cities fix-ime-hosp 를 53eb8cb 로 되돌린 새 커밋(강제 push 아님)을 올리고 이 파일을 다시 push.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
@@ -306,6 +307,16 @@ jobs:
                 if (r === "kid/k1/card") { await p16.getByRole("button", { name: "확인하고 카드 보기" }).click(); await p16.waitForTimeout(500); }
                 over[r] = await p16.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth); }
               ok("181·182 글자 400% 아이·카드·마이 화면 가로 넘침 없음", Object.values(over).every((x) => x <= 2), JSON.stringify(over)); await c16.close(); }
+            { const c17 = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block" }); const p17 = await c17.newPage();
+              await p17.goto(B + "/yuseong/#about"); await p17.waitForTimeout(1500); await p17.evaluate(() => localStorage.setItem(NS + "edu.installDone", "1"));
+              await p17.getByRole("button", { name: "개인정보 처리방침 전체 보기" }).click(); await p17.waitForTimeout(800);
+              const v17 = await p17.locator("#view").innerText();
+              ok("184 처리방침(초안) 12개 항목·곁나루/효숲·초안 띠", [1,2,3,4,5,6,7,8,9,10,11,12].every((i) => v17.includes(i + ". ")) && v17.includes("곁나루") && v17.includes("초안"));
+              await c17.close(); }
+            { const c18 = await br.newContext({ viewport: { width: 103, height: 229 }, deviceScaleFactor: 10.5, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p18 = await c18.newPage();
+              await p18.goto(B + "/yuseong/#privacy"); await p18.waitForTimeout(1500);
+              const o18 = await p18.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth);
+              ok("184 글자 400% 처리방침 가로 넘침 없음", o18 <= 2, String(o18)); await c18.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
