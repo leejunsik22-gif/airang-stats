@@ -22,6 +22,8 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-16 134 (대표 통합 시험 승인): fix-ime-hosp 에 int-134(129+131+132 통합) 합침 — 앱 화면 변화는 없음, 기존 확인 항목 전부 재실행.
 # 2026-11-27 181·182 (대표 승인 21:11 — 4항 알레르기 확인 카드 가안 시험판·5항 피트 보완 시험판): fix-ime-hosp 53eb8cb 에 fix-182(=fix-181 7539bf7 + 182 b74c0b5) 합침 → 84e4700. 확인 항목 181·182 9개 추가(가상 아이 자료만). 1차 실행 46000119700: 132 옛 제목 확인·자동 권유 창 가림 → 시험 쪽 2곳 고침(앱 변경 없음). 2차 46000784300: 마이 글자 400% 가로 45px 넘침(181 지우기 버튼) 발견 → fix-181 691c005 고침, fix-182 6b8dfc7, fix-ime-hosp 31314fd 로 3차.
 # 2026-11-28 184 (대표 결정 00:14 4항 처리방침 초안 준비): fix-ime-hosp 31314fd + fix-184 e4ebd2b → b3851c1. 확인 항목 2개 추가.
+# 2026-11-28 187 (피트 '대표 직접 작업 최소화' 지시 6항 — 시험판에서 수정): fix-ime-hosp b3851c1 + fix-187 d1d5d7b → cbd4fc7. 확인 항목 4개 추가(글자 150% 입력칸·400% 학원 빼기·누르는 곳 크기·인쇄 카드만·외부 요청에 아이 정보 없음).
+#   187 되돌리기: airang-cities fix-ime-hosp 를 b3851c1 로 되돌린 새 커밋(강제 push 아님)을 올리고 이 파일을 다시 push.
 #   181·182 되돌리기: airang-cities fix-ime-hosp 를 53eb8cb 로 되돌린 새 커밋(강제 push 아님)을 올리고 이 파일을 다시 push.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
@@ -317,6 +319,32 @@ jobs:
               await p18.goto(B + "/yuseong/#privacy"); await p18.waitForTimeout(1500);
               const o18 = await p18.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth);
               ok("184 글자 400% 처리방침 가로 넘침 없음", o18 <= 2, String(o18)); await c18.close(); }
+            { const c19 = await br.newContext({ viewport: { width: 260, height: 572 }, deviceScaleFactor: 4.5, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p19 = await c19.newPage();
+              await p19.goto(B + "/yuseong/"); await p19.waitForTimeout(1500);
+              await p19.evaluate(() => { localStorage.setItem(NS + "edu.kids", JSON.stringify([{ id: "k1", name: "가상아이", code: "", grade: 2, gy: 2026, color: 0, al: [1, 5], acas: [{ id: "A123", n: "가상학원" }] }])); localStorage.setItem(NS + "edu.installDone", "1"); });
+              const o19 = {}; for (const r of ["kid/new", "kid/k1"]) { await p19.goto(B + "/yuseong/#" + r); await p19.reload(); await p19.waitForTimeout(1500); o19[r] = await p19.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth); }
+              ok("187 글자 150%(폭 260) 아이 화면 입력칸 넘침 없음", Object.values(o19).every((x) => x <= 2), JSON.stringify(o19)); await c19.close(); }
+            { const c20 = await br.newContext({ viewport: { width: 103, height: 229 }, deviceScaleFactor: 10.5, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p20 = await c20.newPage();
+              await p20.goto(B + "/yuseong/"); await p20.waitForTimeout(1500);
+              await p20.evaluate(() => { localStorage.setItem(NS + "edu.kids", JSON.stringify([{ id: "k1", name: "가상아이", code: "", grade: 2, gy: 2026, color: 0, al: [1], acas: [{ id: "A123", n: "가상학원" }] }])); localStorage.setItem(NS + "edu.installDone", "1"); });
+              await p20.goto(B + "/yuseong/#kid/k1"); await p20.reload(); await p20.waitForTimeout(1500);
+              const r20 = await p20.evaluate(() => { const W = document.documentElement.clientWidth; const b = [...document.querySelectorAll("#view button")].find((x) => x.textContent.trim() === "빼기"); return b ? Math.round(b.getBoundingClientRect().right - W) : "없음"; });
+              ok("187 글자 400% 학원 '빼기' 버튼 화면 안", r20 !== "없음" && r20 <= 1, String(r20)); await c20.close(); }
+            { const c21 = await br.newContext({ viewport: { width: 360, height: 780 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const p21 = await c21.newPage();
+              const ext = []; c21.on("request", (q) => { const u = q.url(); if (!u.startsWith(B) && !/^(data|blob):/.test(u)) ext.push(u + " " + (q.postData() || "")); });
+              await p21.goto(B + "/yuseong/"); await p21.waitForTimeout(1500);
+              await p21.evaluate(() => { localStorage.setItem(NS + "edu.kids", JSON.stringify([{ id: "k1", name: "비밀별명가", code: "", grade: 2, gy: 2026, color: 0, al: [1, 4], acas: [] }])); localStorage.setItem(NS + "edu.installDone", "1"); });
+              await p21.goto(B + "/yuseong/#kid/new"); await p21.reload(); await p21.waitForTimeout(1500);
+              await p21.getByRole("button", { name: "확인하고 고르기" }).click(); await p21.waitForTimeout(300);
+              const t21 = await p21.evaluate(() => { const g = document.getElementById("kguard").closest("label").getBoundingClientRect(); const ch = [...document.querySelectorAll("#view button")].filter((b) => /^(⚠️ )?(밀|게|잣)$/.test(b.textContent.trim())).map((b) => Math.round(b.getBoundingClientRect().width)); return { 보호자줄: Math.round(g.height), 좁은칸: Math.min(...ch) }; });
+              ok("187 누르는 곳: 보호자 줄 44px 이상·알레르기 칸 폭 44px 이상", t21.보호자줄 >= 44 && t21.좁은칸 >= 44, JSON.stringify(t21));
+              await p21.goto(B + "/yuseong/#kid/k1/card"); await p21.waitForTimeout(1200); await p21.getByRole("button", { name: "확인하고 카드 보기" }).click(); await p21.waitForTimeout(500);
+              await p21.evaluate(() => { window.print = () => {}; }); await p21.getByRole("button", { name: "인쇄하기" }).click(); await p21.emulateMedia({ media: "print" });
+              const pr = await p21.evaluate(() => ({ 카드: getComputedStyle(document.getElementById("kidCard")).visibility, 버튼: [...document.querySelectorAll("#view button")].filter((b) => getComputedStyle(b).visibility !== "hidden").length }));
+              ok("187 인쇄본 = 카드만(버튼 안 찍힘)", pr.카드 === "visible" && pr.버튼 === 0, JSON.stringify(pr));
+              await p21.emulateMedia({ media: "screen" }); await p21.goto(B + "/yuseong/#my"); await p21.waitForTimeout(2500);
+              const leak = ext.filter((x) => /비밀별명가|난류|땅콩|K1_/.test(decodeURIComponent(x)));
+              ok("187 바깥 주소 요청에 아이 별명·알레르기 없음", leak.length === 0, "바깥 요청 " + ext.length + "건, 발견 " + leak.length); await c21.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
