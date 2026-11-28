@@ -24,6 +24,9 @@ name: hosp-preview (갤럭시 확인용 병원 시험 주소 — 운영과 분�
 # 2026-11-28 184 (대표 결정 00:14 4항 처리방침 초안 준비): fix-ime-hosp 31314fd + fix-184 e4ebd2b → b3851c1. 확인 항목 2개 추가.
 # 2026-11-28 187 (피트 '대표 직접 작업 최소화' 지시 6항 — 시험판에서 수정): fix-ime-hosp b3851c1 + fix-187 d1d5d7b → cbd4fc7. 확인 항목 4개 추가(글자 150% 입력칸·400% 학원 빼기·누르는 곳 크기·인쇄 카드만·외부 요청에 아이 정보 없음).
 #   187 되돌리기: airang-cities fix-ime-hosp 를 b3851c1 로 되돌린 새 커밋(강제 push 아님)을 올리고 이 파일을 다시 push.
+# 2026-11-28 188 (피트 dc1211 추가 지시 4·5항): fix-ime-hosp cbd4fc7 + fix-188 73235a8 → 6fb34bf. 확인 추가: 요일 두 줄(폭 3종), 실제 GoatCounter count.js 가 보내려는 내용.
+#   실제 count.js 는 gc.zgo.at 에서 받아 그대로 실행하되, goatcounter.com/count 로 나가는 요청은 이 시험 안에서 가로채 204 로 답한다(운영 통계에 안 들어감).
+#   188 되돌리기: fix-ime-hosp 를 cbd4fc7 로 되돌린 새 커밋을 올리고 이 파일을 다시 push.
 #   181·182 되돌리기: airang-cities fix-ime-hosp 를 53eb8cb 로 되돌린 새 커밋(강제 push 아님)을 올리고 이 파일을 다시 push.
 #   되돌리기: 아래 ref 를 hosp-preview 로 되돌려 다시 올리면 이전 시험 화면(044d516)으로 돌아감.
 on:
@@ -345,6 +348,35 @@ jobs:
               await p21.emulateMedia({ media: "screen" }); await p21.goto(B + "/yuseong/#my"); await p21.waitForTimeout(2500);
               const leak = ext.filter((x) => /비밀별명가|난류|땅콩|K1_/.test(decodeURIComponent(x)));
               ok("187 바깥 주소 요청에 아이 별명·알레르기 없음", leak.length === 0, "바깥 요청 " + ext.length + "건, 발견 " + leak.length); await c21.close(); }
+            for (const [w, want] of [[690, 1], [360, 2], [260, 0]]) { const cd = await br.newContext({ viewport: { width: w, height: 800 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, serviceWorkers: "block" }); const pd = await cd.newPage();
+              await pd.goto(B + "/yuseong/"); await pd.waitForTimeout(1500);
+              await pd.evaluate(() => { localStorage.setItem(NS + "edu.kids", JSON.stringify([{ id: "k1", name: "가상아이", code: "", grade: 2, gy: 2026, color: 0, al: [], acas: [{ id: "A123", n: "가상학원", days: [0, 2] }] }])); localStorage.setItem(NS + "edu.installDone", "1"); });
+              await pd.goto(B + "/yuseong/#kid/k1"); await pd.reload(); await pd.waitForTimeout(1500);
+              const rd = await pd.evaluate(() => { const bs = [...document.querySelectorAll(".acadays button")].map((b) => b.getBoundingClientRect()); return { 칸: bs.length, 줄: new Set(bs.map((b) => Math.round(b.top))).size, 최소폭: Math.round(Math.min(...bs.map((b) => b.width))), 넘침: document.scrollingElement.scrollWidth - document.documentElement.clientWidth }; });
+              ok("188 요일 칸 폭 " + w + " (7칸·44px 이상·넘침 없음" + (want ? "·" + want + "줄" : "") + ")", rd.칸 === 7 && rd.최소폭 >= 44 && rd.넘침 <= 2 && (!want || rd.줄 === want), JSON.stringify(rd)); await cd.close(); }
+            { /* 188 실제 GoatCounter: 운영과 같은 script 태그를 되살려 실제 count.js 를 실행, 보내려는 요청만 가로채 기록 */
+              const cg = await br.newContext({ ...devices["Galaxy S9+"], serviceWorkers: "block" }); const pg = await cg.newPage();
+              const sent = [], csp = []; let js = "";
+              pg.on("console", (m) => { if (/Content Security Policy/i.test(m.text())) csp.push(m.text().slice(0, 160)); });
+              await cg.route(/goatcounter\.com\/count/, async (r) => { const q = r.request(); sent.push({ url: q.url(), method: q.method(), body: q.postData() || "", referer: (await q.allHeaders())["referer"] || "" }); await r.fulfill({ status: 204, body: "" }); });
+              await cg.route(/gc\.zgo\.at\/count\.js/, async (r) => { const res = await r.fetch(); js = await res.text(); await r.fulfill({ response: res, body: js }); });
+              await cg.route((u) => u.href.split("#")[0].replace(/\?.*$/, "") === B + "/yuseong/", async (r) => { const res = await r.fetch(); let html = await res.text();
+                html = html.replace("</head>", `<script data-goatcounter="https://yuseong-edu-app.goatcounter.com/count" data-goatcounter-settings='{"no_onload": true}' async src="https://gc.zgo.at/count.js"></script></head>`); await r.fulfill({ response: res, body: html }); });
+              await pg.goto(B + "/yuseong/"); await pg.waitForTimeout(3000);
+              await pg.evaluate(() => { localStorage.setItem(NS + "edu.kids", JSON.stringify([{ id: "k1", name: "비밀별명가", code: "", grade: 2, gy: 2026, color: 0, al: [1, 4], acas: [{ id: "A123", n: "가상학원" }] }])); localStorage.setItem(NS + "edu.installDone", "1"); });
+              for (const h of ["kid/new", "kid/k1", "kid/k1/card", "my", "about", "privacy"]) { await pg.evaluate((h) => { location.hash = h; }, h); await pg.waitForTimeout(1500); const b = pg.getByRole("button", { name: "확인하고 카드 보기" }); if (await b.count()) { await b.click(); await pg.waitForTimeout(1200); } }
+              await pg.waitForTimeout(4000);
+              const keys = {}; for (const x of sent) for (const [k, v] of new URL(x.url).searchParams) (keys[k] = keys[k] || new Set()).add(v.slice(0, 80));
+              const hash = require("crypto").createHash("sha256").update(js).digest("hex");
+              console.log("188 count.js 받은 크기 " + js.length + " / sha256 " + hash);
+              console.log("188 보내려던 요청 " + sent.length + "건 · 방식 " + [...new Set(sent.map((x) => x.method))].join(",") + " · 본문 있는 요청 " + sent.filter((x) => x.body).length);
+              for (const [k, v] of Object.entries(keys)) console.log("188 항목 " + k + " = " + [...v].slice(0, 8).join(" | "));
+              console.log("188 referer 머리글 = " + [...new Set(sent.map((x) => x.referer.replace(/#.*/, "#…")))].join(" | "));
+              console.log("188 CSP 막힘 " + csp.length + (csp[0] ? " : " + csp[0] : ""));
+              const leak = sent.filter((x) => /비밀별명가|난류|땅콩|가상학원|A123|K1_/.test(decodeURIComponent(x.url) + x.body + decodeURIComponent(x.referer)));
+              ok("188 실제 count.js 실행됨·전송 시도 기록됨", js.length > 1000 && sent.length > 0, sent.length + "건");
+              ok("188 실제 count.js 전송 내용에 아이 별명·알레르기·학원 없음", leak.length === 0, "발견 " + leak.length);
+              await cg.close(); }
             await br.close(); console.log("브라우저 확인 실패 " + bad); process.exit(bad ? 1 : 0);
           })();
           JS
